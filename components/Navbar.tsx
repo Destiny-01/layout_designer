@@ -6,7 +6,7 @@ type Props = {};
 
 const Navbar = (props: Props) => {
   return (
-    <div className="py-4 px-7 fixed top-0 z-50 flex items-center justify-between w-full h-[10vh] bg-white">
+    <div className="py-4 lg:py-6 px-7 fixed top-0 z-50 flex items-center justify-between w-full h-[10vh] lg:h-[12vh] bg-white">
       <Image src={Logo} className="flex md:hidden" priority alt="Logo" />
       <Image src={LogoFull} className="md:flex hidden" priority alt="Logo" />
 

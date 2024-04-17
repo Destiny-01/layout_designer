@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import useDeviceWidth from '@/hooks/useDeviceWidth'; // Path to your custom hook
 
 function Grid() {
-  const boxSize = 60; // Size of each box in pixels
+  const deviceWidth = useDeviceWidth();
+  const boxSize = deviceWidth >= 1024 ? 80 : 60; // Size of each box in pixels
   const containerRef = useRef<any>(null);
 
   const [numRows, setNumRows] = useState(3); // Initial number of rows, adjust as needed
@@ -13,10 +15,13 @@ function Grid() {
         const containerWidth = containerRef.current.offsetWidth;
 
         // Calculate number of rows and columns based on container width and box size
-        const newNumRows = Math.floor(containerWidth / boxSize);
         const newNumCols = Math.floor(containerWidth / boxSize);
+        const newNumRows =
+          deviceWidth >= 1024
+            ? Math.floor(containerWidth / 2 / boxSize)
+            : Math.floor(containerWidth / boxSize);
 
-        // Set number of rows and columns to be the same
+        // Set number of rows and columns
         setNumRows(newNumRows);
         setNumCols(newNumCols);
       }
@@ -29,7 +34,7 @@ function Grid() {
     return () => {
       window.removeEventListener('resize', calculateGrid);
     };
-  }, []);
+  }, [deviceWidth]);
 
   // Create arrays of row and column indices
   const rows = Array.from({ length: numRows }, (_, index) => index);
@@ -41,15 +46,17 @@ function Grid() {
         className="grid-container rounded-lg my-7 relative"
         ref={containerRef}
       >
-        <p className="text-[#616161] text-lg absolute top-1/2 left-1/4">
-          Please choose a model
-        </p>
+        <div className="w-full h-full absolute flex items-center justify-center">
+          <p className="text-[#616161] text-lg">Please choose a model</p>
+        </div>
+
         {rows.map((rowIndex) => (
           <div key={rowIndex} className="flex">
             {cols.map((colIndex) => (
               <div
                 key={colIndex}
                 className="w-16 h-16 bg-[#FAFAFA] border border-[#F1F1F1]"
+                style={{ width: `${boxSize}px`, height: `${boxSize}px` }}
               ></div>
             ))}
           </div>

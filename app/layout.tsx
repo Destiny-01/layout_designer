@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={'font-nohemi container text-black'}>
+      <body className={'font-nohemi text-black'}>
         <Navbar />
         <div className="mt-[10vh]">{children}</div>
       </body>
