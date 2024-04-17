@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 function Grid() {
   const boxSize = 60; // Size of each box in pixels
-  const containerRef = useRef(null);
+  const containerRef = useRef<any>(null);
 
   const [numRows, setNumRows] = useState(3); // Initial number of rows, adjust as needed
   const [numCols, setNumCols] = useState(3); // Initial number of columns, same as rows
