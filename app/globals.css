@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Nohemi';
+  src: url('../public/fonts/nohemi-variable.ttf');
+
+  font-family: 'Mermaid';
+  src: url('../public/fonts/mermaid.ttf');
+}
+
