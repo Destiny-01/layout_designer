@@ -1,10 +1,12 @@
 'use client';
 import Grid from '@/components/Grid';
+import TileCategory from '@/components/TileCategory';
 import { useEffect, useState } from 'react';
 
 type Props = {};
 
 const page = (props: Props) => {
+  const [showTile, setShowTile] = useState<boolean>(false);
   return (
     <div className="w-full p-7 flex flex-col lg:flex-row">
       <div className="lg:w-1/3 lg:px-10 border-r-2 border-[#F5F5F5]">
@@ -56,7 +58,12 @@ const page = (props: Props) => {
         </div>
 
         <div className="flex space-x-7 py-7 lg:flex-col lg:space-x-0 lg:space-y-3">
-          <div className="flex space-x-2 items-center">
+          <div
+            className="flex space-x-2 items-center"
+            onClick={() => {
+              setShowTile(!showTile);
+            }}
+          >
             <p className="font-mermaid font-bold">See All</p>
             <svg
               width="18"
@@ -112,6 +119,8 @@ const page = (props: Props) => {
           </div>
         </div>
       </div>
+
+      {showTile && <TileCategory />}
 
       {/* SideGrid */}
 
