@@ -80,30 +80,37 @@ export const collectionTiles: TileCategory[] = [
   {
     colorVariation: colorVariation,
     tileName: 'Flora',
+    tileVariation: tileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Hanoi',
+    tileVariation: tileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Onda',
+    tileVariation: tileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Penang',
+    tileVariation: tileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Posidonia',
+    tileVariation: tileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Reykjavik',
+    tileVariation: tileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Rio',
+    tileVariation: tileCategory.colorVariation,
   },
 ];
 
