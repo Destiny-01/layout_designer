@@ -3,6 +3,10 @@ import {
   tileCategory,
 } from '@/public/assets/tiles/Cadaques/output';
 
+import { tileCategory as FloraTileCategory } from '@/public/assets/tiles/Flora/output';
+import { tileCategory as HanoiTileCategory } from '@/public/assets/tiles/Hanoi/output';
+import { tileCategory as OndaTileCategory } from '@/public/assets/tiles/Onda/output';
+
 export interface ColorVariation {
   colorName: string;
   colorHEX: string;
@@ -64,7 +68,7 @@ export const colorVariation: ColorVariation[] = [
     colorHEX: '#43B3AE',
   },
   {
-    colorName: 'Verdigris',
+    colorName: 'White',
     colorHEX: '#FFFFFF',
   },
 ];
@@ -80,17 +84,17 @@ export const collectionTiles: TileCategory[] = [
   {
     colorVariation: colorVariation,
     tileName: 'Flora',
-    tileVariation: tileCategory.colorVariation,
+    tileVariation: FloraTileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Hanoi',
-    tileVariation: tileCategory.colorVariation,
+    tileVariation: HanoiTileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Onda',
-    tileVariation: tileCategory.colorVariation,
+    tileVariation: OndaTileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,

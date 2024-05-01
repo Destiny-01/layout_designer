@@ -43,7 +43,7 @@ const TileCategory = (props: Props) => {
     <div className="space-y-3 py-3">
       {collectionTiles.map((item) => {
         return (
-          <div key={item.tileName} style={{ backgroundColor: 'red' }}>
+          <div key={item.tileName}>
             <button
               className="flex items-center space-x-3 h-fit"
               onClick={() => {
@@ -108,7 +108,7 @@ const TileCategory = (props: Props) => {
                         onClick={() => setTileColor(color.colorName)}
                       >
                         <div
-                          className={`w-7 h-7 rounded-full`}
+                          className={`w-7 h-7 rounded-full border ${storedTileColor === color.colorName ? 'border-2 border-yellow-950' : 'border border-black'} `}
                           style={{
                             backgroundColor: color.colorHEX,
                           }}
