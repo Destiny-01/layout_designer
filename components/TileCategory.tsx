@@ -101,11 +101,33 @@ const TileCategory = (props: Props) => {
                 </div>
 
                 <div className="grid grid-cols-5 gap-3 py-3 w-fit">
-                  {item.colorVariation.map((color) => {
+                  {/* {item.colorVariation.map((color) => {
+                   
                     return (
                       <button
                         key={color.colorHEX}
                         onClick={() => setTileColor(color.colorName)}
+                      >
+                        <div
+                          className={`w-7 h-7 rounded-full border ${storedTileColor === color.colorName ? 'border-2 border-yellow-950' : 'border border-black'} `}
+                          style={{
+                            backgroundColor: color.colorHEX,
+                          }}
+                        />
+                      </button>
+                    );
+                  })} */}
+
+                  {item.colorVariation.map((color) => {
+                    const isInFirstArray = item.tileVariation.some(
+                      (obj) => obj.tileColor === color.colorName,
+                    );
+
+                    return (
+                      <button
+                        key={color.colorName}
+                        onClick={() => setTileColor(color.colorName)}
+                        className={`${isInFirstArray ? 'flex' : 'hidden'}`}
                       >
                         <div
                           className={`w-7 h-7 rounded-full border ${storedTileColor === color.colorName ? 'border-2 border-yellow-950' : 'border border-black'} `}

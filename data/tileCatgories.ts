@@ -6,6 +6,9 @@ import {
 import { tileCategory as FloraTileCategory } from '@/public/assets/tiles/Flora/output';
 import { tileCategory as HanoiTileCategory } from '@/public/assets/tiles/Hanoi/output';
 import { tileCategory as OndaTileCategory } from '@/public/assets/tiles/Onda/output';
+import { tileCategory as PenangTileCategory } from '@/public/assets/tiles/Penang/output';
+import { tileCategory as PoiseTileCategory } from '@/public/assets/tiles/Posidonia/output';
+import { tileCategory as ReyTileCategory } from '@/public/assets/tiles/Reykjavik/output';
 
 export interface ColorVariation {
   colorName: string;
@@ -99,17 +102,17 @@ export const collectionTiles: TileCategory[] = [
   {
     colorVariation: colorVariation,
     tileName: 'Penang',
-    tileVariation: tileCategory.colorVariation,
+    tileVariation: PenangTileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Posidonia',
-    tileVariation: tileCategory.colorVariation,
+    tileVariation: PoiseTileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
     tileName: 'Reykjavik',
-    tileVariation: tileCategory.colorVariation,
+    tileVariation: ReyTileCategory.colorVariation,
   },
   {
     colorVariation: colorVariation,
