@@ -43,11 +43,12 @@ const TileCategory = (props: Props) => {
     <div className="space-y-3 py-3">
       {collectionTiles.map((item) => {
         return (
-          <div key={item.tileName}>
+          <div key={item.tileName} style={{ backgroundColor: 'red' }}>
             <button
               className="flex items-center space-x-3 h-fit"
               onClick={() => {
                 setShowSubCategory(!showSubCategory);
+                setTileName(item.tileName);
               }}
             >
               <svg
