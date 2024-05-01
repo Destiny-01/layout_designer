@@ -1,14 +1,20 @@
 import Image from 'next/image';
 import Logo from '@/public/assets/logo.png';
 import LogoFull from '@/public/assets/logoFull.png';
+import Link from 'next/link';
 
 type Props = {};
 
 const Navbar = (props: Props) => {
   return (
     <div className="py-4 lg:py-6 px-7 fixed top-0 z-50 flex items-center justify-between w-full h-[10vh] lg:h-[12vh] bg-white">
-      <Image src={Logo} className="flex md:hidden" priority alt="Logo" />
-      <Image src={LogoFull} className="md:flex hidden" priority alt="Logo" />
+      <Link href={'/'} className="flex md:hidden">
+        <Image src={Logo} priority alt="Logo" />
+      </Link>
+
+      <Link href={'/'} className="md:flex hidden">
+        <Image src={LogoFull} priority alt="Logo" />
+      </Link>
 
       <div className="border border-primary rounded-full w-1/4 h-full hidden md:flex">
         <div className="w-1/2 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]">

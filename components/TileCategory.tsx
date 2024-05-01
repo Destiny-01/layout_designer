@@ -1,33 +1,51 @@
-import Tile from '@/public/assets/tile.svg';
+import { collectionTiles } from '@/data/tileCatgories';
+import {
+  TileVariation,
+  tileCategory,
+} from '@/public/assets/tiles/Cadaques/output';
 import useTileStore from '@/store';
 import Image from 'next/image';
-import { useState } from 'react';
+
+import { useEffect, useState } from 'react';
 
 type Props = {};
 
 const TileCategory = (props: Props) => {
   const category = [
-    'Hanoi',
-    'Cadaques',
-    'Reykjavik',
-    'Onda',
+    'Alphabet',
     'Amphora',
-    'Penang',
+    'Kant',
+    'Kobenhavn',
+    'Lisboa',
     'Madera',
+    'Malaga',
     'Malfa',
-    'Posidonia',
-    'Rio',
+    'Plain',
+    'Ruta',
+    'Single Tiles',
+    'Siquijor',
+    'Skye',
   ];
   const [showSubCategory, setShowSubCategory] = useState<boolean>(false);
 
   const setTileName = useTileStore((state) => state.setTileName);
+  const storedTileName = useTileStore((state) => state.tileName);
+  const storedTileColor = useTileStore((state) => state.tileColor);
+  const setTileColor = useTileStore((state) => state.setTileColor);
+  const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
+
+  const handleTileChoice = (tileName: string, tilePath: string) => {
+    setTileName(tileName);
+    setActiveTilePath(tilePath);
+  };
+
   return (
     <div className="space-y-3 py-3">
-      {category.map((item) => {
+      {collectionTiles.map((item) => {
         return (
-          <div key={item}>
+          <div key={item.tileName}>
             <button
-              className="flex items-center space-x-3"
+              className="flex items-center space-x-3 h-fit"
               onClick={() => {
                 setShowSubCategory(!showSubCategory);
               }}
@@ -49,17 +67,55 @@ const TileCategory = (props: Props) => {
                   fill="#292D32"
                 />
               </svg>
-              <p>{item}</p>
+              <p>{item.tileName}</p>
             </button>
-            {showSubCategory && item === 'Hanoi' && (
-              <div className="pl-7">
-                <button
-                  onClick={() => {
-                    setTileName('Hanoi');
-                  }}
-                >
-                  <Image src={Tile} className="w-10 h-10" alt="Tile" />
-                </button>
+            {showSubCategory && item.tileName === storedTileName && (
+              <div className="pl-7 lg:pl-10">
+                <div className="grid grid-cols-5 gap-3 py-3 w-fit">
+                  {item.tileVariation.map(
+                    (tileVariant: { tileColor: string; tilePath: string }) => {
+                      return (
+                        tileVariant.tileColor === storedTileColor && (
+                          <button
+                            key={tileVariant.tileColor}
+                            onClick={() => {
+                              handleTileChoice(
+                                item.tileName,
+                                tileVariant.tilePath,
+                              );
+                            }}
+                          >
+                            <Image
+                              src={tileVariant.tilePath}
+                              className="w-12 h-12"
+                              width={10}
+                              height={10}
+                              alt="Tile"
+                            />
+                          </button>
+                        )
+                      );
+                    },
+                  )}
+                </div>
+
+                <div className="grid grid-cols-5 gap-3 py-3 w-fit">
+                  {item.colorVariation.map((color) => {
+                    return (
+                      <button
+                        key={color.colorHEX}
+                        onClick={() => setTileColor(color.colorName)}
+                      >
+                        <div
+                          className={`w-7 h-7 rounded-full`}
+                          style={{
+                            backgroundColor: color.colorHEX,
+                          }}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

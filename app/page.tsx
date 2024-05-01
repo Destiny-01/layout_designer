@@ -1,12 +1,14 @@
 'use client';
 import Grid from '@/components/Grid';
 import TileCategory from '@/components/TileCategory';
+import useTileStore from '@/store';
 import { useEffect, useState } from 'react';
 
 type Props = {};
 
 const page = (props: Props) => {
   const [showTile, setShowTile] = useState<boolean>(false);
+
   return (
     <div className="w-full p-7 flex flex-col lg:flex-row">
       <div className="lg:w-1/3 lg:px-10 border-r-2 border-[#F5F5F5]">
@@ -57,70 +59,71 @@ const page = (props: Props) => {
           </div>
         </div>
 
-        <div className="flex space-x-7 py-7 lg:flex-col lg:space-x-0 lg:space-y-3">
-          <div
-            className="flex space-x-2 items-center"
-            onClick={() => {
-              setShowTile(!showTile);
-            }}
-          >
-            <p className="font-mermaid font-bold">See All</p>
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+        <div>
+          <div className="flex space-x-7 py-7 lg:flex-col lg:space-x-0 lg:space-y-3">
+            <div
+              className="flex space-x-2 items-center"
+              onClick={() => {
+                setShowTile(!showTile);
+              }}
             >
-              <path
-                d="M12.0078 9.63749L10.0428 11.6025C9.4653 12.18 8.5203 12.18 7.9428 11.6025L3.0603 6.71249"
-                stroke="#292D32"
-                strokeWidth="1.5"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M14.9402 6.71249L14.1602 7.49249"
-                stroke="#292D32"
-                strokeWidth="1.5"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+              <p className="font-mermaid font-bold">Pick Collection</p>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12.0078 9.63749L10.0428 11.6025C9.4653 12.18 8.5203 12.18 7.9428 11.6025L3.0603 6.71249"
+                  stroke="#292D32"
+                  strokeWidth="1.5"
+                  strokeMiterlimit="10"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M14.9402 6.71249L14.1602 7.49249"
+                  stroke="#292D32"
+                  strokeWidth="1.5"
+                  strokeMiterlimit="10"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <div className="flex space-x-2 items-center">
+              <p className="font-mermaid font-bold">See All</p>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12.0078 9.63749L10.0428 11.6025C9.4653 12.18 8.5203 12.18 7.9428 11.6025L3.0603 6.71249"
+                  stroke="#292D32"
+                  strokeWidth="1.5"
+                  strokeMiterlimit="10"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M14.9402 6.71249L14.1602 7.49249"
+                  stroke="#292D32"
+                  strokeWidth="1.5"
+                  strokeMiterlimit="10"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           </div>
-          <div className="flex space-x-2 items-center">
-            <p className="font-mermaid font-bold">Pick Collection</p>
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12.0078 9.63749L10.0428 11.6025C9.4653 12.18 8.5203 12.18 7.9428 11.6025L3.0603 6.71249"
-                stroke="#292D32"
-                strokeWidth="1.5"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M14.9402 6.71249L14.1602 7.49249"
-                stroke="#292D32"
-                strokeWidth="1.5"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+          {showTile && <TileCategory />}
         </div>
       </div>
-
-      {showTile && <TileCategory />}
 
       {/* SideGrid */}
 

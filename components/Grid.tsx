@@ -43,7 +43,7 @@ function Grid() {
   const rows = Array.from({ length: numRows }, (_, index) => index);
   const cols = Array.from({ length: numCols }, (_, index) => index);
 
-  const tileName = useTileStore((state) => state.tileName);
+  const activeTilePath = useTileStore((state) => state.activeTilePath);
 
   return (
     <>
@@ -51,7 +51,7 @@ function Grid() {
         className="grid-container rounded-lg my-7 relative"
         ref={containerRef}
       >
-        {!tileName && (
+        {rows.length > 3 && !activeTilePath && (
           <div className="w-full h-full absolute flex items-center justify-center">
             <p className="text-[#616161] text-lg">Please choose a model</p>
           </div>
@@ -64,9 +64,11 @@ function Grid() {
                 className="w-16 h-16 bg-[#FAFAFA] border border-[#F1F1F1]"
                 style={{ width: `${boxSize}px`, height: `${boxSize}px` }}
               >
-                {rows.length > 3 && tileName === 'Hanoi' && (
+                {rows.length > 3 && activeTilePath !== '' && (
                   <Image
-                    src={Tile}
+                    src={activeTilePath}
+                    width={16}
+                    height={16}
                     className="w-full h-full object-cover"
                     alt="Tile"
                   />
