@@ -9,6 +9,7 @@ import { tileCategory as OndaTileCategory } from '@/public/assets/tiles/Onda/out
 import { tileCategory as PenangTileCategory } from '@/public/assets/tiles/Penang/output';
 import { tileCategory as PoiseTileCategory } from '@/public/assets/tiles/Posidonia/output';
 import { tileCategory as ReyTileCategory } from '@/public/assets/tiles/Reykjavik/output';
+import { tileCategory as RioTileCategory } from '@/public/assets/tiles/Rio/output';
 
 export interface ColorVariation {
   colorName: string;
@@ -117,7 +118,7 @@ export const collectionTiles: TileCategory[] = [
   {
     colorVariation: colorVariation,
     tileName: 'Rio',
-    tileVariation: tileCategory.colorVariation,
+    tileVariation: RioTileCategory.colorVariation,
   },
 ];
 
