@@ -9,7 +9,7 @@ const TileEditComponent = ({ tileIndex }: Props) => {
   const [rotationDegree, setRotationDegree] = useState<number>(0);
 
   const rotateDiv = (direction: 'clockwise' | 'anticlockwise') => {
-    let newDegree;
+    let newDegree = 0;
     if (direction === 'clockwise') {
       newDegree = rotationDegree + 90;
       if (newDegree >= 360) {
