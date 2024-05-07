@@ -2,12 +2,36 @@
 import Grid from '@/components/Grid';
 import TileCategory from '@/components/TileCategory';
 import useTileStore from '@/store';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 type Props = {};
 
 const page = (props: Props) => {
   const [showTile, setShowTile] = useState<boolean>(false);
+
+  const rotationDegree = useTileStore((state) => state.activeRotationDegree);
+  const editedTiles = useTileStore((state) => state.editedTiles);
+  const setEditedTiles = useTileStore((state) => state.setEditedTiles);
+  const setRotationDegree = useTileStore(
+    (state) => state.setActiveRotationDegree,
+  );
+
+  const rotateDiv = () => {
+    let newDegree = rotationDegree + 90;
+    if (newDegree >= 360) {
+      newDegree = 0;
+    }
+    setRotationDegree(newDegree);
+    updateRotationDegrees(newDegree);
+  };
+
+  const updateRotationDegrees = (newRotationDegree: number) => {
+    const updatedTiles = editedTiles.map((tile) => ({
+      ...tile,
+      rotationDegree: newRotationDegree,
+    }));
+    setEditedTiles(updatedTiles);
+  };
 
   return (
     <div className="w-full p-7 flex flex-col lg:flex-row">
@@ -569,7 +593,10 @@ const page = (props: Props) => {
             <p className="text-sm font-medium">Randomise</p>
           </div>
 
-          <div className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
+          <button
+            onClick={rotateDiv}
+            className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center"
+          >
             <div>
               <svg
                 width="16"
@@ -603,7 +630,7 @@ const page = (props: Props) => {
             </div>
 
             <p className="text-sm font-medium">Rotate All</p>
-          </div>
+          </button>
 
           <div className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
             <div>
@@ -800,7 +827,10 @@ const page = (props: Props) => {
             <p className="text-sm font-medium">Randomise</p>
           </div>
 
-          <div className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center">
+          <button
+            onClick={rotateDiv}
+            className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center"
+          >
             <div>
               <svg
                 width="16"
@@ -834,7 +864,7 @@ const page = (props: Props) => {
             </div>
 
             <p className="text-sm font-medium">Rotate All</p>
-          </div>
+          </button>
         </div>
       </div>
     </div>

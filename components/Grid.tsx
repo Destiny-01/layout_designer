@@ -1,8 +1,8 @@
 import useDeviceWidth from '@/hooks/useDeviceWidth'; // Path to your custom hook
-import Tile from '@/public/assets/tile.svg';
 import useTileStore from '@/store';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import TileEditComponent from './TileEditComponent';
 
 function Grid() {
   const deviceWidth = useDeviceWidth();
@@ -44,6 +44,23 @@ function Grid() {
   const cols = Array.from({ length: numCols }, (_, index) => index);
 
   const activeTilePath = useTileStore((state) => state.activeTilePath);
+  // const editedTiles = useTileStore((state) => state.editedTiles);
+  const activeRotationDegree = useTileStore(
+    (state) => state.activeRotationDegree,
+  );
+
+  const { editedTiles } = useTileStore();
+
+  const [activeTileIndex, setActiveTileIndex] = useState<string | null>(null);
+
+  let index = -1;
+
+  const getIndex = (tileIndex: string) => {
+    let position = editedTiles.findIndex(
+      (tile) => tile.tileIndex === tileIndex,
+    );
+    return position;
+  };
 
   return (
     <>
@@ -65,13 +82,27 @@ function Grid() {
                 style={{ width: `${boxSize}px`, height: `${boxSize}px` }}
               >
                 {rows.length > 3 && activeTilePath !== '' && (
-                  <Image
-                    src={activeTilePath}
-                    width={16}
-                    height={16}
-                    className="w-full h-full object-cover"
-                    alt="Tile"
-                  />
+                  <button
+                    onClick={() => {
+                      setActiveTileIndex(`${colIndex}-${rowIndex}`);
+                    }}
+                    className="relative"
+                  >
+                    <Image
+                      src={activeTilePath}
+                      width={16}
+                      height={16}
+                      className="w-full h-full object-cover"
+                      alt="Tile"
+                      style={{
+                        rotate: `${getIndex(`${colIndex}-${rowIndex}`) === -1 ? 0 : editedTiles[getIndex(`${colIndex}-${rowIndex}`)].rotationDegree}deg`,
+                      }}
+                    />
+
+                    {activeTileIndex === `${colIndex}-${rowIndex}` && (
+                      <TileEditComponent tileIndex={activeTileIndex} />
+                    )}
+                  </button>
                 )}
               </div>
             ))}

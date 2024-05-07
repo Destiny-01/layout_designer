@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface EditedTile {
+  tileIndex: string;
+  rotationDegree: number;
+}
+
 export interface TileState {
   tileName: string;
   setTileName: (tileName: string) => void;
@@ -8,6 +13,10 @@ export interface TileState {
   setTileColor: (tileColor: string) => void;
   activeTilePath: string;
   setActiveTilePath: (activeTilePath: string) => void;
+  editedTiles: EditedTile[];
+  setEditedTiles: (editedTiles: EditedTile[]) => void;
+  activeRotationDegree: number;
+  setActiveRotationDegree: (activeRotationDegree: number) => void;
 }
 
 const useTileStore = create(
@@ -19,6 +28,11 @@ const useTileStore = create(
       setTileColor: (tileColor: string) => set({ tileColor }),
       activeTilePath: '',
       setActiveTilePath: (activeTilePath: string) => set({ activeTilePath }),
+      editedTiles: [],
+      setEditedTiles: (editedTiles: EditedTile[]) => set({ editedTiles }),
+      activeRotationDegree: 0,
+      setActiveRotationDegree: (activeRotationDegree: number) =>
+        set({ activeRotationDegree }),
     }),
     {
       name: 'tile-choice',
