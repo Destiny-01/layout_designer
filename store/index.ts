@@ -6,6 +6,12 @@ export interface EditedTile {
   rotationDegree: number;
 }
 
+export interface Dimension {
+  customWidth: number;
+  customHeight: number;
+  activeDimension: 'cm' | 'in';
+}
+
 export interface TileState {
   tileName: string;
   setTileName: (tileName: string) => void;
@@ -17,6 +23,8 @@ export interface TileState {
   setEditedTiles: (editedTiles: EditedTile[]) => void;
   activeRotationDegree: number;
   setActiveRotationDegree: (activeRotationDegree: number) => void;
+  measurement: Dimension;
+  setMeasurement: (measurement: Dimension) => void;
 }
 
 const useTileStore = create(
@@ -33,6 +41,12 @@ const useTileStore = create(
       activeRotationDegree: 0,
       setActiveRotationDegree: (activeRotationDegree: number) =>
         set({ activeRotationDegree }),
+      measurement: {
+        activeDimension: 'cm',
+        customHeight: 0,
+        customWidth: 0,
+      },
+      setMeasurement: (measurement: Dimension) => set({ measurement }),
     }),
     {
       name: 'tile-choice',

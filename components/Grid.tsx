@@ -44,7 +44,7 @@ function Grid() {
   const cols = Array.from({ length: numCols }, (_, index) => index);
 
   const activeTilePath = useTileStore((state) => state.activeTilePath);
-  // const editedTiles = useTileStore((state) => state.editedTiles);
+
   const activeRotationDegree = useTileStore(
     (state) => state.activeRotationDegree,
   );
@@ -88,16 +88,29 @@ function Grid() {
                     }}
                     className="relative"
                   >
-                    <Image
-                      src={activeTilePath}
-                      width={16}
-                      height={16}
-                      className="w-full h-full object-cover"
-                      alt="Tile"
-                      style={{
-                        rotate: `${getIndex(`${colIndex}-${rowIndex}`) === -1 ? 0 : editedTiles[getIndex(`${colIndex}-${rowIndex}`)].rotationDegree}deg`,
-                      }}
-                    />
+                    {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
+                      <Image
+                        src={activeTilePath}
+                        width={16}
+                        height={16}
+                        className="w-full h-full object-cover"
+                        alt="Tile"
+                        style={{
+                          rotate: `${activeRotationDegree}deg`,
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        src={activeTilePath}
+                        width={16}
+                        height={16}
+                        className="w-full h-full object-cover"
+                        alt="Tile"
+                        style={{
+                          rotate: `${editedTiles[getIndex(`${colIndex}-${rowIndex}`)].rotationDegree}deg`,
+                        }}
+                      />
+                    )}
 
                     {activeTileIndex === `${colIndex}-${rowIndex}` && (
                       <TileEditComponent tileIndex={activeTileIndex} />

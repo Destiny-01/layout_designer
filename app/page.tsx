@@ -1,8 +1,9 @@
 'use client';
 import Grid from '@/components/Grid';
 import TileCategory from '@/components/TileCategory';
+import { collectionTiles, colorVariation } from '@/data/tileCatgories';
 import useTileStore from '@/store';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Props = {};
 
@@ -12,16 +13,18 @@ const page = (props: Props) => {
   const rotationDegree = useTileStore((state) => state.activeRotationDegree);
   const editedTiles = useTileStore((state) => state.editedTiles);
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
-  const setRotationDegree = useTileStore(
+  const setActiveRotationDegree = useTileStore(
     (state) => state.setActiveRotationDegree,
   );
-
+  const setTileName = useTileStore((state) => state.setTileName);
+  const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
+  const setMeasurement = useTileStore((state) => state.setMeasurement);
   const rotateDiv = () => {
     let newDegree = rotationDegree + 90;
     if (newDegree >= 360) {
       newDegree = 0;
     }
-    setRotationDegree(newDegree);
+    setActiveRotationDegree(newDegree);
     updateRotationDegrees(newDegree);
   };
 
@@ -32,6 +35,60 @@ const page = (props: Props) => {
     }));
     setEditedTiles(updatedTiles);
   };
+
+  const randomizeTileChoice = () => {
+    const numTiles = collectionTiles.length;
+    const randomIndex = Math.floor(Math.random() * numTiles);
+    const randomTileData = collectionTiles[randomIndex];
+    setTileName(randomTileData.tileName);
+    setActiveTilePath(randomTileData.tileVariation[0].tilePath);
+  };
+
+  const deleteTileChoice = () => {
+    setTileName('');
+    setActiveTilePath('');
+  };
+
+  // const Zoom = () => {
+  //   const initialValue = document.body.style.zoom;
+
+  //   // Change zoom level on mount
+  //   document.body.style.zoom = '150%';
+  // };
+
+  const [formData, setFormData] = useState<{
+    width: string | number;
+    height: string | number;
+  }>({
+    width: 0,
+    height: 0,
+  });
+
+  const [showSaveBtn, setShowSaveBtn] = useState<boolean>(false);
+
+  const handleInput = (inputName: string, inputValue: string) => {
+    setFormData({ ...formData, [inputName]: inputValue });
+  };
+
+  const storedTileColor = useTileStore((state) => state.tileColor);
+  const colorData = colorVariation.find((color) => {
+    return storedTileColor === color.colorName;
+  });
+
+  const saveDimension = () => {
+    const customWidth = Number(formData.width);
+    const customHeight = Number(formData.height);
+
+    setMeasurement({
+      activeDimension: 'cm',
+      customWidth,
+      customHeight,
+    });
+  };
+
+  useEffect(() => {
+    formData.width && formData.height && setShowSaveBtn(true);
+  }, [formData]);
 
   return (
     <div className="w-full p-7 flex flex-col lg:flex-row">
@@ -58,6 +115,8 @@ const page = (props: Props) => {
               <input
                 type="number"
                 className="w-24 h-10 border border-primary rounded-full p-3 mt-2"
+                onChange={(e) => handleInput(e.target.name, e.target.value)}
+                name="width"
               />
             </div>
             <div>
@@ -65,6 +124,8 @@ const page = (props: Props) => {
               <input
                 type="number"
                 className="w-24 h-10 border border-primary rounded-full p-3 mt-2"
+                onChange={(e) => handleInput(e.target.name, e.target.value)}
+                name="height"
               />
             </div>
           </div>
@@ -82,6 +143,19 @@ const page = (props: Props) => {
             </div>
           </div>
         </div>
+
+        {showSaveBtn && (
+          <button
+            type="button"
+            className={`my-2 px-5 py-3 rounded-lg`}
+            onClick={saveDimension}
+            style={{
+              backgroundColor: colorData?.colorHEX,
+            }}
+          >
+            Save
+          </button>
+        )}
 
         <div>
           <div className="flex space-x-7 py-7 lg:flex-col lg:space-x-0 lg:space-y-3">
@@ -346,7 +420,8 @@ const page = (props: Props) => {
                   </g>
                 </svg>
               </div>
-              <div>
+              {/* Delete Button */}
+              <button onClick={deleteTileChoice}>
                 <svg
                   width="20"
                   height="20"
@@ -406,7 +481,7 @@ const page = (props: Props) => {
                     />
                   </g>
                 </svg>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -487,6 +562,7 @@ const page = (props: Props) => {
           </div>
 
           <div className="flex space-x-5 md:hidden">
+            {/* Zoom In Button */}
             <div>
               <svg
                 width="34"
@@ -571,7 +647,10 @@ const page = (props: Props) => {
             </div>
           </div>
 
-          <div className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
+          <button
+            onClick={randomizeTileChoice}
+            className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center"
+          >
             <div>
               <svg
                 width="16"
@@ -591,7 +670,7 @@ const page = (props: Props) => {
             </div>
 
             <p className="text-sm font-medium">Randomise</p>
-          </div>
+          </button>
 
           <button
             onClick={rotateDiv}
@@ -805,7 +884,10 @@ const page = (props: Props) => {
         </div>
 
         <div className="flex items-center justify-between opacity-50">
-          <div className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center">
+          <button
+            onClick={randomizeTileChoice}
+            className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center"
+          >
             <div>
               <svg
                 width="16"
@@ -825,7 +907,7 @@ const page = (props: Props) => {
             </div>
 
             <p className="text-sm font-medium">Randomise</p>
-          </div>
+          </button>
 
           <button
             onClick={rotateDiv}
