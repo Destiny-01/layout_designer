@@ -1,11 +1,37 @@
+'use client';
+
 import Image from 'next/image';
 import Logo from '@/public/assets/logo.png';
 import LogoFull from '@/public/assets/logoFull.png';
 import Link from 'next/link';
+import useTileStore from '@/store';
+import { useEffect } from 'react';
 
 type Props = {};
 
 const Navbar = (props: Props) => {
+  const activeSize = useTileStore((state) => state.activeSize);
+  const setActiveSize = useTileStore((state) => state.setActiveSize);
+  const setMeasurement = useTileStore((state) => state.setMeasurement);
+  const activeDimension = useTileStore(
+    (state) => state.measurement,
+  ).activeDimension;
+
+  useEffect(() => {
+    setActiveSize(9);
+  }, []);
+
+  const handleDimension = (type: 'cm' | 'in') => {
+    setMeasurement({
+      activeDimension: type,
+      customWidth: activeSize,
+      customHeight: activeSize,
+    });
+  };
+
+  useEffect(() => {
+    handleDimension('cm');
+  }, [activeSize]);
   return (
     <div className="py-4 lg:py-6 px-7 fixed top-0 z-50 flex items-center justify-between w-full h-[10vh] lg:h-[12vh] bg-white">
       <Link href={'/'} className="flex md:hidden">
@@ -17,16 +43,54 @@ const Navbar = (props: Props) => {
       </Link>
 
       <div className="border border-primary rounded-full w-1/4 h-full hidden md:flex">
-        <div className="w-1/2 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]">
-          <div className="w-full h-full rounded-full bg-[#303825] flex items-center justify-center">
-            <p className="text-xs font-semibold text-white">cm</p>
+        <button
+          onClick={() => {
+            handleDimension('cm');
+          }}
+          className={`${
+            activeDimension === 'cm'
+              ? 'bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]'
+              : 'bg-[#FBFBFB]'
+          } w-1/2 h-full rounded-full p-1 shadow-inner `}
+        >
+          <div
+            className={`${
+              activeDimension === 'cm' ? 'bg-[#303825]' : 'bg-[#FBFBFB]'
+            } w-full h-full rounded-full  flex items-center justify-center`}
+          >
+            <p
+              className={`text-xs font-semibold ${
+                activeDimension === 'cm' ? 'text-white' : 'text-black'
+              }`}
+            >
+              cm
+            </p>
           </div>
-        </div>
-        <div className="w-1/2 h-full rounded-full p-1">
-          <div className="w-full h-full rounded-full flex items-center justify-center">
-            <p className="text-xs font-semibold text-black">in</p>
+        </button>
+        <button
+          onClick={() => {
+            handleDimension('in');
+          }}
+          className={`${
+            activeDimension === 'in'
+              ? 'bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]'
+              : 'bg-[#FBFBFB]'
+          } w-1/2 h-full rounded-full p-1 shadow-inner `}
+        >
+          <div
+            className={`${
+              activeDimension === 'in' ? 'bg-[#303825]' : 'bg-[#FBFBFB]'
+            } w-full h-full rounded-full  flex items-center justify-center`}
+          >
+            <p
+              className={`text-xs font-semibold ${
+                activeDimension === 'in' ? 'text-white' : 'text-black'
+              }`}
+            >
+              in
+            </p>
           </div>
-        </div>
+        </button>
       </div>
 
       <h2 className="font-mermaid font-bold text-xl">

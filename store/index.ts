@@ -25,6 +25,8 @@ export interface TileState {
   setActiveRotationDegree: (activeRotationDegree: number) => void;
   measurement: Dimension;
   setMeasurement: (measurement: Dimension) => void;
+  activeSize: number;
+  setActiveSize: (activeSize: number) => void;
 }
 
 const useTileStore = create(
@@ -47,6 +49,8 @@ const useTileStore = create(
         customWidth: 0,
       },
       setMeasurement: (measurement: Dimension) => set({ measurement }),
+      activeSize: 9,
+      setActiveSize: (activeSize: number) => set({ activeSize }),
     }),
     {
       name: 'tile-choice',

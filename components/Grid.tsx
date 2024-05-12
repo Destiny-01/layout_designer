@@ -6,11 +6,22 @@ import TileEditComponent from './TileEditComponent';
 
 function Grid() {
   const deviceWidth = useDeviceWidth();
-  const boxSize = deviceWidth >= 1024 ? 80 : 60; // Size of each box in pixels
+  const customWidth = useTileStore((state) => state.measurement).customWidth;
+  const activeDimension = useTileStore(
+    (state) => state.measurement,
+  ).activeDimension;
+  const [boxSize, setBoxSize] = useState(deviceWidth >= 1024 ? 80 : 60); // Size of each box in pixels
   const containerRef = useRef<any>(null);
-
   const [numRows, setNumRows] = useState(3); // Initial number of rows, adjust as needed
   const [numCols, setNumCols] = useState(3); // Initial number of columns, same as rows
+
+  useEffect(() => {
+    if (activeDimension === 'cm') {
+      setBoxSize(customWidth * 5);
+    } else if (activeDimension === 'in') {
+      setBoxSize(customWidth * 7.5);
+    }
+  }, [customWidth, activeDimension]);
 
   useEffect(() => {
     const calculateGrid = () => {
@@ -37,7 +48,7 @@ function Grid() {
     return () => {
       window.removeEventListener('resize', calculateGrid);
     };
-  }, [deviceWidth]);
+  }, [deviceWidth, boxSize]);
 
   // Create arrays of row and column indices
   const rows = Array.from({ length: numRows }, (_, index) => index);

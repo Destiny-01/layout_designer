@@ -3,6 +3,7 @@ import Grid from '@/components/Grid';
 import TileCategory from '@/components/TileCategory';
 import { collectionTiles, colorVariation } from '@/data/tileCatgories';
 import useTileStore from '@/store';
+import { redirect, usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type Props = {};
@@ -19,6 +20,7 @@ const page = (props: Props) => {
   const setTileName = useTileStore((state) => state.setTileName);
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
   const setMeasurement = useTileStore((state) => state.setMeasurement);
+  const measurement = useTileStore((state) => state.measurement);
   const rotateDiv = () => {
     let newDegree = rotationDegree + 90;
     if (newDegree >= 360) {
@@ -49,13 +51,6 @@ const page = (props: Props) => {
     setActiveTilePath('');
   };
 
-  // const Zoom = () => {
-  //   const initialValue = document.body.style.zoom;
-
-  //   // Change zoom level on mount
-  //   document.body.style.zoom = '150%';
-  // };
-
   const [formData, setFormData] = useState<{
     width: string | number;
     height: string | number;
@@ -75,10 +70,10 @@ const page = (props: Props) => {
     return storedTileColor === color.colorName;
   });
 
-  const saveDimension = () => {
-    const customWidth = Number(formData.width);
-    const customHeight = Number(formData.height);
+  const customWidth = Number(formData.width);
+  const customHeight = Number(formData.height);
 
+  const saveDimension = () => {
     setMeasurement({
       activeDimension: 'cm',
       customWidth,
@@ -90,22 +85,90 @@ const page = (props: Props) => {
     formData.width && formData.height && setShowSaveBtn(true);
   }, [formData]);
 
+  const activeSize = useTileStore((state) => state.activeSize);
+  const setActiveSize = useTileStore((state) => state.setActiveSize);
+
+  useEffect(() => {
+    setActiveSize(9);
+  }, []);
+
+  useEffect(() => {
+    setMeasurement({
+      activeDimension: 'cm',
+      customWidth: activeSize,
+      customHeight: activeSize,
+    });
+  }, [activeSize]);
+
+  const router = useRouter();
+
   return (
     <div className="w-full p-7 flex flex-col lg:flex-row">
       <div className="lg:w-1/3 lg:px-10 border-r-2 border-[#F5F5F5]">
         <div className="flex items-start justify-between lg:flex-col">
           <div className="mt-5 space-y-3 md:mt-0 md:hidden">
             <div className="border border-primary rounded-full w-24 h-10 flex  bg-[#FBFBFB]">
-              <div className="w-1/2 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]">
-                <div className="w-full h-full rounded-full bg-[#303825] flex items-center justify-center">
-                  <p className="text-xs font-semibold text-white">cm</p>
+              <button
+                onClick={() => {
+                  setMeasurement({
+                    activeDimension: 'cm',
+                    customHeight: activeSize,
+                    customWidth: activeSize,
+                  });
+                }}
+                className={`${
+                  measurement.activeDimension === 'cm'
+                    ? 'w-1/2 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]'
+                    : 'w-1/2 h-full rounded-full p-1 bg-[#FBFBFB]'
+                } `}
+              >
+                <div
+                  className={`${
+                    measurement.activeDimension === 'cm'
+                      ? 'bg-[#303825]'
+                      : 'bg-[#FBFBFB]'
+                  } w-full h-full rounded-full  flex items-center justify-center`}
+                >
+                  <p
+                    className={`text-xs font-semibold ${
+                      measurement.activeDimension === 'cm'
+                        ? 'text-white'
+                        : 'text-black'
+                    }`}
+                  >
+                    cm
+                  </p>
                 </div>
-              </div>
-              <div className="w-1/2 h-full rounded-full p-1">
-                <div className="w-full h-full rounded-full flex items-center justify-center">
-                  <p className="text-xs font-semibold text-black">in</p>
+              </button>
+
+              <button
+                className={`w-1/2 h-full rounded-full p-1`}
+                onClick={() => {
+                  setMeasurement({
+                    activeDimension: 'in',
+                    customHeight: activeSize,
+                    customWidth: activeSize,
+                  });
+                }}
+              >
+                <div
+                  className={`${
+                    measurement.activeDimension === 'in'
+                      ? 'bg-[#303825]'
+                      : 'bg-[#FBFBFB]'
+                  } w-full h-full rounded-full  flex items-center justify-center`}
+                >
+                  <p
+                    className={`text-xs font-semibold ${
+                      measurement.activeDimension === 'in'
+                        ? 'text-white'
+                        : 'text-black'
+                    }`}
+                  >
+                    in
+                  </p>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -131,16 +194,44 @@ const page = (props: Props) => {
           </div>
 
           <div className="border border-primary rounded-full w-52 h-10 md:flex mt-5 hidden bg-[#FBFBFB]">
-            <div className="w-2/5 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#CA9A51] to-[#E4B979]">
-              <div className="w-full h-full rounded-full bg-[#CE9640] flex items-center justify-center">
-                <p className="text-xs font-semibold text-white">9x9 cm</p>
+            <button
+              onClick={() => {
+                setActiveSize(9);
+              }}
+              className={`${
+                activeSize < 13.5
+                  ? 'w-2/5 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#CA9A51] to-[#E4B979]'
+                  : 'w-2/5 h-full rounded-full p-1 bg-[#FBFBFB]'
+              } `}
+            >
+              <div
+                className={`${
+                  activeSize < 13.5 ? 'bg-[#CE9640]' : 'bg-[#FBFBFB]'
+                } w-full h-full rounded-full  flex items-center justify-center`}
+              >
+                <p
+                  className={`text-xs font-semibold ${activeSize < 13.5 ? 'text-white' : 'text-black'}`}
+                >
+                  9x9 {measurement.activeDimension}
+                </p>
               </div>
-            </div>
-            <div className="w-3/5 h-full rounded-full p-1 bg-[#FBFBFB]">
+            </button>
+            <button
+              onClick={() => {
+                setActiveSize(13.5);
+              }}
+              className={`w-3/5 h-full rounded-full p-1 ${
+                activeSize >= 13.5 ? 'bg-[#CE9640]' : 'bg-[#FBFBFB]'
+              }`}
+            >
               <div className="w-full h-full rounded-full flex items-center justify-center">
-                <p className="text-xs font-semibold text-black">13.5x13.5 cm</p>
+                <p
+                  className={`text-xs font-semibold ${activeSize >= 13.5 ? 'text-white' : 'text-black'}`}
+                >
+                  13.5x13.5 {measurement.activeDimension}
+                </p>
               </div>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -159,7 +250,7 @@ const page = (props: Props) => {
 
         <div>
           <div className="flex space-x-7 py-7 lg:flex-col lg:space-x-0 lg:space-y-3">
-            <div
+            <button
               className="flex space-x-2 items-center"
               onClick={() => {
                 setShowTile(!showTile);
@@ -190,7 +281,7 @@ const page = (props: Props) => {
                   strokeLinejoin="round"
                 />
               </svg>
-            </div>
+            </button>
             <div className="flex space-x-2 items-center">
               <p className="font-mermaid font-bold">See All</p>
               <svg
@@ -301,7 +392,12 @@ const page = (props: Props) => {
           </div>
 
           <div className="md:flex space-x-5 hidden">
-            <div>
+            {/* Zoom in button */}
+            <button
+              onClick={() => {
+                setActiveSize(activeSize !== 15 ? activeSize + 1 : 15);
+              }}
+            >
               <svg
                 width="34"
                 height="33"
@@ -347,9 +443,14 @@ const page = (props: Props) => {
                   />
                 </g>
               </svg>
-            </div>
+            </button>
 
-            <div>
+            {/* Zoom out button */}
+            <button
+              onClick={() => {
+                setActiveSize(activeSize === 15 ? activeSize - 1 : 9);
+              }}
+            >
               <svg
                 width="35"
                 height="34"
@@ -382,26 +483,56 @@ const page = (props: Props) => {
                   />
                 </g>
               </svg>
-            </div>
+            </button>
           </div>
           <div className="space-y-3 flex items-center justify-between">
             <div className="border border-primary rounded-full w-52 h-10 flex md:hidden bg-[#FBFBFB]">
-              <div className="w-2/5 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#CA9A51] to-[#E4B979]">
-                <div className="w-full h-full rounded-full bg-[#CE9640] flex items-center justify-center">
-                  <p className="text-xs font-semibold text-white">9x9 cm</p>
-                </div>
-              </div>
-              <div className="w-3/5 h-full rounded-full p-1 bg-[#FBFBFB]">
-                <div className="w-full h-full rounded-full flex items-center justify-center">
-                  <p className="text-xs font-semibold text-black">
-                    13.5x13.5 cm
+              <button
+                onClick={() => {
+                  setActiveSize(9);
+                }}
+                className={`${
+                  activeSize < 13.5
+                    ? 'w-2/5 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#CA9A51] to-[#E4B979]'
+                    : 'w-2/5 h-full rounded-full p-1 bg-[#FBFBFB]'
+                } `}
+              >
+                <div
+                  className={`${
+                    activeSize < 13.5 ? 'bg-[#CE9640]' : 'bg-[#FBFBFB]'
+                  } w-full h-full rounded-full  flex items-center justify-center`}
+                >
+                  <p
+                    className={`text-xs font-semibold ${activeSize < 13.5 ? 'text-white' : 'text-black'}`}
+                  >
+                    9x9 {measurement.activeDimension}
                   </p>
                 </div>
-              </div>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveSize(13.5);
+                }}
+                className={`w-3/5 h-full rounded-full p-1 ${
+                  activeSize >= 13.5 ? 'bg-[#CE9640]' : 'bg-[#FBFBFB]'
+                }`}
+              >
+                <div className="w-full h-full rounded-full flex items-center justify-center">
+                  <p
+                    className={`text-xs font-semibold ${activeSize >= 13.5 ? 'text-white' : 'text-black'}`}
+                  >
+                    13.5x13.5 {measurement.activeDimension}
+                  </p>
+                </div>
+              </button>
             </div>
 
             <div className="flex space-x-7">
-              <div>
+              <button
+                onClick={() => {
+                  router.refresh();
+                }}
+              >
                 <svg
                   width="20"
                   height="20"
@@ -419,7 +550,7 @@ const page = (props: Props) => {
                     />
                   </g>
                 </svg>
-              </div>
+              </button>
               {/* Delete Button */}
               <button onClick={deleteTileChoice}>
                 <svg
@@ -563,7 +694,11 @@ const page = (props: Props) => {
 
           <div className="flex space-x-5 md:hidden">
             {/* Zoom In Button */}
-            <div>
+            <button
+              onClick={() => {
+                setActiveSize(activeSize !== 15 ? activeSize + 1 : 15);
+              }}
+            >
               <svg
                 width="34"
                 height="33"
@@ -609,9 +744,14 @@ const page = (props: Props) => {
                   />
                 </g>
               </svg>
-            </div>
+            </button>
 
-            <div>
+            {/* Zoom out button */}
+            <button
+              onClick={() => {
+                setActiveSize(activeSize === 15 ? activeSize - 1 : 9);
+              }}
+            >
               <svg
                 width="35"
                 height="34"
@@ -644,7 +784,7 @@ const page = (props: Props) => {
                   />
                 </g>
               </svg>
-            </div>
+            </button>
           </div>
 
           <button
