@@ -16,10 +16,12 @@ function Grid() {
   const [numCols, setNumCols] = useState(3); // Initial number of columns, same as rows
 
   useEffect(() => {
-    if (activeDimension === 'cm') {
-      setBoxSize(customWidth * 5);
-    } else if (activeDimension === 'in') {
-      setBoxSize(customWidth * 7.5);
+    if (customWidth && activeDimension) {
+      if (activeDimension === 'cm') {
+        setBoxSize(customWidth * 5);
+      } else if (activeDimension === 'in') {
+        setBoxSize(customWidth * 7.5);
+      }
     }
   }, [customWidth, activeDimension]);
 
