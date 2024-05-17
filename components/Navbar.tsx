@@ -42,7 +42,7 @@ const Navbar = (props: Props) => {
         <Image src={LogoFull} priority alt="Logo" />
       </Link>
 
-      <div className="border border-primary rounded-full w-1/4 h-full hidden md:flex">
+      <div className="border border-primary rounded-full w-1/4 lg:w-64 h-full hidden md:flex">
         <button
           onClick={() => {
             handleDimension('cm');

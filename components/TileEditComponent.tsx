@@ -1,12 +1,21 @@
+import { collectionTiles, colorVariation } from '@/data/tileCatgories';
 import useTileStore from '@/store';
 import { useEffect, useState } from 'react';
 
 type Props = {
   tileIndex: string;
+  boxSize: number;
 };
 
-const TileEditComponent = ({ tileIndex }: Props) => {
+const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
+  const activeTileName = useTileStore((state) => state.tileName);
+  const activeTilePath = useTileStore((state) => state.activeTilePath);
+
+  const [showColorPanel, setShowColorPanel] = useState(false);
+  const [updatedTilePath, setUpdatedTilePath] = useState<string | null>(null);
   const [rotationDegree, setRotationDegree] = useState<number>(0);
+  const [tilePath, setTilePath] = useState<string>(activeTilePath);
+  const [tileColor, setTileColor] = useState<string>('');
 
   const rotateDiv = (direction: 'clockwise' | 'anticlockwise') => {
     let newDegree = 0;
@@ -24,32 +33,68 @@ const TileEditComponent = ({ tileIndex }: Props) => {
     setRotationDegree(newDegree);
   };
 
-  const setEditedTiles = useTileStore((state) => state.setEditedTiles);
-
-  const editedTiles = useTileStore((state) => state.editedTiles);
-
-  const handleTileEdit = (
-    editType: 'rotate' | 'rotateRight' | 'rotateLeft',
-  ) => {
-    editType === 'rotate' && rotateDiv('clockwise');
-    editType === 'rotateRight' && rotateDiv('clockwise');
-    editType === 'rotateLeft' && rotateDiv('anticlockwise');
+  const updateTileData = () => {
     const tileEditData = {
       tileIndex,
       rotationDegree,
+      tilePath,
     };
 
     const index = editedTiles.findIndex((tile) => tile.tileIndex === tileIndex);
 
     if (index !== -1) {
       editedTiles[index] = tileEditData;
-      setEditedTiles(editedTiles);
+      setEditedTiles([...editedTiles]);
     } else {
-      editedTiles.push(tileEditData);
-      setEditedTiles(editedTiles);
+      setEditedTiles([...editedTiles, tileEditData]);
     }
   };
 
+  const handleColorPick = () => {
+    setShowColorPanel(!showColorPanel);
+  };
+
+  const setEditedTilePath = (colorValue: string) => {
+    setTileColor(colorValue);
+    if (tileColor) {
+      const specificTile = collectionTiles.find((item) => {
+        return item.tileName === activeTileName;
+      });
+
+      if (specificTile) {
+        const tileVariation = specificTile.tileVariation;
+
+        const specificColorData = tileVariation.find((item) => {
+          return item.tileColor === colorValue;
+        });
+
+        if (specificColorData) {
+          setTilePath(specificColorData.tilePath);
+          setUpdatedTilePath(specificColorData.tilePath);
+        }
+      }
+    }
+  };
+
+  const setEditedTiles = useTileStore((state) => state.setEditedTiles);
+
+  const editedTiles = useTileStore((state) => state.editedTiles);
+
+  const handleTileEdit = (
+    editType: 'rotate' | 'rotateRight' | 'rotateLeft' | 'colorEdit',
+  ) => {
+    editType === 'rotate' && rotateDiv('clockwise');
+    editType === 'rotateRight' && rotateDiv('clockwise');
+    editType === 'rotateLeft' && rotateDiv('anticlockwise');
+    editType === 'colorEdit' && handleColorPick();
+    updateTileData();
+  };
+
+  useEffect(() => {
+    if (updatedTilePath !== null) {
+      updateTileData();
+    }
+  }, [updatedTilePath]);
   return (
     <div className="absolute z-50 top-0">
       {/* Rotate Button */}
@@ -138,77 +183,185 @@ const TileEditComponent = ({ tileIndex }: Props) => {
 
       {/* Color Button */}
       <div className="absolute left-[5.5rem] rotate-90">
-        <svg
-          width="52"
-          height="52"
-          viewBox="0 0 52 52"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="rotate-[270deg]"
-        >
-          <g filter="url(#filter0_d_11_9248)">
-            <circle cx="26" cy="22" r="15" fill="white" />
-            <circle
-              cx="26"
-              cy="22"
-              r="14.75"
-              stroke="#898989"
-              strokeWidth="0.5"
-            />
-          </g>
-          <path
-            opacity="0.6"
-            d="M27.6666 25.3333C27.6666 26.8083 27.025 28.1416 26 29.05C25.1166 29.85 23.95 30.3333 22.6666 30.3333C19.9083 30.3333 17.6666 28.0916 17.6666 25.3333C17.6666 23.0333 19.2333 21.0833 21.35 20.5083C21.925 21.9583 23.1583 23.075 24.6833 23.4916C25.1 23.6083 25.5416 23.6666 26 23.6666C26.4583 23.6666 26.9 23.6083 27.3166 23.4916C27.5416 24.0583 27.6666 24.6833 27.6666 25.3333Z"
-            fill="#191919"
-          />
-          <path
-            d="M31 18.6667C31 19.3167 30.875 19.9417 30.65 20.5083C30.075 21.9583 28.8417 23.075 27.3167 23.4917C26.9 23.6083 26.4583 23.6667 26 23.6667C25.5417 23.6667 25.1 23.6083 24.6833 23.4917C23.1583 23.075 21.925 21.9583 21.35 20.5083C21.125 19.9417 21 19.3167 21 18.6667C21 15.9083 23.2417 13.6667 26 13.6667C28.7583 13.6667 31 15.9083 31 18.6667Z"
-            fill="#191919"
-          />
-          <path
-            opacity="0.4"
-            d="M34.3333 25.3333C34.3333 28.0916 32.0917 30.3333 29.3333 30.3333C28.05 30.3333 26.8833 29.85 26 29.05C27.025 28.1416 27.6667 26.8083 27.6667 25.3333C27.6667 24.6833 27.5417 24.0583 27.3167 23.4916C28.8417 23.075 30.075 21.9583 30.65 20.5083C32.7667 21.0833 34.3333 23.0333 34.3333 25.3333Z"
-            fill="#191919"
-          />
-          <defs>
-            <filter
-              id="filter0_d_11_9248"
-              x="0.6"
-              y="0.6"
-              width="50.8"
-              height="50.8"
-              filterUnits="userSpaceOnUse"
-              colorInterpolationFilters="sRGB"
-            >
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset dy="4" />
-              <feGaussianBlur stdDeviation="5.2" />
-              <feComposite in2="hardAlpha" operator="out" />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
-              />
-              <feBlend
-                mode="normal"
-                in2="BackgroundImageFix"
-                result="effect1_dropShadow_11_9248"
-              />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="effect1_dropShadow_11_9248"
-                result="shape"
-              />
-            </filter>
-          </defs>
-        </svg>
+        {showColorPanel && (
+          <div className="flex bottom-24 -left-10 rotate-[270deg] w-32 overflow-x-scroll gap-3 py-3 absolute">
+            {colorVariation.map((color) => {
+              return (
+                <button
+                  key={color.colorName}
+                  onClick={() => {
+                    setEditedTilePath(color.colorName);
+                  }}
+                >
+                  <div
+                    className={`w-7 h-7 rounded-full border ${tileColor === color.colorName ? 'border-2 border-yellow-950' : 'border border-black'} `}
+                    style={{
+                      backgroundColor: color.colorHEX,
+                    }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        )}
 
+        {showColorPanel ? (
+          // Cancel button
+          <svg
+            width="52"
+            height="52"
+            viewBox="0 0 52 52"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="rotate-[270deg]"
+            onClick={() => {
+              handleTileEdit('colorEdit');
+            }}
+          >
+            <g filter="url(#filter0_d_84_88528)">
+              <circle cx="26" cy="22" r="15" fill="white" />
+              <circle
+                cx="26"
+                cy="22"
+                r="14.75"
+                stroke="#898989"
+                strokeWidth="0.5"
+              />
+            </g>
+            <path
+              d="M26.0001 30.3333C30.5834 30.3333 34.3334 26.5833 34.3334 22C34.3334 17.4167 30.5834 13.6667 26.0001 13.6667C21.4167 13.6667 17.6667 17.4167 17.6667 22C17.6667 26.5833 21.4167 30.3333 26.0001 30.3333Z"
+              stroke="#292D32"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M23.6416 24.3583L28.3583 19.6416"
+              stroke="#292D32"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M28.3583 24.3583L23.6416 19.6416"
+              stroke="#292D32"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <defs>
+              <filter
+                id="filter0_d_84_88528"
+                x="0.6"
+                y="0.6"
+                width="50.8"
+                height="50.8"
+                filterUnits="userSpaceOnUse"
+                colorInterpolationFilters="sRGB"
+              >
+                <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                <feColorMatrix
+                  in="SourceAlpha"
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                  result="hardAlpha"
+                />
+                <feOffset dy="4" />
+                <feGaussianBlur stdDeviation="5.2" />
+                <feComposite in2="hardAlpha" operator="out" />
+                <feColorMatrix
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                />
+                <feBlend
+                  mode="normal"
+                  in2="BackgroundImageFix"
+                  result="effect1_dropShadow_84_88528"
+                />
+                <feBlend
+                  mode="normal"
+                  in="SourceGraphic"
+                  in2="effect1_dropShadow_84_88528"
+                  result="shape"
+                />
+              </filter>
+            </defs>
+          </svg>
+        ) : (
+          <svg
+            width="52"
+            height="52"
+            viewBox="0 0 52 52"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="rotate-[270deg]"
+            onClick={() => {
+              handleTileEdit('colorEdit');
+            }}
+          >
+            <g filter="url(#filter0_d_11_9248)">
+              <circle cx="26" cy="22" r="15" fill="white" />
+              <circle
+                cx="26"
+                cy="22"
+                r="14.75"
+                stroke="#898989"
+                strokeWidth="0.5"
+              />
+            </g>
+            <path
+              opacity="0.6"
+              d="M27.6666 25.3333C27.6666 26.8083 27.025 28.1416 26 29.05C25.1166 29.85 23.95 30.3333 22.6666 30.3333C19.9083 30.3333 17.6666 28.0916 17.6666 25.3333C17.6666 23.0333 19.2333 21.0833 21.35 20.5083C21.925 21.9583 23.1583 23.075 24.6833 23.4916C25.1 23.6083 25.5416 23.6666 26 23.6666C26.4583 23.6666 26.9 23.6083 27.3166 23.4916C27.5416 24.0583 27.6666 24.6833 27.6666 25.3333Z"
+              fill="#191919"
+            />
+            <path
+              d="M31 18.6667C31 19.3167 30.875 19.9417 30.65 20.5083C30.075 21.9583 28.8417 23.075 27.3167 23.4917C26.9 23.6083 26.4583 23.6667 26 23.6667C25.5417 23.6667 25.1 23.6083 24.6833 23.4917C23.1583 23.075 21.925 21.9583 21.35 20.5083C21.125 19.9417 21 19.3167 21 18.6667C21 15.9083 23.2417 13.6667 26 13.6667C28.7583 13.6667 31 15.9083 31 18.6667Z"
+              fill="#191919"
+            />
+            <path
+              opacity="0.4"
+              d="M34.3333 25.3333C34.3333 28.0916 32.0917 30.3333 29.3333 30.3333C28.05 30.3333 26.8833 29.85 26 29.05C27.025 28.1416 27.6667 26.8083 27.6667 25.3333C27.6667 24.6833 27.5417 24.0583 27.3167 23.4916C28.8417 23.075 30.075 21.9583 30.65 20.5083C32.7667 21.0833 34.3333 23.0333 34.3333 25.3333Z"
+              fill="#191919"
+            />
+            <defs>
+              <filter
+                id="filter0_d_11_9248"
+                x="0.6"
+                y="0.6"
+                width="50.8"
+                height="50.8"
+                filterUnits="userSpaceOnUse"
+                colorInterpolationFilters="sRGB"
+              >
+                <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                <feColorMatrix
+                  in="SourceAlpha"
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                  result="hardAlpha"
+                />
+                <feOffset dy="4" />
+                <feGaussianBlur stdDeviation="5.2" />
+                <feComposite in2="hardAlpha" operator="out" />
+                <feColorMatrix
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                />
+                <feBlend
+                  mode="normal"
+                  in2="BackgroundImageFix"
+                  result="effect1_dropShadow_11_9248"
+                />
+                <feBlend
+                  mode="normal"
+                  in="SourceGraphic"
+                  in2="effect1_dropShadow_11_9248"
+                  result="shape"
+                />
+              </filter>
+            </defs>
+          </svg>
+        )}
         <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
       </div>
 
@@ -490,7 +643,13 @@ const TileEditComponent = ({ tileIndex }: Props) => {
 
         <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
       </div>
-      <div className="w-[3.75rem] h-[3.75rem] border-2 border-black"></div>
+      <div
+        className={`w-[${boxSize}px] h-[${boxSize}px] border-2 border-black`}
+        style={{
+          width: `${boxSize}px`,
+          height: `${boxSize}px`,
+        }}
+      ></div>
     </div>
   );
 };

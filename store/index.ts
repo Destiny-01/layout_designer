@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface EditedTile {
   tileIndex: string;
   rotationDegree: number;
+  tilePath: string | undefined;
 }
 
 export interface Dimension {

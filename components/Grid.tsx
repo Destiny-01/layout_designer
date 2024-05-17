@@ -66,8 +66,6 @@ function Grid() {
 
   const [activeTileIndex, setActiveTileIndex] = useState<string | null>(null);
 
-  let index = -1;
-
   const getIndex = (tileIndex: string) => {
     let position = editedTiles.findIndex(
       (tile) => tile.tileIndex === tileIndex,
@@ -113,20 +111,31 @@ function Grid() {
                         }}
                       />
                     ) : (
-                      <Image
-                        src={activeTilePath}
-                        width={16}
-                        height={16}
-                        className="w-full h-full object-cover"
-                        alt="Tile"
-                        style={{
-                          rotate: `${editedTiles[getIndex(`${colIndex}-${rowIndex}`)].rotationDegree}deg`,
-                        }}
-                      />
+                      <>
+                        {editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
+                          .tilePath && (
+                          <Image
+                            src={
+                              editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
+                                .tilePath ?? ''
+                            }
+                            width={16}
+                            height={16}
+                            className="w-full h-full object-cover"
+                            alt="Tile"
+                            style={{
+                              rotate: `${editedTiles[getIndex(`${colIndex}-${rowIndex}`)].rotationDegree}deg`,
+                            }}
+                          />
+                        )}
+                      </>
                     )}
 
                     {activeTileIndex === `${colIndex}-${rowIndex}` && (
-                      <TileEditComponent tileIndex={activeTileIndex} />
+                      <TileEditComponent
+                        tileIndex={activeTileIndex}
+                        boxSize={boxSize}
+                      />
                     )}
                   </button>
                 )}

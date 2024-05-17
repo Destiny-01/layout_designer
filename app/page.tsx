@@ -65,11 +65,6 @@ const page = (props: Props) => {
     setFormData({ ...formData, [inputName]: inputValue });
   };
 
-  const storedTileColor = useTileStore((state) => state.tileColor);
-  const colorData = colorVariation.find((color) => {
-    return storedTileColor === color.colorName;
-  });
-
   const customWidth = Number(formData.width);
   const customHeight = Number(formData.height);
 
@@ -107,7 +102,7 @@ const page = (props: Props) => {
       <div className="lg:w-1/3 lg:px-10 border-r-2 border-[#F5F5F5]">
         <div className="flex items-start justify-between lg:flex-col">
           <div className="mt-5 space-y-3 md:mt-0 md:hidden">
-            <div className="border border-primary rounded-full w-24 h-10 flex  bg-[#FBFBFB]">
+            <div className="border border-primary rounded-full w-24 h-10 flex lg:w-32 bg-[#FBFBFB]">
               <button
                 onClick={() => {
                   setMeasurement({
@@ -142,7 +137,6 @@ const page = (props: Props) => {
               </button>
 
               <button
-                className={`w-1/2 h-full rounded-full p-1`}
                 onClick={() => {
                   setMeasurement({
                     activeDimension: 'in',
@@ -150,6 +144,11 @@ const page = (props: Props) => {
                     customWidth: activeSize,
                   });
                 }}
+                className={`${
+                  measurement.activeDimension === 'in'
+                    ? 'w-1/2 h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]'
+                    : 'w-1/2 h-full rounded-full p-1 bg-[#FBFBFB]'
+                } `}
               >
                 <div
                   className={`${
@@ -238,11 +237,8 @@ const page = (props: Props) => {
         {showSaveBtn && (
           <button
             type="button"
-            className={`my-2 px-5 py-3 rounded-lg`}
+            className={`my-2 px-5 py-3 rounded-lg text-white bg-[#303825]`}
             onClick={saveDimension}
-            style={{
-              backgroundColor: colorData?.colorHEX,
-            }}
           >
             Save
           </button>
