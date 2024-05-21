@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Logo from '@/public/assets/logo.png';
-import LogoFull from '@/public/assets/logoFull.png';
-import Link from 'next/link';
-import useTileStore from '@/store';
-import { useEffect } from 'react';
+import Image from "next/image";
+import Logo from "@/public/assets/logo.png";
+import LogoFull from "@/public/assets/logoFull.png";
+import Link from "next/link";
+import useTileStore from "@/store";
+import { useEffect } from "react";
 
 type Props = {};
 
@@ -14,14 +14,14 @@ const Navbar = (props: Props) => {
   const setActiveSize = useTileStore((state) => state.setActiveSize);
   const setMeasurement = useTileStore((state) => state.setMeasurement);
   const activeDimension = useTileStore(
-    (state) => state.measurement,
+    (state) => state.measurement
   ).activeDimension;
 
   useEffect(() => {
     setActiveSize(9);
   }, []);
 
-  const handleDimension = (type: 'cm' | 'in') => {
+  const handleDimension = (type: "cm" | "in") => {
     setMeasurement({
       activeDimension: type,
       customWidth: activeSize,
@@ -30,37 +30,37 @@ const Navbar = (props: Props) => {
   };
 
   useEffect(() => {
-    handleDimension('cm');
+    handleDimension("cm");
   }, [activeSize]);
   return (
     <div className="py-4 lg:py-6 px-7 fixed top-0 z-50 flex items-center justify-between w-full h-[10vh] lg:h-[12vh] bg-white">
-      <Link href={'/'} className="flex md:hidden">
+      <Link href={"/"} className="flex md:hidden">
         <Image src={Logo} priority alt="Logo" />
       </Link>
 
-      <Link href={'/'} className="md:flex hidden">
+      <Link href={"/"} className="md:flex hidden">
         <Image src={LogoFull} priority alt="Logo" />
       </Link>
 
-      <div className="border border-primary rounded-full w-1/4 lg:w-64 h-full hidden md:flex">
+      <div className="border border-primary bg-[#fbfbfb] rounded-full w-1/4 lg:w-fit h-full hidden md:flex">
         <button
           onClick={() => {
-            handleDimension('cm');
+            handleDimension("cm");
           }}
           className={`${
-            activeDimension === 'cm'
-              ? 'bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]'
-              : 'bg-[#FBFBFB]'
-          } w-1/2 h-full rounded-full p-1 shadow-inner `}
+            activeDimension === "cm"
+              ? "bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
+              : "bg-[#FBFBFB]"
+          } w-[75px] h-full rounded-full p-0.5 shadow-inner `}
         >
           <div
             className={`${
-              activeDimension === 'cm' ? 'bg-[#303825]' : 'bg-[#FBFBFB]'
+              activeDimension === "cm" ? "bg-[#303825]" : "bg-[#FBFBFB]"
             } w-full h-full rounded-full  flex items-center justify-center`}
           >
             <p
               className={`text-xs font-semibold ${
-                activeDimension === 'cm' ? 'text-white' : 'text-black'
+                activeDimension === "cm" ? "text-white" : "text-black"
               }`}
             >
               cm
@@ -69,22 +69,22 @@ const Navbar = (props: Props) => {
         </button>
         <button
           onClick={() => {
-            handleDimension('in');
+            handleDimension("in");
           }}
           className={`${
-            activeDimension === 'in'
-              ? 'bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]'
-              : 'bg-[#FBFBFB]'
-          } w-1/2 h-full rounded-full p-1 shadow-inner `}
+            activeDimension === "in"
+              ? "bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
+              : "bg-[#FBFBFB]"
+          } w-[75px] h-full rounded-full p-1 shadow-inner `}
         >
           <div
             className={`${
-              activeDimension === 'in' ? 'bg-[#303825]' : 'bg-[#FBFBFB]'
+              activeDimension === "in" ? "bg-[#303825]" : "bg-[#FBFBFB]"
             } w-full h-full rounded-full  flex items-center justify-center`}
           >
             <p
               className={`text-xs font-semibold ${
-                activeDimension === 'in' ? 'text-white' : 'text-black'
+                activeDimension === "in" ? "text-white" : "text-black"
               }`}
             >
               in
@@ -94,7 +94,7 @@ const Navbar = (props: Props) => {
       </div>
 
       <h2 className="font-mermaid font-bold text-xl">
-        <span className="text-black">Layout</span>{' '}
+        <span className="text-black">Layout</span>{" "}
         <span className="text-gold">Designer</span>
       </h2>
 
@@ -116,4 +116,3 @@ const Navbar = (props: Props) => {
 };
 
 export default Navbar;
-

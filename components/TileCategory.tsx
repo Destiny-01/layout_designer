@@ -1,30 +1,30 @@
-import { collectionTiles } from '@/data/tileCatgories';
+import { collectionTiles } from "@/data/tileCatgories";
 import {
   TileVariation,
   tileCategory,
-} from '@/public/assets/tiles/Cadaques/output';
-import useTileStore from '@/store';
-import Image from 'next/image';
+} from "@/public/assets/tiles/Cadaques/output";
+import useTileStore from "@/store";
+import Image from "next/image";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 type Props = {};
 
 const TileCategory = (props: Props) => {
   const category = [
-    'Alphabet',
-    'Amphora',
-    'Kant',
-    'Kobenhavn',
-    'Lisboa',
-    'Madera',
-    'Malaga',
-    'Malfa',
-    'Plain',
-    'Ruta',
-    'Single Tiles',
-    'Siquijor',
-    'Skye',
+    "Alphabet",
+    "Amphora",
+    "Kant",
+    "Kobenhavn",
+    "Lisboa",
+    "Madera",
+    "Malaga",
+    "Malfa",
+    "Plain",
+    "Ruta",
+    "Single Tiles",
+    "Siquijor",
+    "Skye",
   ];
   const [showSubCategory, setShowSubCategory] = useState<boolean>(false);
 
@@ -33,10 +33,12 @@ const TileCategory = (props: Props) => {
   const storedTileColor = useTileStore((state) => state.tileColor);
   const setTileColor = useTileStore((state) => state.setTileColor);
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
+  const setEditedTiles = useTileStore((state) => state.setEditedTiles);
 
   const handleTileChoice = (tileName: string, tilePath: string) => {
     setTileName(tileName);
     setActiveTilePath(tilePath);
+    setEditedTiles([]);
   };
 
   return (
@@ -82,7 +84,7 @@ const TileCategory = (props: Props) => {
                             onClick={() => {
                               handleTileChoice(
                                 item.tileName,
-                                tileVariant.tilePath,
+                                tileVariant.tilePath
                               );
                             }}
                           >
@@ -96,24 +98,28 @@ const TileCategory = (props: Props) => {
                           </button>
                         )
                       );
-                    },
+                    }
                   )}
                 </div>
 
                 <div className="grid grid-cols-5 gap-3 py-3 w-fit">
                   {item.colorVariation.map((color) => {
                     const isInFirstArray = item.tileVariation.some(
-                      (obj) => obj.tileColor === color.colorName,
+                      (obj) => obj.tileColor === color.colorName
                     );
 
                     return (
                       <button
                         key={color.colorName}
                         onClick={() => setTileColor(color.colorName)}
-                        className={`${isInFirstArray ? 'flex' : 'hidden'}`}
+                        className={`${isInFirstArray ? "flex" : "hidden"}`}
                       >
                         <div
-                          className={`w-7 h-7 rounded-full border ${storedTileColor === color.colorName ? 'border-2 border-yellow-950' : 'border border-black'} `}
+                          className={`w-7 h-7 rounded-full border ${
+                            storedTileColor === color.colorName
+                              ? "border-2 border-yellow-950"
+                              : "border border-black"
+                          } `}
                           style={{
                             backgroundColor: color.colorHEX,
                           }}
@@ -132,4 +138,3 @@ const TileCategory = (props: Props) => {
 };
 
 export default TileCategory;
-

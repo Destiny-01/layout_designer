@@ -1,6 +1,6 @@
-import { collectionTiles, colorVariation } from '@/data/tileCatgories';
-import useTileStore from '@/store';
-import { useEffect, useState } from 'react';
+import { collectionTiles, colorVariation } from "@/data/tileCatgories";
+import useTileStore, { EditedTile } from "@/store";
+import { useEffect, useState } from "react";
 
 type Props = {
   tileIndex: string;
@@ -10,35 +10,55 @@ type Props = {
 const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
   const activeTileName = useTileStore((state) => state.tileName);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
+  const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
 
   const [showColorPanel, setShowColorPanel] = useState(false);
   const [updatedTilePath, setUpdatedTilePath] = useState<string | null>(null);
   const [rotationDegree, setRotationDegree] = useState<number>(0);
+  const [rotateStyle, setRotateStyle] =
+    useState<EditedTile["rotateStyle"]>("rotate");
   const [tilePath, setTilePath] = useState<string>(activeTilePath);
-  const [tileColor, setTileColor] = useState<string>('');
+  const [tileColor, setTileColor] = useState<string>("");
 
-  const rotateDiv = (direction: 'clockwise' | 'anticlockwise') => {
+  const rotateDiv = (
+    direction: "clockwise" | "anticlockwise" | "flipX" | "flipY"
+  ) => {
     let newDegree = 0;
-    if (direction === 'clockwise') {
-      newDegree = rotationDegree + 90;
-      if (newDegree >= 360) {
+    switch (direction) {
+      case "clockwise":
+        // newDegree = rotationDegree + 90;
+        // if (newDegree >= 360) {
         newDegree = 0;
-      }
-    } else if (direction === 'anticlockwise') {
-      newDegree = rotationDegree - 90;
-      if (newDegree < 0) {
-        newDegree = 270;
-      }
+      // }
+      case "anticlockwise":
+        newDegree = rotationDegree - 90;
+        if (newDegree < 0) {
+          newDegree = 270;
+        }
+      case "flipX":
+        newDegree = rotationDegree > 0 ? 0 : 180;
+        break;
+      case "flipY":
+        newDegree = rotationDegree > 0 ? 0 : 180;
+        break;
     }
+    console.log(direction);
+    direction === "flipX" || direction === "flipY"
+      ? setRotateStyle(direction)
+      : setRotateStyle("rotate");
+
     setRotationDegree(newDegree);
   };
+  console.log(rotationDegree, rotateStyle);
 
   const updateTileData = () => {
     const tileEditData = {
       tileIndex,
       rotationDegree,
+      rotateStyle,
       tilePath,
     };
+    console.log(tileEditData, "lll");
 
     const index = editedTiles.findIndex((tile) => tile.tileIndex === tileIndex);
 
@@ -54,24 +74,24 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
     setShowColorPanel(!showColorPanel);
   };
 
+  console.log("actibe", activeTileName, activeTilePath, tilePath);
   const setEditedTilePath = (colorValue: string) => {
     setTileColor(colorValue);
-    if (tileColor) {
-      const specificTile = collectionTiles.find((item) => {
-        return item.tileName === activeTileName;
+    const specificTile = collectionTiles.find((item) => {
+      return item.tileName === activeTileName;
+    });
+
+    if (specificTile) {
+      const tileVariation = specificTile.tileVariation;
+
+      const specificColorData = tileVariation.find((item) => {
+        return item.tileColor === colorValue;
       });
 
-      if (specificTile) {
-        const tileVariation = specificTile.tileVariation;
-
-        const specificColorData = tileVariation.find((item) => {
-          return item.tileColor === colorValue;
-        });
-
-        if (specificColorData) {
-          setTilePath(specificColorData.tilePath);
-          setUpdatedTilePath(specificColorData.tilePath);
-        }
+      if (specificColorData) {
+        console.log("reached", specificTile, activeTileName);
+        setTilePath(specificColorData.tilePath);
+        setUpdatedTilePath(specificColorData.tilePath);
       }
     }
   };
@@ -81,20 +101,27 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
   const editedTiles = useTileStore((state) => state.editedTiles);
 
   const handleTileEdit = (
-    editType: 'rotate' | 'rotateRight' | 'rotateLeft' | 'colorEdit',
+    editType: "rotate" | "flipX" | "flipY" | "colorEdit"
   ) => {
-    editType === 'rotate' && rotateDiv('clockwise');
-    editType === 'rotateRight' && rotateDiv('clockwise');
-    editType === 'rotateLeft' && rotateDiv('anticlockwise');
-    editType === 'colorEdit' && handleColorPick();
-    updateTileData();
+    editType === "rotate" && rotateDiv("clockwise");
+    editType === "flipX" && rotateDiv("flipX");
+    editType === "flipY" && rotateDiv("flipY");
+    editType === "colorEdit" && handleColorPick();
   };
 
   useEffect(() => {
     if (updatedTilePath !== null) {
       updateTileData();
+      setTilePath(updatedTilePath);
     }
   }, [updatedTilePath]);
+
+  useEffect(() => {
+    updateTileData();
+  }, [showColorPanel, rotationDegree, tilePath]);
+
+  useEffect(() => setTilePath(activeTilePath), [activeTilePath]);
+
   return (
     <div className="absolute z-50 top-0">
       {/* Rotate Button */}
@@ -106,7 +133,7 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           onClick={() => {
-            handleTileEdit('rotate');
+            handleTileEdit("rotate");
           }}
         >
           <g filter="url(#filter0_d_11_9249)">
@@ -182,7 +209,7 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
       </div>
 
       {/* Color Button */}
-      <div className="absolute left-[5.5rem] rotate-90">
+      <div className="absolute left-[4.5rem] rotate-90">
         {showColorPanel && (
           <div className="flex bottom-24 -left-10 rotate-[270deg] w-32 overflow-x-scroll gap-3 py-3 absolute">
             {colorVariation.map((color) => {
@@ -194,7 +221,11 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
                   }}
                 >
                   <div
-                    className={`w-7 h-7 rounded-full border ${tileColor === color.colorName ? 'border-2 border-yellow-950' : 'border border-black'} `}
+                    className={`w-7 h-7 rounded-full border ${
+                      tileColor === color.colorName
+                        ? "border-2 border-yellow-950"
+                        : "border border-black"
+                    } `}
                     style={{
                       backgroundColor: color.colorHEX,
                     }}
@@ -215,7 +246,7 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
             xmlns="http://www.w3.org/2000/svg"
             className="rotate-[270deg]"
             onClick={() => {
-              handleTileEdit('colorEdit');
+              handleTileEdit("colorEdit");
             }}
           >
             <g filter="url(#filter0_d_84_88528)">
@@ -296,7 +327,7 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
             xmlns="http://www.w3.org/2000/svg"
             className="rotate-[270deg]"
             onClick={() => {
-              handleTileEdit('colorEdit');
+              handleTileEdit("colorEdit");
             }}
           >
             <g filter="url(#filter0_d_11_9248)">
@@ -366,7 +397,7 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
       </div>
 
       {/* Delete Button */}
-      <div className="absolute -left-20 rotate-[270deg]">
+      {/* <div className="absolute -left-20 rotate-[270deg]">
         <svg
           width="52"
           height="52"
@@ -474,19 +505,19 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
         </svg>
 
         <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
-      </div>
+      </div> */}
 
       {/* Rotate Right Button */}
-      <div className="absolute -bottom-16 left-14 rotate-[135deg]">
+      <div className="absolute -bottom-20 left14 rotate-[180deg]">
         <svg
           width="52"
           height="52"
           viewBox="0 0 52 52"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="rotate-[225deg]"
+          className="rotate-[180deg]"
           onClick={() => {
-            handleTileEdit('rotateRight');
+            handleTileEdit("flipX");
           }}
         >
           <g filter="url(#filter0_d_11_9247)">
@@ -561,16 +592,16 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
       </div>
 
       {/* Rotate Left Button */}
-      <div className="absolute -bottom-16 -left-12 rotate-[225deg]">
+      <div className="absolute -left-[5rem] rotate-[270deg]">
         <svg
           width="52"
           height="52"
           viewBox="0 0 52 52"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="rotate-[225deg]"
+          className="rotate-[180deg]"
           onClick={() => {
-            handleTileEdit('rotateRight');
+            handleTileEdit("flipY");
           }}
         >
           <g filter="url(#filter0_d_11_9247)">
@@ -655,4 +686,3 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
 };
 
 export default TileEditComponent;
-

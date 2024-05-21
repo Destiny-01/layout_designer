@@ -1,16 +1,19 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface EditedTile {
   tileIndex: string;
   rotationDegree: number;
+  rotateStyle: "rotate" | "flipX" | "flipY";
   tilePath: string | undefined;
 }
 
 export interface Dimension {
   customWidth: number;
   customHeight: number;
-  activeDimension: 'cm' | 'in';
+  rows?: number;
+  columns?: number;
+  activeDimension: "cm" | "in";
 }
 
 export interface TileState {
@@ -33,11 +36,11 @@ export interface TileState {
 const useTileStore = create(
   persist<TileState>(
     (set) => ({
-      tileName: 'Cadaques',
+      tileName: "Cadaques",
       setTileName: (tileName: string) => set({ tileName }),
-      tileColor: 'Blush',
+      tileColor: "Blush",
       setTileColor: (tileColor: string) => set({ tileColor }),
-      activeTilePath: '',
+      activeTilePath: "",
       setActiveTilePath: (activeTilePath: string) => set({ activeTilePath }),
       editedTiles: [],
       setEditedTiles: (editedTiles: EditedTile[]) => set({ editedTiles }),
@@ -45,7 +48,7 @@ const useTileStore = create(
       setActiveRotationDegree: (activeRotationDegree: number) =>
         set({ activeRotationDegree }),
       measurement: {
-        activeDimension: 'cm',
+        activeDimension: "cm",
         customHeight: 0,
         customWidth: 0,
       },
@@ -54,11 +57,10 @@ const useTileStore = create(
       setActiveSize: (activeSize: number) => set({ activeSize }),
     }),
     {
-      name: 'tile-choice',
+      name: "tile-choice",
       getStorage: () => localStorage,
-    },
-  ),
+    }
+  )
 );
 
 export default useTileStore;
-
