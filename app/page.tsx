@@ -79,12 +79,11 @@ const page = (props: Props) => {
 
   const saveDimension = () => {
     setMeasurement({
-      activeDimension: "cm",
+      ...measurement,
       customWidth,
       customHeight,
     });
   };
-  console.log(isModalOpen, price);
 
   useEffect(() => {
     formData.width && formData.height && setShowSaveBtn(true);
@@ -111,32 +110,36 @@ const page = (props: Props) => {
 
   useEffect(() => {
     setMeasurement({
-      activeDimension: "cm",
-      customWidth: activeSize,
-      customHeight: activeSize,
+      ...measurement,
+      customWidth: customWidth > activeSize ? customWidth : activeSize,
+      customHeight: customHeight > activeSize ? customHeight : activeSize,
     });
   }, [activeSize]);
 
-  const router = useRouter();
-
   return (
-    <div className="w-full p-7 flex items-start flex-col lg:flex-row">
-      <div className="lg:w-1/3 w-full lg:px-10 lg:border-r-2 border-[#F5F5F5]">
-        <div className="flex items-start justify-between lg:flex-col">
+    <div className="w-full lg:px-20 p-7 flex items-start flex-col lg:flex-row">
+      <div className="lg:max-w-1/3 lg:w-fit w-full lg:mr-10">
+        <div className="flex lg:items-start items-end gap-5 justify-between lg:flex-col">
           <div className="mt-5 space-y-3 md:mt-0 md:hidden">
-            <div className="border border-primary rounded-full w-24 h-10 flex lg:w-32 bg-[#FBFBFB]">
+            <div className="border border-primary rounded-full h-10 flex lg:w-32 bg-[#FBFBFB]">
               <button
                 onClick={() => {
                   setMeasurement({
                     activeDimension: "cm",
-                    customHeight: activeSize,
-                    customWidth: activeSize,
+                    customWidth:
+                      measurement.customWidth > activeSize
+                        ? measurement.customWidth
+                        : activeSize,
+                    customHeight:
+                      measurement.customHeight > activeSize
+                        ? measurement.customHeight
+                        : activeSize,
                   });
                 }}
                 className={`${
                   measurement.activeDimension === "cm"
-                    ? "w-[75px] h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
-                    : "w-[75px] h-full rounded-full p-1 bg-[#FBFBFB]"
+                    ? "h-full rounded-full p-0.5 scale-[1.15] shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
+                    : "h-full rounded-full p-0.5 bg-[#FBFBFB]"
                 } `}
               >
                 <div
@@ -144,10 +147,10 @@ const page = (props: Props) => {
                     measurement.activeDimension === "cm"
                       ? "bg-[#303825]"
                       : "bg-[#FBFBFB]"
-                  } w-full h-full rounded-full  flex items-center justify-center`}
+                  } lg:px-6 px-5 py-3 w-full h-full rounded-full  flex items-center justify-center`}
                 >
                   <p
-                    className={`text-xs font-semibold ${
+                    className={`text-xs mb-0.5 font-semibold ${
                       measurement.activeDimension === "cm"
                         ? "text-white"
                         : "text-black"
@@ -162,14 +165,20 @@ const page = (props: Props) => {
                 onClick={() => {
                   setMeasurement({
                     activeDimension: "in",
-                    customHeight: activeSize,
-                    customWidth: activeSize,
+                    customWidth:
+                      measurement.customWidth > activeSize
+                        ? measurement.customWidth
+                        : activeSize,
+                    customHeight:
+                      measurement.customHeight > activeSize
+                        ? measurement.customHeight
+                        : activeSize,
                   });
                 }}
                 className={`${
                   measurement.activeDimension === "in"
-                    ? "w-[75px] h-full rounded-full p-1 shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
-                    : "w-[75px] h-full rounded-full p-1 bg-[#FBFBFB]"
+                    ? "h-full rounded-full p-0.5 scale-[1.15] shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
+                    : "h-full rounded-full p-0.5 bg-[#FBFBFB]"
                 } `}
               >
                 <div
@@ -177,10 +186,10 @@ const page = (props: Props) => {
                     measurement.activeDimension === "in"
                       ? "bg-[#303825]"
                       : "bg-[#FBFBFB]"
-                  } w-full h-full rounded-full  flex items-center justify-center`}
+                  } lg:px-6 px-5 py-3 w-full h-full rounded-full  flex items-center justify-center`}
                 >
                   <p
-                    className={`text-xs font-semibold ${
+                    className={`text-xs mb-0.5 font-semibold ${
                       measurement.activeDimension === "in"
                         ? "text-white"
                         : "text-black"
@@ -198,18 +207,18 @@ const page = (props: Props) => {
               <p className="text-gold text-xs">Height</p>
               <input
                 type="number"
-                className="w-24 h-10 border border-primary rounded-full p-3 mt-2"
+                className="md:w-24 w-full h-10 border border-primary rounded-full p-3 mt-2"
                 onChange={(e) => handleInput(e.target.name, e.target.value)}
-                name="width"
+                name="height"
               />
             </div>
             <div>
-              <p className="text-gold text-xs">Weight</p>
+              <p className="text-gold text-xs">Width</p>
               <input
                 type="number"
-                className="w-24 h-10 border border-primary rounded-full p-3 mt-2"
+                className="md:w-24 w-full h-10 border border-primary rounded-full p-3 mt-2"
                 onChange={(e) => handleInput(e.target.name, e.target.value)}
-                name="height"
+                name="width"
               />
             </div>
           </div>
@@ -338,9 +347,9 @@ const page = (props: Props) => {
 
       {/* SideGrid */}
 
-      <div className="lg:w-2/3 w-full gap-[56px] lg:px-10 flex items-end">
+      <div className="w-full gap-8 lg:border-l-2 border-[#F5F5F5] lg:pl-10 flex items-end">
         <div className="w-full">
-          <div className="flex items-center justify-between">
+          <div className="w-full flex items-center justify-between">
             <div className="md:flex space-x-7 hidden">
               <div>
                 <svg
@@ -377,6 +386,7 @@ const page = (props: Props) => {
                   </g>
                 </svg>
               </div>
+
               <div>
                 <svg
                   width="20"
@@ -413,8 +423,101 @@ const page = (props: Props) => {
                 </svg>
               </div>
             </div>
+            <div className="md:flex hidden space-x-5 lg:hidden">
+              {/* Zoom In Button */}
+              <button
+                onClick={() => {
+                  setActiveSize(activeSize !== 15 ? activeSize + 1 : 15);
+                }}
+              >
+                <svg
+                  width="34"
+                  height="33"
+                  viewBox="0 0 34 33"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g opacity="0.5">
+                    <ellipse
+                      cx="16.9342"
+                      cy="16.5"
+                      rx="16.9342"
+                      ry="16.5"
+                      fill="#FFE3B7"
+                    />
+                    <path
+                      d="M15.4333 15.9092H18.386"
+                      stroke="#292D32"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M16.9099 17.3855V14.4329"
+                      stroke="#292D32"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M16.7929 10.1811C19.8931 10.1811 22.4029 12.6909 22.4029 15.7911C22.4029 18.8914 19.8931 21.4011 16.7929 21.4011C13.6926 21.4011 11.1829 18.8914 11.1829 15.7911C11.1829 13.6062 12.4289 11.7165 14.2536 10.7894"
+                      stroke="#292D32"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M22.9918 21.9916L21.8108 20.8105"
+                      stroke="#292D32"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </g>
+                </svg>
+              </button>
 
-            <div className="w-full flex items-center justify-between">
+              {/* Zoom out button */}
+              <button
+                onClick={() => {
+                  setActiveSize(activeSize === 15 ? activeSize - 1 : 9);
+                }}
+              >
+                <svg
+                  width="35"
+                  height="34"
+                  viewBox="0 0 35 34"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g opacity="0.5">
+                    <circle cx="17.8684" cy="17" r="17" fill="#FDECD1" />
+                    <path
+                      d="M16.2036 16.936H19.1677"
+                      stroke="#292D32"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M17.686 11.1856C20.7983 11.1856 23.3178 13.7051 23.3178 16.8174C23.3178 19.9297 20.7983 22.4492 17.686 22.4492C14.5737 22.4492 12.0542 19.9297 12.0542 16.8174C12.0542 14.624 13.3051 12.727 15.1369 11.7962"
+                      stroke="#292D32"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M23.9115 23.042L22.7258 21.8564"
+                      stroke="#292D32"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </g>
+                </svg>
+              </button>
+            </div>
+            <div className="flex w-full md:w-fit items-center justify-between">
               <div className="border border-primary rounded-full w-52 h-10 flex md:hidden bg-[#FBFBFB]">
                 <button
                   onClick={() => {
@@ -463,7 +566,7 @@ const page = (props: Props) => {
               <div className="flex mt-0 space-x-7">
                 <button
                   onClick={() => {
-                    router.refresh();
+                    setEditedTiles([]);
                   }}
                 >
                   <svg
@@ -878,10 +981,14 @@ const page = (props: Props) => {
 
             <div className="flex space-x-5">
               <p className="font-bold">TOTAL:</p>
-              <p>
-                &#8364;
-                {price}
-              </p>
+              {activeTilePath && price ? (
+                <p>
+                  &#8364;
+                  {Math.round(price)}
+                </p>
+              ) : (
+                <p>-- --</p>
+              )}
             </div>
           </div>
           {isModalOpen && <SaveModal onClose={() => setIsModalOpen(false)} />}
@@ -1037,7 +1144,7 @@ const page = (props: Props) => {
           </div>
         </div>
 
-        <div className="md:flex flex-col space-y-5 hidden">
+        <div className="lg:flex flex-col mb-16 space-y-5 hidden">
           {/* Zoom in button */}
           <button
             onClick={() => {

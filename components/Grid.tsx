@@ -8,35 +8,57 @@ function Grid({ isMainGrid = true }) {
   const deviceWidth = useDeviceWidth();
   const measurement = useTileStore((state) => state.measurement);
   const customWidth = measurement.customWidth;
+  const customHeight = measurement.customHeight;
   const activeDimension = measurement.activeDimension;
   const setActiveDimension = useTileStore((state) => state.setMeasurement);
-  const [boxSize, setBoxSize] = useState(deviceWidth >= 1024 ? 80 : 60); // Size of each box in pixels
+  const activeSize = useTileStore((state) => state.activeSize);
+  const activeTile = useTileStore((state) => state.tileName);
+  const activeTilePath = useTileStore((state) => state.activeTilePath);
+  // const [boxSize, setBoxSize] = useState(deviceWidth >= 1024 ? 80 : 60); // Size of each box in pixels
   const containerRef = useRef<any>(null);
   const [numRows, setNumRows] = useState(3); // Initial number of rows, adjust as needed
   const [numCols, setNumCols] = useState(3); // Initial number of columns, same as rows
+  const [scale, setScale] = useState(1);
+  const singleTile = useRef<any>(null);
 
   useEffect(() => {
     if (customWidth && activeDimension) {
       if (activeDimension === "cm") {
-        setBoxSize(customWidth * 5);
+        // setBoxSize(customWidth * 5);
       } else if (activeDimension === "in") {
-        setBoxSize(customWidth * 7.5);
+        // setBoxSize(customWidth * 7.5);
       }
     }
   }, [customWidth, activeDimension]);
 
+  const boxSize = activeSize > 9 ? 80 : 64;
   useEffect(() => {
     const calculateGrid = () => {
       if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
+        const availableWidth = containerRef.current.offsetWidth;
+        const availableHeight = containerRef.current.offsetHeight;
+        let containerWidth = customWidth > 20 ? customWidth : availableWidth;
+        // containerWidth =
+        //   activeDimension === "in" ? containerWidth * 0.393701 : containerWidth;
+        let containerHeight =
+          customHeight > 20 ? customHeight : availableHeight;
+        containerHeight =
+          activeTile === "Rio" && activeTilePath.includes("Rio")
+            ? containerHeight - 40
+            : containerHeight;
+        // containerHeight =
+        //   activeDimension === "in"
+        //     ? containerHeight * 0.393701
+        //     : containerHeight;
 
-        // Calculate number of rows and columns based on container width and box size
         const newNumCols = Math.floor(containerWidth / boxSize);
-        const newNumRows =
-          deviceWidth >= 1024
-            ? Math.floor(containerWidth / 2 / boxSize)
-            : Math.floor(containerWidth / boxSize);
-        console.log(containerWidth);
+        const newNumRows = Math.floor(containerHeight / boxSize);
+        // const newNumCols = Math.floor(containerWidth / boxSize);
+        // const newNumRows =
+        //   deviceWidth >= 1024
+        //     ? Math.floor(containerWidth / 2 / boxSize)
+        //     : Math.floor(containerWidth / boxSize);
+        console.log(containerWidth, containerHeight, customWidth, boxSize);
 
         // Set number of rows and columns
         setNumRows(newNumRows);
@@ -46,6 +68,13 @@ function Grid({ isMainGrid = true }) {
           columns: newNumCols,
         });
         setNumCols(newNumCols);
+
+        // Calculate scale factor to fit the container within the available space
+        const widthScale = availableWidth / containerWidth;
+        const heightScale = availableHeight / containerHeight;
+        const newScale = Math.min(widthScale, heightScale);
+
+        setScale(newScale);
       }
     };
 
@@ -57,15 +86,20 @@ function Grid({ isMainGrid = true }) {
     return () => {
       window.removeEventListener("resize", calculateGrid);
     };
-    if (isMainGrid) {
-    }
-  }, [deviceWidth, boxSize, isMainGrid]);
+  }, [
+    deviceWidth,
+    activeSize,
+    activeTile,
+    customWidth,
+    customHeight,
+    activeTilePath,
+    isMainGrid,
+    activeDimension,
+  ]);
 
   // Create arrays of row and column indices
   const rows = Array.from({ length: numRows }, (_, index) => index);
   const cols = Array.from({ length: numCols }, (_, index) => index);
-
-  const activeTilePath = useTileStore((state) => state.activeTilePath);
 
   const activeRotationDegree = useTileStore(
     (state) => state.activeRotationDegree
@@ -89,8 +123,9 @@ function Grid({ isMainGrid = true }) {
       <div
         className={`${
           !isMainGrid && "wfit mx-auto"
-        } grid-container rounded-lg my-7 relative`}
+        } grid-container w-full origin-top-left h-[500px] rounded-lg my-7 relative min-h-32`}
         ref={containerRef}
+        style={{ scale: scale }}
       >
         {rows.length > 3 && !activeTilePath && (
           <div className="w-full h-full absolute flex items-center justify-center">
@@ -107,7 +142,9 @@ function Grid({ isMainGrid = true }) {
               return (
                 <div
                   key={colIndex}
-                  className="w-16 h-16 bg-[#FAFAFA] border border-[#F1F1F1]"
+                  className={`${
+                    activeSize === 13 ? "w-20 h-20" : "w-16 h-16"
+                  } bg-[#FAFAFA] border border-[#F1F1F1]`}
                   style={{ width: `${boxSize}px`, height: `${boxSize}px` }}
                 >
                   {rows.length > 3 && activeTilePath !== "" && (
@@ -115,6 +152,7 @@ function Grid({ isMainGrid = true }) {
                       onClick={() => {
                         setActiveTileIndex(`${colIndex}-${rowIndex}`);
                       }}
+                      ref={singleTile}
                       className="relative"
                     >
                       {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
@@ -154,9 +192,7 @@ function Grid({ isMainGrid = true }) {
                                   ? {
                                       transform: `rotateX(${activeTile.rotationDegree}deg)`,
                                     }
-                                  : {
-                                      rotate: `${activeTile.rotationDegree}deg`,
-                                    }
+                                  : {}
                               }
                             />
                           )}
@@ -166,7 +202,8 @@ function Grid({ isMainGrid = true }) {
                       {activeTileIndex === `${colIndex}-${rowIndex}` && (
                         <TileEditComponent
                           tileIndex={activeTileIndex}
-                          boxSize={boxSize}
+                          boxSizeHeight={singleTile.current?.offsetHeight}
+                          boxSizeWidth={singleTile.current?.offsetWidth}
                         />
                       )}
                     </button>

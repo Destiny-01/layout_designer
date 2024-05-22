@@ -12,6 +12,7 @@ type Props = {};
 const Navbar = (props: Props) => {
   const activeSize = useTileStore((state) => state.activeSize);
   const setActiveSize = useTileStore((state) => state.setActiveSize);
+  const measurement = useTileStore((state) => state.measurement);
   const setMeasurement = useTileStore((state) => state.setMeasurement);
   const activeDimension = useTileStore(
     (state) => state.measurement
@@ -24,8 +25,14 @@ const Navbar = (props: Props) => {
   const handleDimension = (type: "cm" | "in") => {
     setMeasurement({
       activeDimension: type,
-      customWidth: activeSize,
-      customHeight: activeSize,
+      customWidth:
+        measurement.customWidth > activeSize
+          ? measurement.customWidth
+          : activeSize,
+      customHeight:
+        measurement.customHeight > activeSize
+          ? measurement.customHeight
+          : activeSize,
     });
   };
 
@@ -33,7 +40,7 @@ const Navbar = (props: Props) => {
     handleDimension("cm");
   }, [activeSize]);
   return (
-    <div className="py-4 lg:py-6 px-7 fixed top-0 z-50 flex items-center justify-between w-full h-[10vh] lg:h-[12vh] bg-white">
+    <div className="py-4 lg:py-6 px-7 lg:px-20 flex items-center justify-between w-full h-[10vh] lg:h-[12vh] bg-white">
       <Link href={"/"} className="flex md:hidden">
         <Image src={Logo} priority alt="Logo" />
       </Link>
@@ -42,24 +49,34 @@ const Navbar = (props: Props) => {
         <Image src={LogoFull} priority alt="Logo" />
       </Link>
 
-      <div className="border border-primary bg-[#fbfbfb] rounded-full w-1/4 lg:w-fit h-full hidden md:flex">
+      <div className="border border-primary bg-[#fbfbfb] rounded-full lg:w-fit h-full hidden md:flex">
         <button
           onClick={() => {
-            handleDimension("cm");
+            setMeasurement({
+              activeDimension: "cm",
+              customWidth:
+                measurement.customWidth > activeSize
+                  ? measurement.customWidth
+                  : activeSize,
+              customHeight:
+                measurement.customHeight > activeSize
+                  ? measurement.customHeight
+                  : activeSize,
+            });
           }}
           className={`${
             activeDimension === "cm"
-              ? "bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
-              : "bg-[#FBFBFB]"
-          } w-[75px] h-full rounded-full p-0.5 shadow-inner `}
+              ? "h-full rounded-full p-0.5 scale-[1.15] shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
+              : "h-full rounded-full p-0.5 bg-[#FBFBFB]"
+          } `}
         >
           <div
             className={`${
               activeDimension === "cm" ? "bg-[#303825]" : "bg-[#FBFBFB]"
-            } w-full h-full rounded-full  flex items-center justify-center`}
+            } lg:px-6 px-5 py-3 w-full h-full rounded-full  flex items-center justify-center`}
           >
             <p
-              className={`text-xs font-semibold ${
+              className={`text-xs mb-0.5 font-semibold ${
                 activeDimension === "cm" ? "text-white" : "text-black"
               }`}
             >
@@ -67,23 +84,34 @@ const Navbar = (props: Props) => {
             </p>
           </div>
         </button>
+
         <button
           onClick={() => {
-            handleDimension("in");
+            setMeasurement({
+              activeDimension: "in",
+              customWidth:
+                measurement.customWidth > activeSize
+                  ? measurement.customWidth
+                  : activeSize,
+              customHeight:
+                measurement.customHeight > activeSize
+                  ? measurement.customHeight
+                  : activeSize,
+            });
           }}
           className={`${
             activeDimension === "in"
-              ? "bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
-              : "bg-[#FBFBFB]"
-          } w-[75px] h-full rounded-full p-1 shadow-inner `}
+              ? "h-full rounded-full p-0.5 scale-[1.15] shadow-inner bg-gradient-to-br from-[#3C5F58] to-[#97AF7A]"
+              : "h-full rounded-full p-0.5 bg-[#FBFBFB]"
+          } `}
         >
           <div
             className={`${
               activeDimension === "in" ? "bg-[#303825]" : "bg-[#FBFBFB]"
-            } w-full h-full rounded-full  flex items-center justify-center`}
+            } lg:px-6 px-5 py-3 w-full h-full rounded-full  flex items-center justify-center`}
           >
             <p
-              className={`text-xs font-semibold ${
+              className={`text-xs mb-0.5 font-semibold ${
                 activeDimension === "in" ? "text-white" : "text-black"
               }`}
             >

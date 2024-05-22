@@ -41,12 +41,12 @@ function SaveModal({ onClose }: { onClose: () => void }) {
       <div className="absolute inset-0 bg-black bg-opacity-10 backdrop-blur-md"></div>
       <div
         ref={modalRef}
-        className="relative mx-4 lg:py-8 py-4 rounded-xl lg:px-7 px-3 shadow-modal-shadow border border-milk bg-white w-[550px] max-wmd text-center"
+        className="relative mx-4 overflow-scroll max-h-[75%] lg:py-8 py-4 rounded-xl lg:px-7 px-4 shadow-modal-shadow border border-milk bg-white w-[550px] max-wmd text-center"
       >
-        <h2 className="text-gray900 mt-6 mb-2 text-2xl lg:text-[28px]">
+        <h2 className="text-gray900 mt-6 text-2xl lg:text-[28px]">
           Order Summary
         </h2>
-        <div className="pointer-events-none pl-6 scale50 mx-auto">
+        <div className="pointer-events-none pl-6 overflow-auto h-[300px] scale50 mx-auto">
           <Grid isMainGrid={false} />
         </div>
         <div className="flex mt-6 justify-between">

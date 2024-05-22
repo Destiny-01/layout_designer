@@ -4,10 +4,15 @@ import { useEffect, useState } from "react";
 
 type Props = {
   tileIndex: string;
-  boxSize: number;
+  boxSizeHeight: number;
+  boxSizeWidth: number;
 };
 
-const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
+const TileEditComponent = ({
+  tileIndex,
+  boxSizeHeight,
+  boxSizeWidth,
+}: Props) => {
   const activeTileName = useTileStore((state) => state.tileName);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
@@ -15,26 +20,23 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
   const [showColorPanel, setShowColorPanel] = useState(false);
   const [updatedTilePath, setUpdatedTilePath] = useState<string | null>(null);
   const [rotationDegree, setRotationDegree] = useState<number>(0);
-  const [rotateStyle, setRotateStyle] =
-    useState<EditedTile["rotateStyle"]>("rotate");
+  const [rotateStyle, setRotateStyle] = useState<
+    EditedTile["rotateStyle"] | undefined
+  >();
   const [tilePath, setTilePath] = useState<string>(activeTilePath);
   const [tileColor, setTileColor] = useState<string>("");
 
-  const rotateDiv = (
-    direction: "clockwise" | "anticlockwise" | "flipX" | "flipY"
-  ) => {
+  const rotateDiv = (direction: "reset" | "flipX" | "flipY") => {
     let newDegree = 0;
     switch (direction) {
-      case "clockwise":
+      case "reset":
         // newDegree = rotationDegree + 90;
         // if (newDegree >= 360) {
         newDegree = 0;
+        setEditedTiles(
+          editedTiles.filter((tile) => tile.tileIndex !== tileIndex)
+        );
       // }
-      case "anticlockwise":
-        newDegree = rotationDegree - 90;
-        if (newDegree < 0) {
-          newDegree = 270;
-        }
       case "flipX":
         newDegree = rotationDegree > 0 ? 0 : 180;
         break;
@@ -42,10 +44,10 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
         newDegree = rotationDegree > 0 ? 0 : 180;
         break;
     }
-    console.log(direction);
+    console.log(direction, newDegree, editedTiles);
     direction === "flipX" || direction === "flipY"
       ? setRotateStyle(direction)
-      : setRotateStyle("rotate");
+      : setRotateStyle(undefined);
 
     setRotationDegree(newDegree);
   };
@@ -101,9 +103,9 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
   const editedTiles = useTileStore((state) => state.editedTiles);
 
   const handleTileEdit = (
-    editType: "rotate" | "flipX" | "flipY" | "colorEdit"
+    editType: "reset" | "flipX" | "flipY" | "colorEdit"
   ) => {
-    editType === "rotate" && rotateDiv("clockwise");
+    editType === "reset" && rotateDiv("reset");
     editType === "flipX" && rotateDiv("flipX");
     editType === "flipY" && rotateDiv("flipY");
     editType === "colorEdit" && handleColorPick();
@@ -133,7 +135,7 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           onClick={() => {
-            handleTileEdit("rotate");
+            handleTileEdit("reset");
           }}
         >
           <g filter="url(#filter0_d_11_9249)">
@@ -209,7 +211,7 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
       </div>
 
       {/* Color Button */}
-      <div className="absolute left-[4.5rem] rotate-90">
+      <div className="absolute left-[5.5rem] rotate-90">
         {showColorPanel && (
           <div className="flex bottom-24 -left-10 rotate-[270deg] w-32 overflow-x-scroll gap-3 py-3 absolute">
             {colorVariation.map((color) => {
@@ -675,10 +677,10 @@ const TileEditComponent = ({ tileIndex, boxSize }: Props) => {
         <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
       </div>
       <div
-        className={`w-[${boxSize}px] h-[${boxSize}px] border-2 border-black`}
+        className={`w-[${boxSizeWidth}px] h-[${boxSizeHeight}px] border-2 border-black`}
         style={{
-          width: `${boxSize}px`,
-          height: `${boxSize}px`,
+          width: `${boxSizeWidth}px`,
+          height: `${boxSizeHeight}px`,
         }}
       ></div>
     </div>

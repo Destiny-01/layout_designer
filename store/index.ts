@@ -4,7 +4,7 @@ import { persist } from "zustand/middleware";
 export interface EditedTile {
   tileIndex: string;
   rotationDegree: number;
-  rotateStyle: "rotate" | "flipX" | "flipY";
+  rotateStyle: "flipX" | "flipY" | undefined;
   tilePath: string | undefined;
 }
 
