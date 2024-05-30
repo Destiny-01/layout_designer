@@ -31,7 +31,37 @@ export interface TileState {
   setMeasurement: (measurement: Dimension) => void;
   activeSize: number;
   setActiveSize: (activeSize: number) => void;
+  zoom: number;
+  setZoom: (zoom: number) => void;
 }
+export interface HistoryEntry {
+  tileIndex: string | null;
+  from: any;
+  to: any;
+  action: "rotate" | "flipX" | "flipY" | "color";
+}
+
+export interface HistoryState {
+  currentIndex: number;
+  state: HistoryEntry[];
+  setState: (state: HistoryEntry[]) => void;
+  setCurrentIndex: (currentIndex: number) => void;
+}
+
+export const useHistoryStore = create(
+  persist<HistoryState>(
+    (set) => ({
+      currentIndex: 0,
+      state: [],
+      setState: (state: HistoryState["state"]) => set({ state }),
+      setCurrentIndex: (currentIndex: number) => set({ currentIndex }),
+    }),
+    {
+      name: "history",
+      getStorage: () => localStorage,
+    }
+  )
+);
 
 const useTileStore = create(
   persist<TileState>(
@@ -55,6 +85,8 @@ const useTileStore = create(
       setMeasurement: (measurement: Dimension) => set({ measurement }),
       activeSize: 9,
       setActiveSize: (activeSize: number) => set({ activeSize }),
+      zoom: 1,
+      setZoom: (zoom: number) => set({ zoom }),
     }),
     {
       name: "tile-choice",

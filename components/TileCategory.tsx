@@ -26,10 +26,15 @@ const TileCategory = (props: Props) => {
     "Siquijor",
     "Skye",
   ];
+  const [activeTile, setActiveTile] = useState("");
   const [showSubCategory, setShowSubCategory] = useState<boolean>(false);
+  const [activeCategory, setActiveCategory] = useState(0);
 
   const setTileName = useTileStore((state) => state.setTileName);
-  const storedTileName = useTileStore((state) => state.tileName);
+  const setActiveRotationDegree = useTileStore(
+    (state) => state.setActiveRotationDegree
+  );
+  // const storedTileName = useTileStore((state) => state.tileName);
   const storedTileColor = useTileStore((state) => state.tileColor);
   const setTileColor = useTileStore((state) => state.setTileColor);
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
@@ -49,8 +54,11 @@ const TileCategory = (props: Props) => {
             <button
               className="flex items-center space-x-3 h-fit"
               onClick={() => {
-                setShowSubCategory(!showSubCategory);
-                setTileName(item.tileName);
+                console.log(item.tileName, activeTile, showSubCategory);
+                setShowSubCategory(item.tileName !== activeTile);
+                setActiveTile(
+                  item.tileName === activeTile ? "" : item.tileName
+                );
               }}
             >
               <svg
@@ -59,6 +67,12 @@ const TileCategory = (props: Props) => {
                 viewBox="0 0 14 14"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                className="mb-0.5 transition-all"
+                style={
+                  item.tileName === activeTile
+                    ? { rotate: "90deg" }
+                    : { rotate: "0deg" }
+                }
               >
                 <path
                   opacity="0.4"
@@ -70,13 +84,17 @@ const TileCategory = (props: Props) => {
                   fill="#292D32"
                 />
               </svg>
-              <p>{item.tileName}</p>
+              <p
+                className={item.tileName === activeTile ? "text-[#C98319]" : ""}
+              >
+                {item.tileName}
+              </p>
             </button>
-            {showSubCategory && item.tileName === storedTileName && (
+            {showSubCategory && item.tileName === activeTile && (
               <div className="pl-7 lg:pl-10">
                 <div className="grid grid-cols-5 gap-3 py-3 w-fit">
-                  {item.tileVariation.map(
-                    (tileVariant: { tileColor: string; tilePath: string }) => {
+                  {item.subCategories.map((category) => {
+                    return category.tileVariation.map((tileVariant) => {
                       return (
                         tileVariant.tileColor === storedTileColor && (
                           <button
@@ -86,6 +104,7 @@ const TileCategory = (props: Props) => {
                                 item.tileName,
                                 tileVariant.tilePath
                               );
+                              setActiveRotationDegree(0);
                             }}
                           >
                             <Image
@@ -98,15 +117,17 @@ const TileCategory = (props: Props) => {
                           </button>
                         )
                       );
-                    }
-                  )}
+                    });
+                  })}
                 </div>
 
                 <div className="grid grid-cols-5 gap-3 py-3 w-fit">
                   {item.colorVariation.map((color) => {
-                    const isInFirstArray = item.tileVariation.some(
-                      (obj) => obj.tileColor === color.colorName
-                    );
+                    const isInFirstArray = item.subCategories
+                      .find((category) => category.id === activeCategory)
+                      ?.tileVariation.some(
+                        (obj) => obj.tileColor === color.colorName
+                      );
 
                     return (
                       <button

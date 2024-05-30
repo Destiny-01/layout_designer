@@ -1,10 +1,11 @@
 import useDeviceWidth from "@/hooks/useDeviceWidth"; // Path to your custom hook
 import useTileStore from "@/store";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import TileEditComponent from "./TileEditComponent";
 
-function Grid({ isMainGrid = true }) {
+const Grid = ({ isMainGrid = true, containerRef }: any) => {
+  // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
   const deviceWidth = useDeviceWidth();
   const measurement = useTileStore((state) => state.measurement);
   const customWidth = measurement.customWidth;
@@ -15,11 +16,13 @@ function Grid({ isMainGrid = true }) {
   const activeTile = useTileStore((state) => state.tileName);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   // const [boxSize, setBoxSize] = useState(deviceWidth >= 1024 ? 80 : 60); // Size of each box in pixels
-  const containerRef = useRef<any>(null);
   const [numRows, setNumRows] = useState(3); // Initial number of rows, adjust as needed
   const [numCols, setNumCols] = useState(3); // Initial number of columns, same as rows
   const [scale, setScale] = useState(1);
   const singleTile = useRef<any>(null);
+  const zoom = useTileStore((state) => state.zoom);
+
+  console.log(zoom, scale);
 
   useEffect(() => {
     if (customWidth && activeDimension) {
@@ -31,7 +34,7 @@ function Grid({ isMainGrid = true }) {
     }
   }, [customWidth, activeDimension]);
 
-  const boxSize = activeSize > 9 ? 80 : 64;
+  const boxSize = activeSize > 9 ? 64 * 1.5 : 64;
   useEffect(() => {
     const calculateGrid = () => {
       if (containerRef.current) {
@@ -79,8 +82,8 @@ function Grid({ isMainGrid = true }) {
     };
 
     // Call calculateGrid initially and on window resize
+    isMainGrid && calculateGrid();
     // calculateGrid();
-    calculateGrid();
     window.addEventListener("resize", calculateGrid);
 
     return () => {
@@ -117,15 +120,52 @@ function Grid({ isMainGrid = true }) {
     return position;
   };
   console.log(boxSize, rows, numRows, numCols);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setActiveTileIndex("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleSpacing = useCallback(() => {
+    const activeTileIndexes = activeTileIndex?.split("-");
+    let margin = "";
+    if (activeTileIndexes) {
+      margin = activeTileIndexes[0] === "0" ? margin + " ml-20" : "ml-0";
+      margin =
+        activeTileIndexes[1] === "0" ? margin + " mt-20" : margin + " mt-0";
+      margin =
+        activeTileIndexes[0] === String(cols.length - 1)
+          ? margin + " mr-20"
+          : margin + " mr-0";
+      margin =
+        activeTileIndexes[1] === String(rows.length - 1)
+          ? margin + " mb-20"
+          : margin + " mb-0";
+
+      return margin;
+    }
+  }, [activeTileIndex]);
 
   return (
     <>
       <div
-        className={`${
-          !isMainGrid && "wfit mx-auto"
-        } grid-container w-full origin-top-left h-[500px] rounded-lg my-7 relative min-h-32`}
+        className={`${handleSpacing()} grid-container w-full origin-top-left rounded-lg relative h-full`}
         ref={containerRef}
-        style={{ scale: scale }}
+        style={{
+          transform: `scale(${scale * zoom})`,
+          transformOrigin: "top left",
+          // width: `${numCols * boxSize}px`,
+          // height: `${numRows * boxSize}px`,
+        }}
       >
         {rows.length > 3 && !activeTilePath && (
           <div className="w-full h-full absolute flex items-center justify-center">
@@ -138,77 +178,99 @@ function Grid({ isMainGrid = true }) {
               const activeTile =
                 editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
               activeTile &&
-                console.log({ activeTile, colIndex, rowIndex, editedTiles });
+                console.log({
+                  activeTile,
+                  colIndex,
+                  rowIndex,
+                  editedTiles,
+                  tile: singleTile.current?.offsetWidth,
+                  boxSize,
+                });
               return (
-                <div
-                  key={colIndex}
-                  className={`${
-                    activeSize === 13 ? "w-20 h-20" : "w-16 h-16"
-                  } bg-[#FAFAFA] border border-[#F1F1F1]`}
-                  style={{ width: `${boxSize}px`, height: `${boxSize}px` }}
-                >
-                  {rows.length > 3 && activeTilePath !== "" && (
-                    <button
-                      onClick={() => {
-                        setActiveTileIndex(`${colIndex}-${rowIndex}`);
-                      }}
-                      ref={singleTile}
-                      className="relative"
-                    >
-                      {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
-                        <Image
-                          src={activeTilePath}
-                          width={16}
-                          height={16}
-                          className="w-full h-full object-cover"
-                          alt="Tile"
-                          style={{
-                            rotate: `${activeRotationDegree}deg`,
-                          }}
-                        />
-                      ) : (
-                        <>
-                          {activeTile.rotateStyle === "flipX" &&
-                            console.log(activeTile, {
-                              transform: `rotateX(${activeTile.rotationDegree})`,
-                            })}
-                          {editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
-                            .tilePath && (
-                            <Image
-                              src={
-                                editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
-                                  .tilePath ?? ""
-                              }
-                              width={16}
-                              height={16}
-                              className="w-full h-full object-cover"
-                              alt="Tile"
-                              style={
-                                activeTile.rotateStyle === "flipX"
-                                  ? {
-                                      transform: `rotateY(${activeTile.rotationDegree}deg)`,
-                                    }
-                                  : activeTile.rotateStyle === "flipY"
-                                  ? {
-                                      transform: `rotateX(${activeTile.rotationDegree}deg)`,
-                                    }
-                                  : {}
-                              }
-                            />
-                          )}
-                        </>
-                      )}
+                // <div
+                // className={`${
+                //   ""
+                //   // activeSize === 13 ? "w-24 h-24" : "w-16 h-16"
+                // } bg-[#FAFAFA] border border-[#F1F1F1]`}
+                // style={{
+                //   width: `fit-content`,
+                //   height: `fit-content`,
+                // width: `${
+                //   singleTile.current?.offsetWidth > 20
+                //     ? singleTile.current?.offsetWidth
+                //     : boxSize * scale * zoom
+                // }px`,
+                // height: `${
+                //   singleTile.current?.offsetHeight > 20
+                //     ? singleTile.current?.offsetHeight
+                //     : boxSize * scale * zoom
+                // }px`,
+                // }}
+                // >
+                rows.length > 1 &&
+                activeTilePath !== "" && (
+                  <button
+                    key={colIndex}
+                    onClick={() => {
+                      setActiveTileIndex(`${colIndex}-${rowIndex}`);
+                    }}
+                    ref={singleTile}
+                    className="relative bg-[#FAFAFA] border border-[#F1F1F1]"
+                  >
+                    {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
+                      <Image
+                        src={activeTilePath}
+                        width={"0"}
+                        height={"0"}
+                        className="w-full h-full object-cover"
+                        alt="Tile"
+                        style={{
+                          rotate: `${activeRotationDegree}deg`,
+                        }}
+                      />
+                    ) : (
+                      <>
+                        {activeTile.rotateStyle === "flipX" &&
+                          console.log(activeTile, {
+                            transform: `rotateX(${activeTile.rotationDegree})`,
+                          })}
+                        {editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
+                          .tilePath && (
+                          <Image
+                            src={
+                              editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
+                                .tilePath ?? ""
+                            }
+                            width={"0"}
+                            height={"0"}
+                            className="w-full h-full object-cover"
+                            alt="Tile"
+                            style={
+                              activeTile.rotateStyle === "flipX"
+                                ? {
+                                    transform: `rotateY(${activeTile.rotationDegree}deg)`,
+                                  }
+                                : activeTile.rotateStyle === "flipY"
+                                ? {
+                                    transform: `rotateX(${activeTile.rotationDegree}deg)`,
+                                  }
+                                : {}
+                            }
+                          />
+                        )}
+                      </>
+                    )}
 
-                      {activeTileIndex === `${colIndex}-${rowIndex}` && (
-                        <TileEditComponent
-                          tileIndex={activeTileIndex}
-                          boxSizeHeight={singleTile.current?.offsetHeight}
-                          boxSizeWidth={singleTile.current?.offsetWidth}
-                        />
-                      )}
-                    </button>
-                  )}
-                </div>
+                    {activeTileIndex === `${colIndex}-${rowIndex}` && (
+                      <TileEditComponent
+                        tileIndex={activeTileIndex}
+                        boxSizeHeight={singleTile.current?.offsetHeight}
+                        boxSizeWidth={singleTile.current?.offsetWidth}
+                      />
+                    )}
+                  </button>
+                )
+                // </div>
               );
             })}
           </div>
@@ -216,6 +278,6 @@ function Grid({ isMainGrid = true }) {
       </div>
     </>
   );
-}
+};
 
 export default Grid;

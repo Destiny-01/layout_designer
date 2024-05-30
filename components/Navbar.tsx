@@ -40,7 +40,7 @@ const Navbar = (props: Props) => {
     handleDimension("cm");
   }, [activeSize]);
   return (
-    <div className="py-4 lg:py-6 px-7 lg:px-20 flex items-center justify-between w-full h-[10vh] lg:h-[12vh] bg-white">
+    <div className="pt-4 lg:pt-6 lg:pb-6 px-7 lg:px-20 flex items-center justify-between w-full bg-white">
       <Link href={"/"} className="flex md:hidden">
         <Image src={Logo} priority alt="Logo" />
       </Link>

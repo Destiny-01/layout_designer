@@ -16,7 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={"font-nohemi text-black"}>
         <Navbar />
-        <div className="mt-6">{children}</div>
+        <div className="lg:mt-6">{children}</div>
       </body>
     </html>
   );

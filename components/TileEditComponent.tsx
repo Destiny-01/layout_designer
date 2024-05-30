@@ -1,5 +1,5 @@
 import { collectionTiles, colorVariation } from "@/data/tileCatgories";
-import useTileStore, { EditedTile } from "@/store";
+import useTileStore, { EditedTile, useHistoryStore } from "@/store";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -16,27 +16,46 @@ const TileEditComponent = ({
   const activeTileName = useTileStore((state) => state.tileName);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
+  const editedTiles = useTileStore((state) => state.editedTiles);
+  const { setState, state, currentIndex, setCurrentIndex } = useHistoryStore();
 
+  const activeTile = editedTiles.find((tile) => tile.tileIndex === tileIndex);
   const [showColorPanel, setShowColorPanel] = useState(false);
   const [updatedTilePath, setUpdatedTilePath] = useState<string | null>(null);
-  const [rotationDegree, setRotationDegree] = useState<number>(0);
+  console.log(activeTile);
+  const [rotationDegree, setRotationDegree] = useState<number>(
+    activeTile?.rotationDegree || 0
+  );
   const [rotateStyle, setRotateStyle] = useState<
     EditedTile["rotateStyle"] | undefined
-  >();
-  const [tilePath, setTilePath] = useState<string>(activeTilePath);
+  >(activeTile?.rotateStyle);
+  const [tilePath, setTilePath] = useState<string>(
+    activeTile?.tilePath ?? activeTilePath
+  );
+  console.log(
+    editedTiles.find((tile) => tile.tileIndex === tileIndex)?.tilePath,
+    activeTilePath
+  );
   const [tileColor, setTileColor] = useState<string>("");
+
+  const storeUserAction = (
+    action: "rotate" | "flipX" | "flipY" | "color",
+    from: any,
+    to: any
+  ) => {
+    setState([...state, { tileIndex, from, to, action }]);
+    setCurrentIndex(currentIndex + 1);
+  };
 
   const rotateDiv = (direction: "reset" | "flipX" | "flipY") => {
     let newDegree = 0;
     switch (direction) {
       case "reset":
-        // newDegree = rotationDegree + 90;
-        // if (newDegree >= 360) {
         newDegree = 0;
         setEditedTiles(
           editedTiles.filter((tile) => tile.tileIndex !== tileIndex)
         );
-      // }
+        setTilePath(activeTilePath);
       case "flipX":
         newDegree = rotationDegree > 0 ? 0 : 180;
         break;
@@ -45,13 +64,16 @@ const TileEditComponent = ({
         break;
     }
     console.log(direction, newDegree, editedTiles);
+    direction !== "reset" &&
+      storeUserAction(direction, rotationDegree, newDegree);
+
     direction === "flipX" || direction === "flipY"
       ? setRotateStyle(direction)
       : setRotateStyle(undefined);
 
     setRotationDegree(newDegree);
   };
-  console.log(rotationDegree, rotateStyle);
+  console.log(rotationDegree, rotateStyle, boxSizeHeight, boxSizeWidth);
 
   const updateTileData = () => {
     const tileEditData = {
@@ -84,23 +106,20 @@ const TileEditComponent = ({
     });
 
     if (specificTile) {
-      const tileVariation = specificTile.tileVariation;
-
-      const specificColorData = tileVariation.find((item) => {
-        return item.tileColor === colorValue;
-      });
-
-      if (specificColorData) {
-        console.log("reached", specificTile, activeTileName);
-        setTilePath(specificColorData.tilePath);
-        setUpdatedTilePath(specificColorData.tilePath);
-      }
+      // const tileVariation = specificTile.tileVariation;
+      // const specificColorData = tileVariation.find((item) => {
+      //   return item.tileColor === colorValue;
+      // });
+      // if (specificColorData) {
+      //   console.log("reached", specificTile, activeTileName);
+      //   storeUserAction("color", tilePath, specificColorData.tilePath);
+      //   setTilePath(specificColorData.tilePath);
+      //   setUpdatedTilePath(specificColorData.tilePath);
+      // }
     }
   };
 
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
-
-  const editedTiles = useTileStore((state) => state.editedTiles);
 
   const handleTileEdit = (
     editType: "reset" | "flipX" | "flipY" | "colorEdit"
@@ -122,7 +141,11 @@ const TileEditComponent = ({
     updateTileData();
   }, [showColorPanel, rotationDegree, tilePath]);
 
-  useEffect(() => setTilePath(activeTilePath), [activeTilePath]);
+  // useEffect(() => {
+  //   setRotateStyle(activeTile?.rotateStyle);
+  //   setRotationDegree(activeTile?.rotationDegree || 0);
+  //   setTilePath(activeTile?.tilePath || activeTilePath);
+  // }, [activeTile]);
 
   return (
     <div className="absolute z-50 top-0">
@@ -398,117 +421,6 @@ const TileEditComponent = ({
         <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
       </div>
 
-      {/* Delete Button */}
-      {/* <div className="absolute -left-20 rotate-[270deg]">
-        <svg
-          width="52"
-          height="52"
-          viewBox="0 0 52 52"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="rotate-[90deg]"
-        >
-          <g filter="url(#filter0_d_11_9250)">
-            <circle cx="26" cy="22" r="15" fill="white" />
-            <circle
-              cx="26"
-              cy="22"
-              r="14.75"
-              stroke="#898989"
-              strokeWidth="0.5"
-            />
-          </g>
-          <path
-            d="M33.5 16.9833C30.725 16.7083 27.9333 16.5667 25.15 16.5667C23.5 16.5667 21.85 16.65 20.2 16.8167L18.5 16.9833"
-            stroke="#292D32"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M23.0834 16.1417L23.2667 15.05C23.4 14.2583 23.5 13.6667 24.9084 13.6667H27.0917C28.5 13.6667 28.6084 14.2917 28.7334 15.0583L28.9167 16.1417"
-            stroke="#292D32"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M28.675 30.3333H23.325C21 30.3333 20.925 29.3167 20.8333 28.0083L20.2916 19.6167"
-            stroke="#292D32"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M31.7083 19.6167L31.1666 28.0083"
-            stroke="#292D32"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M24.6083 25.75H27.3833"
-            stroke="#292D32"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M26.6833 22.4167H28.0833"
-            stroke="#292D32"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M23.9166 22.4167H24.6083"
-            stroke="#292D32"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <defs>
-            <filter
-              id="filter0_d_11_9250"
-              x="0.6"
-              y="0.6"
-              width="50.8"
-              height="50.8"
-              filterUnits="userSpaceOnUse"
-              colorInterpolationFilters="sRGB"
-            >
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset dy="4" />
-              <feGaussianBlur stdDeviation="5.2" />
-              <feComposite in2="hardAlpha" operator="out" />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
-              />
-              <feBlend
-                mode="normal"
-                in2="BackgroundImageFix"
-                result="effect1_dropShadow_11_9250"
-              />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="effect1_dropShadow_11_9250"
-                result="shape"
-              />
-            </filter>
-          </defs>
-        </svg>
-
-        <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
-      </div> */}
-
       {/* Rotate Right Button */}
       <div className="absolute -bottom-20 left14 rotate-[180deg]">
         <svg
@@ -677,7 +589,7 @@ const TileEditComponent = ({
         <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
       </div>
       <div
-        className={`w-[${boxSizeWidth}px] h-[${boxSizeHeight}px] border-2 border-black`}
+        className={`w-[${boxSizeWidth}px] h-[${boxSizeHeight}px] border border-black`}
         style={{
           width: `${boxSizeWidth}px`,
           height: `${boxSizeHeight}px`,

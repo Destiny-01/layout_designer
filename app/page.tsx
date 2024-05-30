@@ -3,24 +3,32 @@ import Grid from "@/components/Grid";
 import SaveModal from "@/components/SaveModal";
 import TileCategory from "@/components/TileCategory";
 import { collectionTiles, colorVariation } from "@/data/tileCatgories";
-import useTileStore from "@/store";
+import useTileStore, { HistoryEntry, useHistoryStore } from "@/store";
+import Image from "next/image";
+import Link from "next/link";
 import { redirect, usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {};
 
 const page = (props: Props) => {
   const [showTile, setShowTile] = useState<boolean>(false);
+  const [showSeeAllTile, setShowSeeAllTile] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [price, setPrice] = useState<number | null>(null);
 
+  const containerRef = useRef<any>(null);
   const rotationDegree = useTileStore((state) => state.activeRotationDegree);
   const editedTiles = useTileStore((state) => state.editedTiles);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
+  const zoom = useTileStore((state) => state.zoom);
+  const setZoom = useTileStore((state) => state.setZoom);
   const setActiveRotationDegree = useTileStore(
     (state) => state.setActiveRotationDegree
   );
+  const storedTileColor = useTileStore((state) => state.tileColor);
+
   const tileName = useTileStore((state) => state.tileName);
   const specificTile = collectionTiles.find((item) => {
     return item.tileName === tileName;
@@ -29,11 +37,26 @@ const page = (props: Props) => {
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
   const setMeasurement = useTileStore((state) => state.setMeasurement);
   const measurement = useTileStore((state) => state.measurement);
+  const state = useHistoryStore((state) => state.state);
+  const setState = useHistoryStore((state) => state.setState);
+  const setCurrentIndex = useHistoryStore((state) => state.setCurrentIndex);
+  const currentIndex = useHistoryStore((state) => state.currentIndex);
+
+  const storeUserAction = (
+    action: "rotate" | "flipX" | "flipY" | "color",
+    from: any,
+    to: any
+  ) => {
+    setState([...state, { tileIndex: null, from, to, action }]);
+    setCurrentIndex(currentIndex + 1);
+  };
+
   const rotateDiv = () => {
     let newDegree = rotationDegree + 90;
     if (newDegree >= 360) {
       newDegree = 0;
     }
+    storeUserAction("rotate", rotationDegree, newDegree);
     setActiveRotationDegree(newDegree);
     updateRotationDegrees(newDegree);
   };
@@ -41,17 +64,21 @@ const page = (props: Props) => {
   const updateRotationDegrees = (newRotationDegree: number) => {
     const updatedTiles = editedTiles.map((tile) => ({
       ...tile,
-      rotationDegree: newRotationDegree,
+      rotationDegree: 0,
+      rotateStyle: undefined,
     }));
     setEditedTiles(updatedTiles);
   };
+  console.log({ rotationDegree, editedTiles });
 
   const randomizeTileChoice = () => {
     const numTiles = collectionTiles.length;
     const randomIndex = Math.floor(Math.random() * numTiles);
     const randomTileData = collectionTiles[randomIndex];
     setTileName(randomTileData.tileName);
-    setActiveTilePath(randomTileData.tileVariation[0].tilePath);
+    setActiveTilePath(
+      randomTileData.subCategories[0].tileVariation[0].tilePath
+    );
     setEditedTiles([]);
   };
 
@@ -74,6 +101,61 @@ const page = (props: Props) => {
     setFormData({ ...formData, [inputName]: inputValue });
   };
 
+  const executeAction = (newState: HistoryEntry, isUndo = true) => {
+    const currentTile = editedTiles.find(
+      (tile) => tile.tileIndex === newState.tileIndex
+    );
+    const index = editedTiles.findIndex(
+      (tile) => tile.tileIndex === newState.tileIndex
+    );
+
+    if (currentTile) {
+      switch (newState.action) {
+        case "rotate":
+          currentTile.rotationDegree = isUndo ? newState.from : newState.to;
+          break;
+        case "flipX":
+          currentTile.rotationDegree = isUndo ? newState.from : newState.to;
+          break;
+        case "flipY":
+          currentTile.rotationDegree = isUndo ? newState.from : newState.to;
+          break;
+        case "color":
+          currentTile.tilePath = isUndo ? newState.from : newState.to;
+          break;
+
+        default:
+          break;
+      }
+
+      if (index !== -1) {
+        editedTiles[index] = currentTile;
+        setEditedTiles([...editedTiles]);
+      } else {
+        setEditedTiles([...editedTiles, currentTile]);
+      }
+    }
+  };
+
+  const undo = (e: any) => {
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      const newState = state[newIndex];
+      console.log(newState, newIndex, state.length);
+      executeAction(newState);
+      setCurrentIndex(newIndex);
+    }
+  };
+
+  const redo = (e: any) => {
+    if (currentIndex < state.length - 1) {
+      const newIndex = currentIndex + 1;
+      const newState = state[newIndex];
+      executeAction(newState, false);
+      setCurrentIndex(newIndex);
+    }
+  };
+
   const customWidth = Number(formData.width);
   const customHeight = Number(formData.height);
 
@@ -85,6 +167,12 @@ const page = (props: Props) => {
     });
   };
 
+  const handleTileChoice = (tileName: string, tilePath: string) => {
+    setTileName(tileName);
+    setActiveTilePath(tilePath);
+    setEditedTiles([]);
+  };
+
   useEffect(() => {
     formData.width && formData.height && setShowSaveBtn(true);
   }, [formData]);
@@ -94,19 +182,20 @@ const page = (props: Props) => {
 
   useEffect(() => {
     setActiveSize(9);
+    setZoom(1);
   }, []);
 
   useEffect(() => {
+    const newPrice =
+      (activeSize > 9 ? specificTile?.price13by13 : specificTile?.price9by9) ||
+      0;
+    console.log(activeSize, newPrice, specificTile);
     setPrice(
       measurement.columns && measurement.rows
-        ? measurement.columns *
-            measurement.rows *
-            ((activeSize === 13
-              ? specificTile?.price13by13
-              : specificTile?.price9by9) || 0)
+        ? measurement.columns * measurement.rows * newPrice
         : null
     );
-  }, [tileName]);
+  }, [tileName, measurement.rows, measurement.columns]);
 
   useEffect(() => {
     setMeasurement({
@@ -118,7 +207,7 @@ const page = (props: Props) => {
 
   return (
     <div className="w-full lg:px-20 p-7 flex items-start flex-col lg:flex-row">
-      <div className="lg:max-w-1/3 lg:w-fit w-full lg:mr-10">
+      <div className="lg:max-w-[25%] lg:w-fit w-full lg:mr-10">
         <div className="flex lg:items-start items-end gap-5 justify-between lg:flex-col">
           <div className="mt-5 space-y-3 md:mt-0 md:hidden">
             <div className="border border-primary rounded-full h-10 flex lg:w-32 bg-[#FBFBFB]">
@@ -151,9 +240,10 @@ const page = (props: Props) => {
                 >
                   <p
                     className={`text-xs mb-0.5 font-semibold ${
-                      measurement.activeDimension === "cm"
-                        ? "text-white"
-                        : "text-black"
+                      // measurement.activeDimension === "cm"
+                      //   ? "text-white"
+                      //   :
+                      "text-black"
                     }`}
                   >
                     cm
@@ -190,9 +280,10 @@ const page = (props: Props) => {
                 >
                   <p
                     className={`text-xs mb-0.5 font-semibold ${
-                      measurement.activeDimension === "in"
-                        ? "text-white"
-                        : "text-black"
+                      // measurement.activeDimension === "in"
+                      //   ? "text-white"
+                      //   :
+                      "text-black"
                     }`}
                   >
                     in
@@ -281,77 +372,118 @@ const page = (props: Props) => {
 
         <div>
           <div className="flex space-x-7 py-7 lg:flex-col lg:space-x-0 lg:space-y-3">
-            <button
-              className="flex space-x-2 items-center"
-              onClick={() => {
-                setShowTile(!showTile);
-              }}
-            >
-              <p className="font-mermaid font-bold">Pick Collection</p>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+            <div>
+              <button
+                className="flex space-x-2 items-center"
+                onClick={() => {
+                  setShowTile(!showTile);
+                }}
               >
-                <path
-                  d="M12.0078 9.63749L10.0428 11.6025C9.4653 12.18 8.5203 12.18 7.9428 11.6025L3.0603 6.71249"
-                  stroke="#292D32"
-                  strokeWidth="1.5"
-                  strokeMiterlimit="10"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M14.9402 6.71249L14.1602 7.49249"
-                  stroke="#292D32"
-                  strokeWidth="1.5"
-                  strokeMiterlimit="10"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <div className="flex space-x-2 items-center">
-              <p className="font-mermaid font-bold">See All</p>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                <p className="font-mermaid font-bold">Pick Collection</p>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mb-0.5 transition-all"
+                  style={showTile ? { rotate: "-180deg" } : { rotate: "0deg" }}
+                >
+                  <path
+                    d="M12.0078 9.63749L10.0428 11.6025C9.4653 12.18 8.5203 12.18 7.9428 11.6025L3.0603 6.71249"
+                    stroke="#292D32"
+                    strokeWidth="1.5"
+                    strokeMiterlimit="10"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M14.9402 6.71249L14.1602 7.49249"
+                    stroke="#292D32"
+                    strokeWidth="1.5"
+                    strokeMiterlimit="10"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              {showTile && <TileCategory />}
+            </div>
+            <div>
+              <button
+                onClick={() => setShowSeeAllTile(!showSeeAllTile)}
+                className="flex space-x-2 items-center"
               >
-                <path
-                  d="M12.0078 9.63749L10.0428 11.6025C9.4653 12.18 8.5203 12.18 7.9428 11.6025L3.0603 6.71249"
-                  stroke="#292D32"
-                  strokeWidth="1.5"
-                  strokeMiterlimit="10"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M14.9402 6.71249L14.1602 7.49249"
-                  stroke="#292D32"
-                  strokeWidth="1.5"
-                  strokeMiterlimit="10"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                <p className="font-mermaid font-bold">See All</p>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mb-0.5 transition-all"
+                  style={
+                    showSeeAllTile ? { rotate: "-180deg" } : { rotate: "0deg" }
+                  }
+                >
+                  <path
+                    d="M12.0078 9.63749L10.0428 11.6025C9.4653 12.18 8.5203 12.18 7.9428 11.6025L3.0603 6.71249"
+                    stroke="#292D32"
+                    strokeWidth="1.5"
+                    strokeMiterlimit="10"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M14.9402 6.71249L14.1602 7.49249"
+                    stroke="#292D32"
+                    strokeWidth="1.5"
+                    strokeMiterlimit="10"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              {showSeeAllTile &&
+                collectionTiles.map((item) => {
+                  return item.subCategories.map((category) => {
+                    return category.tileVariation.map(
+                      (tileVariant) =>
+                        tileVariant.tileColor === storedTileColor && (
+                          <button
+                            key={tileVariant.tileColor}
+                            onClick={() => {
+                              handleTileChoice(
+                                item.tileName,
+                                tileVariant.tilePath
+                              );
+                              setActiveRotationDegree(0);
+                            }}
+                          >
+                            <Image
+                              src={tileVariant.tilePath}
+                              className="w-12 h-12"
+                              width={10}
+                              height={10}
+                              alt="Tile"
+                            />
+                          </button>
+                        )
+                    );
+                  });
+                })}
             </div>
           </div>
-          {showTile && <TileCategory />}
         </div>
       </div>
 
       {/* SideGrid */}
 
-      <div className="w-full gap-8 lg:border-l-2 border-[#F5F5F5] lg:pl-10 flex items-end">
+      <div className="w-full max-w-[calc(100vw-33%-28px)] gap-8 lg:border-l-2 border-[#F5F5F5] lg:pl-10 flex items-end">
         <div className="w-full">
           <div className="w-full flex items-center justify-between">
             <div className="md:flex space-x-7 hidden">
-              <div>
+              <button onClick={undo}>
                 <svg
                   width="20"
                   height="20"
@@ -359,7 +491,7 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity="0.5">
+                  <g opacity={currentIndex > 0 ? "1" : "0.5"}>
                     <path
                       d="M9.14986 6.92499H3.44153"
                       stroke="#292D32"
@@ -385,9 +517,9 @@ const page = (props: Props) => {
                     />
                   </g>
                 </svg>
-              </div>
+              </button>
 
-              <div>
+              <button onClick={redo}>
                 <svg
                   width="20"
                   height="20"
@@ -395,7 +527,7 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity="0.5">
+                  <g opacity={currentIndex < state.length - 1 ? "1" : "0.5"}>
                     <path
                       d="M10.8501 6.92499H16.5584"
                       stroke="#292D32"
@@ -421,13 +553,13 @@ const page = (props: Props) => {
                     />
                   </g>
                 </svg>
-              </div>
+              </button>
             </div>
             <div className="md:flex hidden space-x-5 lg:hidden">
               {/* Zoom In Button */}
               <button
                 onClick={() => {
-                  setActiveSize(activeSize !== 15 ? activeSize + 1 : 15);
+                  setZoom(Math.min(zoom + 0.1, 3)); // max zoom in 300%
                 }}
               >
                 <svg
@@ -437,13 +569,13 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity="0.5">
+                  <g opacity="1">
                     <ellipse
                       cx="16.9342"
                       cy="16.5"
                       rx="16.9342"
                       ry="16.5"
-                      fill="#FFE3B7"
+                      fill={zoom >= 3 ? "#FDECD1" : "#FFE3B7"}
                     />
                     <path
                       d="M15.4333 15.9092H18.386"
@@ -480,7 +612,7 @@ const page = (props: Props) => {
               {/* Zoom out button */}
               <button
                 onClick={() => {
-                  setActiveSize(activeSize === 15 ? activeSize - 1 : 9);
+                  setZoom(Math.max(zoom - 0.1, 0.1)); // min zoom out 10%
                 }}
               >
                 <svg
@@ -490,8 +622,13 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity="0.5">
-                    <circle cx="17.8684" cy="17" r="17" fill="#FDECD1" />
+                  <g opacity="1">
+                    <circle
+                      cx="17.8684"
+                      cy="17"
+                      r="17"
+                      fill={zoom <= 0.1 ? "#FDECD1" : "#FFE3B7"}
+                    />
                     <path
                       d="M16.2036 16.936H19.1677"
                       stroke="#292D32"
@@ -567,6 +704,7 @@ const page = (props: Props) => {
                 <button
                   onClick={() => {
                     setEditedTiles([]);
+                    setZoom(1);
                   }}
                 >
                   <svg
@@ -576,7 +714,7 @@ const page = (props: Props) => {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <g opacity="0.5">
+                    <g opacity="1">
                       <path
                         d="M15.0087 16.6584C13.617 17.7084 11.8753 18.3334 10.0003 18.3334C5.40032 18.3334 2.59199 13.7 2.59199 13.7M2.59199 13.7H6.35866M2.59199 13.7V17.8667M18.3337 10C18.3337 11.5167 17.9253 12.9417 17.217 14.1667M5.02533 3.30835C6.40866 2.27502 8.12532 1.66669 10.0003 1.66669C15.5587 1.66669 18.3337 6.30002 18.3337 6.30002M18.3337 6.30002V2.13335M18.3337 6.30002H14.6337M1.66699 10C1.66699 8.48335 2.06699 7.05835 2.77533 5.83335"
                         stroke="#292D32"
@@ -596,7 +734,7 @@ const page = (props: Props) => {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <g opacity="0.5">
+                    <g opacity="1">
                       <path
                         d="M17.5 4.98332C14.725 4.70832 11.9333 4.56665 9.15 4.56665C7.5 4.56665 5.85 4.64998 4.2 4.81665L2.5 4.98332"
                         stroke="#292D32"
@@ -652,7 +790,9 @@ const page = (props: Props) => {
               </div>
             </div>
           </div>
-          <Grid />
+          <div className="overflow-auto my-6 lg:h-[500px] md:h-[300px] h-[200px]">
+            <Grid containerRef={containerRef} />
+          </div>
 
           <div
             className={`flex items-center justify-between ${
@@ -670,7 +810,7 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity="0.5">
+                  <g opacity="1">
                     <path
                       d="M9.14986 6.92499H3.44153"
                       stroke="#292D32"
@@ -705,7 +845,7 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity="0.5">
+                  <g opacity="1">
                     <path
                       d="M10.8501 6.92499H16.5584"
                       stroke="#292D32"
@@ -738,7 +878,7 @@ const page = (props: Props) => {
               {/* Zoom In Button */}
               <button
                 onClick={() => {
-                  setActiveSize(activeSize !== 15 ? activeSize + 1 : 15);
+                  setZoom(Math.min(zoom + 0.1, 3)); // max zoom in 300%
                 }}
               >
                 <svg
@@ -748,13 +888,13 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity="0.5">
+                  <g opacity="1">
                     <ellipse
                       cx="16.9342"
                       cy="16.5"
                       rx="16.9342"
                       ry="16.5"
-                      fill="#FFE3B7"
+                      fill={zoom >= 3 ? "#FDECD1" : "#FFE3B7"}
                     />
                     <path
                       d="M15.4333 15.9092H18.386"
@@ -791,7 +931,7 @@ const page = (props: Props) => {
               {/* Zoom out button */}
               <button
                 onClick={() => {
-                  setActiveSize(activeSize === 15 ? activeSize - 1 : 9);
+                  setZoom(Math.max(zoom - 0.1, 0.1)); // min zoom out 10%
                 }}
               >
                 <svg
@@ -801,8 +941,13 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity="0.5">
-                    <circle cx="17.8684" cy="17" r="17" fill="#FDECD1" />
+                  <g opacity="1">
+                    <circle
+                      cx="17.8684"
+                      cy="17"
+                      r="17"
+                      fill={zoom <= 0.1 ? "#FDECD1" : "#FFE3B7"}
+                    />
                     <path
                       d="M16.2036 16.936H19.1677"
                       stroke="#292D32"
@@ -924,60 +1069,62 @@ const page = (props: Props) => {
               <p>Save</p>
             </button>
 
-            <button className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
-              <div>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M3.16661 9.31332C3.07327 10.4 3.93327 11.3333 5.0266 11.3333H12.1266C13.0866 11.3333 13.9266 10.5467 13.9999 9.59333L14.3599 4.59333C14.4399 3.48666 13.5999 2.58665 12.4866 2.58665H3.87995"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M1.33374 1.3333H2.49374C3.21374 1.3333 3.78041 1.9533 3.72041 2.66663L3.38708 6.69995"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M10.8333 14.6667C11.2936 14.6667 11.6667 14.2936 11.6667 13.8333C11.6667 13.3731 11.2936 13 10.8333 13C10.3731 13 10 13.3731 10 13.8333C10 14.2936 10.3731 14.6667 10.8333 14.6667Z"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M5.49959 14.6667C5.95983 14.6667 6.33293 14.2936 6.33293 13.8333C6.33293 13.3731 5.95983 13 5.49959 13C5.03936 13 4.66626 13.3731 4.66626 13.8333C4.66626 14.2936 5.03936 14.6667 5.49959 14.6667Z"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M6 5.3333H14"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+            <Link href="https://212dimensions.com/my-cart">
+              <button className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
+                <div>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3.16661 9.31332C3.07327 10.4 3.93327 11.3333 5.0266 11.3333H12.1266C13.0866 11.3333 13.9266 10.5467 13.9999 9.59333L14.3599 4.59333C14.4399 3.48666 13.5999 2.58665 12.4866 2.58665H3.87995"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M1.33374 1.3333H2.49374C3.21374 1.3333 3.78041 1.9533 3.72041 2.66663L3.38708 6.69995"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10.8333 14.6667C11.2936 14.6667 11.6667 14.2936 11.6667 13.8333C11.6667 13.3731 11.2936 13 10.8333 13C10.3731 13 10 13.3731 10 13.8333C10 14.2936 10.3731 14.6667 10.8333 14.6667Z"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M5.49959 14.6667C5.95983 14.6667 6.33293 14.2936 6.33293 13.8333C6.33293 13.3731 5.95983 13 5.49959 13C5.03936 13 4.66626 13.3731 4.66626 13.8333C4.66626 14.2936 5.03936 14.6667 5.49959 14.6667Z"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M6 5.3333H14"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
 
-              <p className="text-sm font-medium">Add to Cart</p>
-            </button>
+                <p className="text-sm font-medium">Add to Cart</p>
+              </button>
+            </Link>
 
             <div className="flex space-x-5">
               <p className="font-bold">TOTAL:</p>
@@ -991,67 +1138,74 @@ const page = (props: Props) => {
               )}
             </div>
           </div>
-          {isModalOpen && <SaveModal onClose={() => setIsModalOpen(false)} />}
+          {isModalOpen && (
+            <SaveModal
+              containerRef={containerRef}
+              onClose={() => setIsModalOpen(false)}
+            />
+          )}
 
           <div className="md:hidden flex items-center justify-between py-5">
             <div className="w-10" />
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center"
-            >
-              <div>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M3.16661 9.31332C3.07327 10.4 3.93327 11.3333 5.0266 11.3333H12.1266C13.0866 11.3333 13.9266 10.5467 13.9999 9.59333L14.3599 4.59333C14.4399 3.48666 13.5999 2.58665 12.4866 2.58665H3.87995"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M1.33374 1.3333H2.49374C3.21374 1.3333 3.78041 1.9533 3.72041 2.66663L3.38708 6.69995"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M10.8333 14.6667C11.2936 14.6667 11.6667 14.2936 11.6667 13.8333C11.6667 13.3731 11.2936 13 10.8333 13C10.3731 13 10 13.3731 10 13.8333C10 14.2936 10.3731 14.6667 10.8333 14.6667Z"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M5.49959 14.6667C5.95983 14.6667 6.33293 14.2936 6.33293 13.8333C6.33293 13.3731 5.95983 13 5.49959 13C5.03936 13 4.66626 13.3731 4.66626 13.8333C4.66626 14.2936 5.03936 14.6667 5.49959 14.6667Z"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M6 5.3333H14"
-                    stroke="#CC9C53"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+            <Link href="https://212dimensions.com/my-cart">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center"
+              >
+                <div>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3.16661 9.31332C3.07327 10.4 3.93327 11.3333 5.0266 11.3333H12.1266C13.0866 11.3333 13.9266 10.5467 13.9999 9.59333L14.3599 4.59333C14.4399 3.48666 13.5999 2.58665 12.4866 2.58665H3.87995"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M1.33374 1.3333H2.49374C3.21374 1.3333 3.78041 1.9533 3.72041 2.66663L3.38708 6.69995"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10.8333 14.6667C11.2936 14.6667 11.6667 14.2936 11.6667 13.8333C11.6667 13.3731 11.2936 13 10.8333 13C10.3731 13 10 13.3731 10 13.8333C10 14.2936 10.3731 14.6667 10.8333 14.6667Z"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M5.49959 14.6667C5.95983 14.6667 6.33293 14.2936 6.33293 13.8333C6.33293 13.3731 5.95983 13 5.49959 13C5.03936 13 4.66626 13.3731 4.66626 13.8333C4.66626 14.2936 5.03936 14.6667 5.49959 14.6667Z"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M6 5.3333H14"
+                      stroke="#CC9C53"
+                      strokeWidth="1.5"
+                      strokeMiterlimit="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
 
-              <p className="text-sm font-medium">Add to Cart</p>
-            </button>
+                <p className="text-sm font-medium">Add to Cart</p>
+              </button>
+            </Link>
             <div className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden">
               <svg
                 width="16"
@@ -1148,7 +1302,7 @@ const page = (props: Props) => {
           {/* Zoom in button */}
           <button
             onClick={() => {
-              setActiveSize(activeSize !== 15 ? activeSize + 1 : 15);
+              setZoom(Math.min(zoom + 0.1, 3)); // max zoom in 300%
             }}
           >
             <svg
@@ -1158,13 +1312,13 @@ const page = (props: Props) => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g opacity="0.5">
+              <g opacity="1">
                 <ellipse
                   cx="16.9342"
                   cy="16.5"
                   rx="16.9342"
                   ry="16.5"
-                  fill="#FFE3B7"
+                  fill={zoom >= 3 ? "#FDECD1" : "#FFE3B7"}
                 />
                 <path
                   d="M15.4333 15.9092H18.386"
@@ -1201,7 +1355,7 @@ const page = (props: Props) => {
           {/* Zoom out button */}
           <button
             onClick={() => {
-              setActiveSize(activeSize === 15 ? activeSize - 1 : 9);
+              setZoom(Math.max(zoom - 0.1, 0.1)); // min zoom out 10%
             }}
           >
             <svg
@@ -1211,8 +1365,13 @@ const page = (props: Props) => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g opacity="0.5">
-                <circle cx="17.8684" cy="17" r="17" fill="#FDECD1" />
+              <g opacity="1">
+                <circle
+                  cx="17.8684"
+                  cy="17"
+                  r="17"
+                  fill={zoom <= 0.1 ? "#FDECD1" : "#FFE3B7"}
+                />
                 <path
                   d="M16.2036 16.936H19.1677"
                   stroke="#292D32"

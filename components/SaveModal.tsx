@@ -1,16 +1,62 @@
 import Image from "next/image";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Grid from "./Grid";
 import useTileStore from "@/store";
 import { collectionTiles } from "@/data/tileCatgories";
+import html2canvas from "html2canvas";
 
-function SaveModal({ onClose }: { onClose: () => void }) {
+function SaveModal({
+  onClose,
+  containerRef,
+}: {
+  onClose: () => void;
+  containerRef: any;
+}) {
   const modalRef: any = useRef(null);
   const activeTileName = useTileStore((state) => state.tileName);
   const activeSize = useTileStore((state) => state.activeSize);
+  const [image, setImage] = useState("");
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const measurement = useTileStore((state) => state.measurement);
+
+  const handleSaveAsImage = () => {
+    console.log("start");
+    const link = document.createElement("a");
+    link.href = image;
+    link.download = "component.png";
+    link.click();
+  };
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const images = containerRef.current.querySelectorAll("img");
+      const promises = Array.from(images).map((img: any) => {
+        if (img.complete) {
+          return Promise.resolve();
+        } else {
+          return new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+        }
+      });
+
+      Promise.all(promises).then(() => {
+        html2canvas(containerRef.current, {
+          useCORS: true,
+          height: containerRef.height,
+          width: containerRef.width,
+        })
+          .then((canvas): any => {
+            const image = canvas.toDataURL("image/png");
+            console.log(image, containerRef);
+            setImage(image);
+          })
+          .catch((err) => console.error(err));
+      });
+    }
+  }, []);
 
   const specificTile = collectionTiles.find((item) => {
     return item.tileName === activeTileName;
@@ -46,10 +92,10 @@ function SaveModal({ onClose }: { onClose: () => void }) {
         <h2 className="text-gray900 mt-6 text-2xl lg:text-[28px]">
           Order Summary
         </h2>
-        <div className="pointer-events-none pl-6 overflow-auto h-[300px] scale50 mx-auto">
-          <Grid isMainGrid={false} />
+        <div className="mt-4 overflow-clip h[300px] scale50 mx-auto">
+          <img src={image} alt="img" className="object-contain" />
         </div>
-        <div className="flex mt-6 justify-between">
+        <div className="flex mt-2 justify-between">
           <p>1 {specificTile?.tileName} tile</p>
           <p>
             &#8364;
@@ -73,7 +119,7 @@ function SaveModal({ onClose }: { onClose: () => void }) {
           </p>
         </div>
         <button
-          onClick={() => alert("Added to cart successfully")}
+          onClick={() => handleSaveAsImage()}
           className="border border-[#F6E2C4] rounded-full px-5 py-2 mt-4 flex mx-auto space-x-3 items-center"
         >
           <div>
@@ -127,7 +173,7 @@ function SaveModal({ onClose }: { onClose: () => void }) {
             </svg>
           </div>
 
-          <p className="text-sm text-gray-500 font-medium">Add to Cart</p>
+          <p className="text-sm font-medium">Save as image</p>
         </button>
       </div>
     </div>

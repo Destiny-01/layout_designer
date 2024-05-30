@@ -1,32 +1,50 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
       colors: {
-        gold: '#CC9C53',
-        black: '#191919',
+        gold: "#CC9C53",
+        black: "#191919",
       },
       borderColor: {
-        primary: '#E7E7E7',
+        primary: "#E7E7E7",
       },
     },
     fontFamily: {
-      nohemi: ['Nohemi', 'sans-serif'],
-      mermaid: ['Mermaid', 'sans-serif'],
+      nohemi: ["Nohemi", "sans-serif"],
+      mermaid: ["Mermaid", "sans-serif"],
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }: any) {
+      addUtilities({
+        "::-webkit-scrollbar": {
+          height: "6px",
+          width: "6px",
+        },
+        "::-webkit-scrollbar-track": {
+          background: "transparent",
+        },
+        "::-webkit-scrollbar-thumb": {
+          backgroundColor: "#a0aec0",
+          borderRadius: "3px",
+        },
+        "::-webkit-scrollbar-thumb:hover": {
+          backgroundColor: "#718096",
+        },
+      });
+    },
+  ],
 };
 export default config;
-
