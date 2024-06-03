@@ -10,10 +10,6 @@ export const tileCategory: TileVariation = {
           tilePath: "/assets/tiles/Malaga/MAL01-Blush.svg",
         },
         {
-          tileColor: "BottleGreen",
-          tilePath: "/assets/tiles/Malaga/MAL01-BottleGreen.svg",
-        },
-        {
           tileColor: "Cobalt",
           tilePath: "/assets/tiles/Malaga/MAL01-Cobalt.svg",
         },

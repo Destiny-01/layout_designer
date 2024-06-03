@@ -17,6 +17,7 @@ const TileEditComponent = ({
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
   const editedTiles = useTileStore((state) => state.editedTiles);
+  const activeSubCategory = useTileStore((state) => state.activeSubCategory);
   const { setState, state, currentIndex, setCurrentIndex } = useHistoryStore();
 
   const activeTile = editedTiles.find((tile) => tile.tileIndex === tileIndex);
@@ -106,16 +107,17 @@ const TileEditComponent = ({
     });
 
     if (specificTile) {
-      // const tileVariation = specificTile.tileVariation;
-      // const specificColorData = tileVariation.find((item) => {
-      //   return item.tileColor === colorValue;
-      // });
-      // if (specificColorData) {
-      //   console.log("reached", specificTile, activeTileName);
-      //   storeUserAction("color", tilePath, specificColorData.tilePath);
-      //   setTilePath(specificColorData.tilePath);
-      //   setUpdatedTilePath(specificColorData.tilePath);
-      // }
+      const tileVariation =
+        specificTile.subCategories[activeSubCategory].tileVariation;
+      const specificColorData = tileVariation.find((item) => {
+        return item.tileColor === colorValue;
+      });
+      if (specificColorData) {
+        console.log("reached", specificTile, activeTileName);
+        storeUserAction("color", tilePath, specificColorData.tilePath);
+        setTilePath(specificColorData.tilePath);
+        setUpdatedTilePath(specificColorData.tilePath);
+      }
     }
   };
 
@@ -149,8 +151,8 @@ const TileEditComponent = ({
 
   return (
     <div className="absolute z-50 top-0">
-      {/* Rotate Button */}
-      <div className="absolute -top-20">
+      {/* Reset Button */}
+      <div className="absolute left-[5px] -top-20">
         <svg
           width="52"
           height="52"
@@ -234,7 +236,7 @@ const TileEditComponent = ({
       </div>
 
       {/* Color Button */}
-      <div className="absolute left-[5.5rem] rotate-90">
+      <div className="absolute left-[5.5rem] top-2 rotate-90">
         {showColorPanel && (
           <div className="flex bottom-24 -left-10 rotate-[270deg] w-32 overflow-x-scroll gap-3 py-3 absolute">
             {colorVariation.map((color) => {
@@ -418,11 +420,11 @@ const TileEditComponent = ({
             </defs>
           </svg>
         )}
-        <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
+        <div className="w-1 h-10 -ml-1 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" />
       </div>
 
       {/* Rotate Right Button */}
-      <div className="absolute -bottom-20 left14 rotate-[180deg]">
+      <div className="absolute -bottom-20 left-1.5 rotate-[180deg]">
         <svg
           width="52"
           height="52"
@@ -506,7 +508,7 @@ const TileEditComponent = ({
       </div>
 
       {/* Rotate Left Button */}
-      <div className="absolute -left-[5rem] rotate-[270deg]">
+      <div className="absolute -left-[5rem] top-1.5 rotate-[270deg]">
         <svg
           width="52"
           height="52"
@@ -591,8 +593,8 @@ const TileEditComponent = ({
       <div
         className={`w-[${boxSizeWidth}px] h-[${boxSizeHeight}px] border border-black`}
         style={{
-          width: `${boxSizeWidth}px`,
-          height: `${boxSizeHeight}px`,
+          width: `${boxSizeWidth || 64}px`,
+          height: `${boxSizeHeight || 64}px`,
         }}
       ></div>
     </div>

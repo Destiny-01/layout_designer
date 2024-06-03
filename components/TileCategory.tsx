@@ -37,11 +37,19 @@ const TileCategory = (props: Props) => {
   // const storedTileName = useTileStore((state) => state.tileName);
   const storedTileColor = useTileStore((state) => state.tileColor);
   const setTileColor = useTileStore((state) => state.setTileColor);
+  const setActiveSubCategory = useTileStore(
+    (state) => state.setActiveSubCategory
+  );
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
 
-  const handleTileChoice = (tileName: string, tilePath: string) => {
+  const handleTileChoice = (
+    tileName: string,
+    tilePath: string,
+    category: number
+  ) => {
     setTileName(tileName);
+    setActiveSubCategory(category);
     setActiveTilePath(tilePath);
     setEditedTiles([]);
   };
@@ -93,7 +101,7 @@ const TileCategory = (props: Props) => {
             {showSubCategory && item.tileName === activeTile && (
               <div className="pl-7 lg:pl-10">
                 <div className="grid grid-cols-5 gap-3 py-3 w-fit">
-                  {item.subCategories.map((category) => {
+                  {item.subCategories.map((category, index) => {
                     return category.tileVariation.map((tileVariant) => {
                       return (
                         tileVariant.tileColor === storedTileColor && (
@@ -102,7 +110,8 @@ const TileCategory = (props: Props) => {
                             onClick={() => {
                               handleTileChoice(
                                 item.tileName,
-                                tileVariant.tilePath
+                                tileVariant.tilePath,
+                                index
                               );
                               setActiveRotationDegree(0);
                             }}

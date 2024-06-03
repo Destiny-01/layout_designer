@@ -23,6 +23,8 @@ export interface TileState {
   setTileColor: (tileColor: string) => void;
   activeTilePath: string;
   setActiveTilePath: (activeTilePath: string) => void;
+  activeSubCategory: number;
+  setActiveSubCategory: (activeSubCategory: number) => void;
   editedTiles: EditedTile[];
   setEditedTiles: (editedTiles: EditedTile[]) => void;
   activeRotationDegree: number;
@@ -72,6 +74,9 @@ const useTileStore = create(
       setTileColor: (tileColor: string) => set({ tileColor }),
       activeTilePath: "",
       setActiveTilePath: (activeTilePath: string) => set({ activeTilePath }),
+      activeSubCategory: 0,
+      setActiveSubCategory: (activeSubCategory: number) =>
+        set({ activeSubCategory }),
       editedTiles: [],
       setEditedTiles: (editedTiles: EditedTile[]) => set({ editedTiles }),
       activeRotationDegree: 0,

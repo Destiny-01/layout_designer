@@ -238,14 +238,7 @@ const page = (props: Props) => {
                       : "bg-[#FBFBFB]"
                   } lg:px-6 px-5 py-3 w-full h-full rounded-full  flex items-center justify-center`}
                 >
-                  <p
-                    className={`text-xs mb-0.5 font-semibold ${
-                      // measurement.activeDimension === "cm"
-                      //   ? "text-white"
-                      //   :
-                      "text-black"
-                    }`}
-                  >
+                  <p className={`text-xs mb-0.5 font-semibold ${"text-black"}`}>
                     cm
                   </p>
                 </div>
@@ -278,14 +271,7 @@ const page = (props: Props) => {
                       : "bg-[#FBFBFB]"
                   } lg:px-6 px-5 py-3 w-full h-full rounded-full  flex items-center justify-center`}
                 >
-                  <p
-                    className={`text-xs mb-0.5 font-semibold ${
-                      // measurement.activeDimension === "in"
-                      //   ? "text-white"
-                      //   :
-                      "text-black"
-                    }`}
-                  >
+                  <p className={`text-xs mb-0.5 font-semibold ${"text-black"}`}>
                     in
                   </p>
                 </div>

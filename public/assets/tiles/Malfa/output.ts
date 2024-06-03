@@ -11,7 +11,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "BottleGreen",
-          tilePath: "/assets/tiles/Malfa/MLF01-BottleGreen.svg",
+          tilePath: "/assets/tiles/Malfa/MLF01-Bottle-Green.svg",
         },
         {
           tileColor: "Cobalt",
@@ -64,7 +64,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "BottleGreen",
-          tilePath: "/assets/tiles/Malfa/MLF02-BottleGreen.svg",
+          tilePath: "/assets/tiles/Malfa/MLF02-Bottle-Green.svg",
         },
         {
           tileColor: "Cobalt",
@@ -117,7 +117,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "BottleGreen",
-          tilePath: "/assets/tiles/Malfa/MLF03-BottleGreen.svg",
+          tilePath: "/assets/tiles/Malfa/MLF03-Bottle-Green.svg",
         },
         {
           tileColor: "Cobalt",
@@ -170,7 +170,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "BottleGreen",
-          tilePath: "/assets/tiles/Malfa/MLF04-BottleGreen.svg",
+          tilePath: "/assets/tiles/Malfa/MLF04-Bottle-Green.svg",
         },
         {
           tileColor: "Cobalt",
@@ -223,7 +223,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "BottleGreen",
-          tilePath: "/assets/tiles/Malfa/MLF05-BottleGreen.svg",
+          tilePath: "/assets/tiles/Malfa/MLF05-Bottle-Green.svg",
         },
         {
           tileColor: "Cobalt",
@@ -276,7 +276,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "BottleGreen",
-          tilePath: "/assets/tiles/Malfa/MLF06-BottleGreen.svg",
+          tilePath: "/assets/tiles/Malfa/MLF06-Bottle-Green.svg",
         },
         {
           tileColor: "Cobalt",
