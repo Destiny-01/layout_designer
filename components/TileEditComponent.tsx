@@ -6,12 +6,14 @@ type Props = {
   tileIndex: string;
   boxSizeHeight: number;
   boxSizeWidth: number;
+  tilePath: string | undefined;
 };
 
 const TileEditComponent = ({
   tileIndex,
   boxSizeHeight,
   boxSizeWidth,
+  tilePath: initialTilePath,
 }: Props) => {
   const activeTileName = useTileStore((state) => state.tileName);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
@@ -22,8 +24,9 @@ const TileEditComponent = ({
 
   const activeTile = editedTiles.find((tile) => tile.tileIndex === tileIndex);
   const [showColorPanel, setShowColorPanel] = useState(false);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [updatedTilePath, setUpdatedTilePath] = useState<string | null>(null);
-  console.log(activeTile);
+  console.log(activeTile, editedTiles);
   const [rotationDegree, setRotationDegree] = useState<number>(
     activeTile?.rotationDegree || 0
   );
@@ -31,11 +34,12 @@ const TileEditComponent = ({
     EditedTile["rotateStyle"] | undefined
   >(activeTile?.rotateStyle);
   const [tilePath, setTilePath] = useState<string>(
-    activeTile?.tilePath ?? activeTilePath
+    initialTilePath ?? activeTile?.tilePath ?? activeTilePath
   );
   console.log(
     editedTiles.find((tile) => tile.tileIndex === tileIndex)?.tilePath,
-    activeTilePath
+    activeTilePath,
+    activeTile?.tilePath
   );
   const [tileColor, setTileColor] = useState<string>("");
 
@@ -105,13 +109,27 @@ const TileEditComponent = ({
     const specificTile = collectionTiles.find((item) => {
       return item.tileName === activeTileName;
     });
+    let specificColorData = null;
 
     if (specificTile) {
-      const tileVariation =
-        specificTile.subCategories[activeSubCategory].tileVariation;
-      const specificColorData = tileVariation.find((item) => {
-        return item.tileColor === colorValue;
-      });
+      console.log(
+        tilePath,
+        colorValue,
+        specificTile.subCategories[0].tileVariation[0].tilePath.split("-")[0]
+      );
+      for (const subCategory of specificTile.subCategories) {
+        const matchingTile = subCategory.tileVariation.find(
+          (tile) =>
+            tile.tileColor === colorValue &&
+            tilePath.includes(tile.tilePath.split("-")[0])
+        );
+        console.log({ matchingTile });
+        if (matchingTile) {
+          specificColorData = matchingTile;
+          break;
+        }
+      }
+
       if (specificColorData) {
         console.log("reached", specificTile, activeTileName);
         storeUserAction("color", tilePath, specificColorData.tilePath);
@@ -133,14 +151,16 @@ const TileEditComponent = ({
   };
 
   useEffect(() => {
-    if (updatedTilePath !== null) {
+    if (updatedTilePath !== null && !isFirstLoad) {
+      console.log("loaded");
       updateTileData();
       setTilePath(updatedTilePath);
     }
+    isFirstLoad && setIsFirstLoad(false);
   }, [updatedTilePath]);
 
   useEffect(() => {
-    updateTileData();
+    !isFirstLoad && updateTileData();
   }, [showColorPanel, rotationDegree, tilePath]);
 
   // useEffect(() => {

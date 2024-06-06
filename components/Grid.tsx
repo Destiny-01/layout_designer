@@ -3,6 +3,7 @@ import useTileStore from "@/store";
 import Image from "next/image";
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import TileEditComponent from "./TileEditComponent";
+import { collectionTiles } from "@/data/tileCatgories";
 
 const Grid = ({ isMainGrid = true, containerRef }: any) => {
   // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
@@ -14,6 +15,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   const setActiveDimension = useTileStore((state) => state.setMeasurement);
   const activeSize = useTileStore((state) => state.activeSize);
   const activeTile = useTileStore((state) => state.tileName);
+  const tileColor = useTileStore((state) => state.tileColor);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   // const [boxSize, setBoxSize] = useState(deviceWidth >= 1024 ? 80 : 60); // Size of each box in pixels
   const [numRows, setNumRows] = useState(3); // Initial number of rows, adjust as needed
@@ -109,6 +111,8 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   );
 
   const editedTiles = useTileStore((state) => state.editedTiles);
+  const activeSubCategory = useTileStore((state) => state.activeSubCategory);
+  const autoFillPattern = useTileStore((state) => state.autoFillPattern);
   console.log({ editedTiles });
 
   const [activeTileIndex, setActiveTileIndex] = useState<string | null>(null);
@@ -134,6 +138,65 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const activeCollection = collectionTiles.find(
+    (tile) => tile.tileName === activeTile
+  );
+  const renderAutoFill = (
+    fillTilePath: string,
+    colIndex: number,
+    initialRowIndex: number
+  ) => {
+    const rows = Math.floor(autoFillPattern.length / 2);
+    if (
+      activeCollection &&
+      activeCollection.subCategories.length > 1 &&
+      autoFillPattern.length > 0
+    ) {
+      // console.log(autoFillPattern, fillTilePath);
+      const definiteIndex = (initialRowIndex - 1) % rows; //+ 1;
+      // if (colIndex % 2 === 0) {
+      let rowIndex =
+        initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
+      let index = Math.abs(
+        colIndex % 2 === 0
+          ? // ? (((rowIndex === 0 ? rowIndex : rowIndex + 2) - 1) %
+            //     autoFillPattern.length) +
+            //   1
+            rowIndex % 2 === 0
+            ? rowIndex + 1 > rows
+              ? rowIndex - rows
+              : rowIndex
+            : (rowIndex === 0 ? rowIndex : rowIndex - 2) - 1
+          : rowIndex % 2 === 0
+          ? rowIndex + 1 - rows
+          : rowIndex + 2
+      );
+      const singleCategory = activeCollection.subCategories[index];
+      !singleCategory && console.log(singleCategory, rowIndex, rows, index);
+      // console.log(
+      //   singleCategory,
+      //   fillTilePath,
+      //   tileColor,
+      //   singleCategory?.tileVariation.find(
+      //     (tile) => tile.tileColor === tileColor
+      //   )?.tilePath
+      // );
+      return (
+        //   editedTiles.find(
+        //   (tile) => tile.tileIndex === `${colIndex}-${rowIndex}`
+        // )?.tilePath ??
+        singleCategory?.tileVariation.find(
+          (tile) => tile.tileColor === tileColor
+        )?.tilePath || singleCategory?.tileVariation[0].tilePath
+      );
+      // } else {
+      //   return
+      // }
+    } else {
+      return fillTilePath;
+    }
+  };
 
   const handleSpacing = useCallback(() => {
     const activeTileIndexes = activeTileIndex?.split("-");
@@ -186,6 +249,11 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                   tile: singleTile.current?.offsetWidth,
                   boxSize,
                 });
+              // console.log(
+              //   getIndex(`${colIndex}-${rowIndex}`),
+              //   activeTile,
+              //   activeTilePath
+              // );
               return (
                 // <div
                 // className={`${
@@ -219,7 +287,8 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                   >
                     {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
                       <Image
-                        src={activeTilePath}
+                        // src={activeTilePath}
+                        src={renderAutoFill(activeTilePath, colIndex, rowIndex)}
                         width={"0"}
                         height={"0"}
                         className="w-full h-full object-cover"
@@ -230,16 +299,16 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                       />
                     ) : (
                       <>
-                        {activeTile.rotateStyle === "flipX" &&
-                          console.log(activeTile, {
-                            transform: `rotateX(${activeTile.rotationDegree})`,
-                          })}
                         {editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
                           .tilePath && (
                           <Image
                             src={
+                              // renderAutoFill(
                               editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
                                 .tilePath ?? ""
+                              // colIndex,
+                              // rowIndex
+                              // )
                             }
                             width={"0"}
                             height={"0"}
@@ -264,6 +333,11 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                     {activeTileIndex === `${colIndex}-${rowIndex}` && (
                       <TileEditComponent
                         tileIndex={activeTileIndex}
+                        tilePath={renderAutoFill(
+                          activeTilePath,
+                          colIndex,
+                          rowIndex
+                        )}
                         boxSizeHeight={singleTile.current?.offsetHeight}
                         boxSizeWidth={singleTile.current?.offsetWidth}
                       />

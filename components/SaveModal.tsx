@@ -5,6 +5,7 @@ import Grid from "./Grid";
 import useTileStore from "@/store";
 import { collectionTiles } from "@/data/tileCatgories";
 import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 
 function SaveModal({
   onClose,
@@ -18,6 +19,7 @@ function SaveModal({
   const activeSize = useTileStore((state) => state.activeSize);
   const [image, setImage] = useState("");
   const activeTilePath = useTileStore((state) => state.activeTilePath);
+  const zoom = useTileStore((state) => state.zoom);
   const measurement = useTileStore((state) => state.measurement);
 
   const handleSaveAsImage = () => {
@@ -30,31 +32,59 @@ function SaveModal({
 
   useEffect(() => {
     if (containerRef.current) {
-      const images = containerRef.current.querySelectorAll("img");
-      const promises = Array.from(images).map((img: any) => {
-        if (img.complete) {
-          return Promise.resolve();
-        } else {
-          return new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-          });
-        }
-      });
+      console.log("start1");
+      const render = () => {
+        const style = {
+          transform: `scale(${zoom})`,
+          transformOrigin: "top left",
+          width: `${containerRef.current.offsetWidth}px`,
+          height: `${containerRef.current.offsetHeight}px`,
+        };
 
-      Promise.all(promises).then(() => {
-        html2canvas(containerRef.current, {
-          useCORS: true,
-          height: containerRef.height,
-          width: containerRef.width,
+        toPng(containerRef.current, {
+          width: containerRef.current.scrollWidth * zoom,
+          height: containerRef.current.scrollHeight * zoom,
+          style,
         })
-          .then((canvas): any => {
-            const image = canvas.toDataURL("image/png");
-            console.log(image, containerRef);
-            setImage(image);
+          .then((dataUrl: string) => {
+            console.log("start");
+            console.log(performance.now() - pf);
+            const img = document.createElement("img") as HTMLImageElement;
+            img.src = dataUrl;
+            console.log(img, dataUrl);
+            setImage(dataUrl);
           })
-          .catch((err) => console.error(err));
-      });
+          .catch((error: Error) => {
+            console.error("Oops, something went wrong!", error);
+          })
+          .finally(() => console.log("done"));
+        // const promises = Array.from(images).map((img: any) => {
+        //   if (img.complete) {nodeRef
+        //     return Promise.resolve();
+        //   } else {
+        //     return new Promise((resolve, reject) => {
+        //       img.onload = resolve;
+        //       img.onerror = reject;
+        //     });
+        //   }
+        // });
+
+        // Promise.all(promises).then(() => {
+        //   html2canvas(containerRef.current, {
+        //     useCORS: true,
+        //     height: containerRef.height,
+        //     width: containerRef.width,
+        //   })
+        //     .then((canvas): any => {
+        //       const image = canvas.toDataURL("image/png");
+        //       console.log(image, containerRef);
+        //       setImage(image);
+        //     })
+        //     .catch((err) => console.error(err));
+        // });
+      };
+      var pf = performance.now();
+      render();
     }
   }, []);
 

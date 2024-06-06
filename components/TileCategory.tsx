@@ -1,4 +1,7 @@
-import { collectionTiles } from "@/data/tileCatgories";
+import {
+  TileCategory as TileCategoryType,
+  collectionTiles,
+} from "@/data/tileCatgories";
 import {
   TileVariation,
   tileCategory,
@@ -31,6 +34,7 @@ const TileCategory = (props: Props) => {
   const [activeCategory, setActiveCategory] = useState(0);
 
   const setTileName = useTileStore((state) => state.setTileName);
+  const setAutoFillPattern = useTileStore((state) => state.setAutoFillPattern);
   const setActiveRotationDegree = useTileStore(
     (state) => state.setActiveRotationDegree
   );
@@ -52,6 +56,35 @@ const TileCategory = (props: Props) => {
     setActiveSubCategory(category);
     setActiveTilePath(tilePath);
     setEditedTiles([]);
+  };
+
+  const autoFill = (item: TileCategoryType) => {
+    // const categories = item.subCategories.length;
+    const finalArrangement: number[] = [];
+    item.subCategories.map((_, i) => finalArrangement.push(i));
+    let activeTilePath = "";
+
+    setTileName(item.tileName);
+    setEditedTiles([]);
+    for (const subCategory of item.subCategories) {
+      const matchingTile = subCategory.tileVariation.find(
+        (tile) => tile.tileColor === storedTileColor
+      );
+      if (matchingTile) {
+        activeTilePath = matchingTile.tilePath;
+        break;
+      }
+    }
+    console.log(activeTilePath);
+
+    setActiveTilePath(activeTilePath);
+
+    // while (finalArrangement.length < categories) {
+    //   const randomIndex = Math.floor(Math.random() * categories);
+    //   if (!finalArrangement.includes(randomIndex))
+    //     finalArrangement.push(randomIndex);
+    // }
+    setAutoFillPattern(finalArrangement);
   };
 
   return (
@@ -100,7 +133,7 @@ const TileCategory = (props: Props) => {
             </button>
             {showSubCategory && item.tileName === activeTile && (
               <div className="pl-7 lg:pl-10">
-                <div className="grid grid-cols-5 gap-3 py-3 w-fit">
+                <div className="grid grid-cols-5 gap-3 items-center py-3 w-fit">
                   {item.subCategories.map((category, index) => {
                     return category.tileVariation.map((tileVariant) => {
                       return (
@@ -114,6 +147,7 @@ const TileCategory = (props: Props) => {
                                 index
                               );
                               setActiveRotationDegree(0);
+                              setAutoFillPattern([]);
                             }}
                           >
                             <Image
@@ -128,6 +162,14 @@ const TileCategory = (props: Props) => {
                       );
                     });
                   })}
+                  {item.subCategories.length > 1 && (
+                    <p
+                      className="underline cursor-pointer font-medium"
+                      onClick={() => autoFill(item)}
+                    >
+                      Autofill
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-5 gap-3 py-3 w-fit">

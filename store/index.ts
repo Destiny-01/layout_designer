@@ -21,6 +21,8 @@ export interface TileState {
   setTileName: (tileName: string) => void;
   tileColor: string;
   setTileColor: (tileColor: string) => void;
+  autoFillPattern: number[];
+  setAutoFillPattern: (AutoFillPattern: number[]) => void;
   activeTilePath: string;
   setActiveTilePath: (activeTilePath: string) => void;
   activeSubCategory: number;
@@ -71,6 +73,9 @@ const useTileStore = create(
       tileName: "Cadaques",
       setTileName: (tileName: string) => set({ tileName }),
       tileColor: "Blush",
+      autoFillPattern: [],
+      setAutoFillPattern: (autoFillPattern: number[]) =>
+        set({ autoFillPattern }),
       setTileColor: (tileColor: string) => set({ tileColor }),
       activeTilePath: "",
       setActiveTilePath: (activeTilePath: string) => set({ activeTilePath }),
