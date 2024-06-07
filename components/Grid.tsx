@@ -147,12 +147,22 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     colIndex: number,
     initialRowIndex: number
   ) => {
+    console.log(fillTilePath);
     const rows = Math.floor(autoFillPattern.length / 2);
     if (
       activeCollection &&
       activeCollection.subCategories.length > 1 &&
       autoFillPattern.length > 0
     ) {
+      if (autoFillPattern.length < 3) {
+        const singleCategory =
+          activeCollection.subCategories[initialRowIndex % 2];
+        return (
+          singleCategory?.tileVariation.find(
+            (tile) => tile.tileColor === tileColor
+          )?.tilePath || singleCategory?.tileVariation[0].tilePath
+        );
+      }
       // console.log(autoFillPattern, fillTilePath);
       const definiteIndex = (initialRowIndex - 1) % rows; //+ 1;
       // if (colIndex % 2 === 0) {

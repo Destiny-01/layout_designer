@@ -27,7 +27,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "NestEgg",
-          tilePath: "/assets/tiles/Malfa/MLF01-NestEgg.svg",
+          tilePath: "/assets/tiles/Malfa/MLF01-Nest-Egg.svg",
         },
         {
           tileColor: "Papaya",
@@ -80,7 +80,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "NestEgg",
-          tilePath: "/assets/tiles/Malfa/MLF02-NestEgg.svg",
+          tilePath: "/assets/tiles/Malfa/MLF02-Nest-Egg.svg",
         },
         {
           tileColor: "Papaya",
@@ -133,7 +133,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "NestEgg",
-          tilePath: "/assets/tiles/Malfa/MLF03-NestEgg.svg",
+          tilePath: "/assets/tiles/Malfa/MLF03-Nest-Egg.svg",
         },
         {
           tileColor: "Papaya",
@@ -186,7 +186,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "NestEgg",
-          tilePath: "/assets/tiles/Malfa/MLF04-NestEgg.svg",
+          tilePath: "/assets/tiles/Malfa/MLF04-Nest-Egg.svg",
         },
         {
           tileColor: "Papaya",
@@ -239,7 +239,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "NestEgg",
-          tilePath: "/assets/tiles/Malfa/MLF05-NestEgg.svg",
+          tilePath: "/assets/tiles/Malfa/MLF05-Nest-Egg.svg",
         },
         {
           tileColor: "Papaya",
@@ -292,7 +292,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "NestEgg",
-          tilePath: "/assets/tiles/Malfa/MLF06-NestEgg.svg",
+          tilePath: "/assets/tiles/Malfa/MLF06-Nest-Egg.svg",
         },
         {
           tileColor: "Papaya",

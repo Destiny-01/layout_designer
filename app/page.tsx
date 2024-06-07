@@ -38,25 +38,14 @@ const page = (props: Props) => {
   const setMeasurement = useTileStore((state) => state.setMeasurement);
   const measurement = useTileStore((state) => state.measurement);
   const state = useHistoryStore((state) => state.state);
-  const setState = useHistoryStore((state) => state.setState);
   const setCurrentIndex = useHistoryStore((state) => state.setCurrentIndex);
   const currentIndex = useHistoryStore((state) => state.currentIndex);
-
-  const storeUserAction = (
-    action: "rotate" | "flipX" | "flipY" | "color",
-    from: any,
-    to: any
-  ) => {
-    setState([...state, { tileIndex: null, from, to, action }]);
-    setCurrentIndex(currentIndex + 1);
-  };
 
   const rotateDiv = () => {
     let newDegree = rotationDegree + 90;
     if (newDegree >= 360) {
       newDegree = 0;
     }
-    storeUserAction("rotate", rotationDegree, newDegree);
     setActiveRotationDegree(newDegree);
     updateRotationDegrees(newDegree);
   };
@@ -116,9 +105,11 @@ const page = (props: Props) => {
           break;
         case "flipX":
           currentTile.rotationDegree = isUndo ? newState.from : newState.to;
+          currentTile.rotateStyle = "flipX";
           break;
         case "flipY":
           currentTile.rotationDegree = isUndo ? newState.from : newState.to;
+          currentTile.rotateStyle = "flipY";
           break;
         case "color":
           currentTile.tilePath = isUndo ? newState.from : newState.to;
@@ -138,7 +129,7 @@ const page = (props: Props) => {
   };
 
   const undo = (e: any) => {
-    if (currentIndex > 0) {
+    if (currentIndex >= 0) {
       const newIndex = currentIndex - 1;
       const newState = state[newIndex];
       console.log(newState, newIndex, state.length);
@@ -148,11 +139,12 @@ const page = (props: Props) => {
   };
 
   const redo = (e: any) => {
-    if (currentIndex < state.length - 1) {
-      const newIndex = currentIndex + 1;
+    console.log(currentIndex, state.length);
+    if (currentIndex < state.length && currentIndex !== -1) {
+      const newIndex = currentIndex;
       const newState = state[newIndex];
       executeAction(newState, false);
-      setCurrentIndex(newIndex);
+      setCurrentIndex(newIndex + 1);
     }
   };
 
@@ -395,7 +387,7 @@ const page = (props: Props) => {
 
       {/* SideGrid */}
 
-      <div className="w-full max-w-[calc(100vw-33%-28px)] gap-8 lg:border-l-2 border-[#F5F5F5] lg:pl-10 flex items-end">
+      <div className="w-full lg:max-w-[calc(100vw-33%-28px)] gap-8 lg:border-l-2 border-[#F5F5F5] lg:pl-10 flex items-end">
         <div className="w-full">
           <div className="w-full flex items-center justify-between">
             <div className="md:flex space-x-7 hidden">
@@ -407,7 +399,7 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity={currentIndex > 0 ? "1" : "0.5"}>
+                  <g opacity={currentIndex >= 0 ? "1" : "0.5"}>
                     <path
                       d="M9.14986 6.92499H3.44153"
                       stroke="#292D32"
@@ -443,7 +435,13 @@ const page = (props: Props) => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g opacity={currentIndex < state.length - 1 ? "1" : "0.5"}>
+                  <g
+                    opacity={
+                      currentIndex < state.length && currentIndex !== -1
+                        ? "1"
+                        : "0.5"
+                    }
+                  >
                     <path
                       d="M10.8501 6.92499H16.5584"
                       stroke="#292D32"
@@ -1064,10 +1062,7 @@ const page = (props: Props) => {
           <div className="md:hidden flex items-center justify-between py-5">
             <div className="w-10" />
             <Link href="https://212dimensions.com/my-cart">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center"
-              >
+              <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center">
                 <div>
                   <svg
                     width="16"
@@ -1122,7 +1117,10 @@ const page = (props: Props) => {
                 <p className="text-sm font-medium">Add to Cart</p>
               </button>
             </Link>
-            <div className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden"
+            >
               <svg
                 width="16"
                 height="16"
@@ -1145,7 +1143,7 @@ const page = (props: Props) => {
                   strokeLinejoin="round"
                 />
               </svg>
-            </div>
+            </button>
           </div>
           <div className={`flex items-center justify-between`}>
             <button

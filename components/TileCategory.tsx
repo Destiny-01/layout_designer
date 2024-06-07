@@ -6,7 +6,7 @@ import {
   TileVariation,
   tileCategory,
 } from "@/public/assets/tiles/Cadaques/output";
-import useTileStore from "@/store";
+import useTileStore, { useHistoryStore } from "@/store";
 import Image from "next/image";
 
 import { useEffect, useState } from "react";
@@ -46,16 +46,19 @@ const TileCategory = (props: Props) => {
   );
   const setActiveTilePath = useTileStore((state) => state.setActiveTilePath);
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
+  const { setState, setCurrentIndex } = useHistoryStore();
 
   const handleTileChoice = (
     tileName: string,
-    tilePath: string,
-    category: number
+    tilePath?: string,
+    category?: number
   ) => {
     setTileName(tileName);
-    setActiveSubCategory(category);
-    setActiveTilePath(tilePath);
+    category && setActiveSubCategory(category);
+    tilePath && setActiveTilePath(tilePath);
     setEditedTiles([]);
+    setState([]);
+    setCurrentIndex(0);
   };
 
   const autoFill = (item: TileCategoryType) => {
@@ -64,8 +67,7 @@ const TileCategory = (props: Props) => {
     item.subCategories.map((_, i) => finalArrangement.push(i));
     let activeTilePath = "";
 
-    setTileName(item.tileName);
-    setEditedTiles([]);
+    handleTileChoice(item.tileName);
     for (const subCategory of item.subCategories) {
       const matchingTile = subCategory.tileVariation.find(
         (tile) => tile.tileColor === storedTileColor

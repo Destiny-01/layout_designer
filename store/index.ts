@@ -55,7 +55,7 @@ export interface HistoryState {
 export const useHistoryStore = create(
   persist<HistoryState>(
     (set) => ({
-      currentIndex: 0,
+      currentIndex: -1,
       state: [],
       setState: (state: HistoryState["state"]) => set({ state }),
       setCurrentIndex: (currentIndex: number) => set({ currentIndex }),
