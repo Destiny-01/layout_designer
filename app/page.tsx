@@ -453,10 +453,12 @@ const page = (props: Props) => {
           <div className="overflow-auto my-6 lg:h-[500px] md:h-[300px] h-[200px]">
             <Grid containerRef={containerRef} />
           </div>
-          <div className="">
-            {((((measurement.columns * activeSize * 10) / 1000) *
-              (measurement.rows * activeSize * 10)) /
-              1000).toFixed(2)}{" "}
+          <div className="text-center mb-4">
+            {(
+              (((measurement.columns * activeSize * 10) / 1000) *
+                (measurement.rows * activeSize * 10)) /
+              1000
+            ).toFixed(2)}{" "}
             SQUARE METER
           </div>
 
