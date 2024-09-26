@@ -23,7 +23,6 @@ function SaveModal({
   const measurement = useTileStore((state) => state.measurement);
 
   const handleSaveAsImage = () => {
-    console.log("start");
     const link = document.createElement("a");
     link.href = image;
     link.download = "component.png";
@@ -32,7 +31,6 @@ function SaveModal({
 
   useEffect(() => {
     if (containerRef.current) {
-      console.log("start1");
       const render = () => {
         const style = {
           transform: `scale(${zoom})`,
@@ -47,41 +45,15 @@ function SaveModal({
           style,
         })
           .then((dataUrl: string) => {
-            console.log("start");
-            console.log(performance.now() - pf);
             const img = document.createElement("img") as HTMLImageElement;
             img.src = dataUrl;
-            console.log(img, dataUrl);
             setImage(dataUrl);
           })
           .catch((error: Error) => {
             console.error("Oops, something went wrong!", error);
           })
           .finally(() => console.log("done"));
-        // const promises = Array.from(images).map((img: any) => {
-        //   if (img.complete) {nodeRef
-        //     return Promise.resolve();
-        //   } else {
-        //     return new Promise((resolve, reject) => {
-        //       img.onload = resolve;
-        //       img.onerror = reject;
-        //     });
-        //   }
-        // });
-
-        // Promise.all(promises).then(() => {
-        //   html2canvas(containerRef.current, {
-        //     useCORS: true,
-        //     height: containerRef.height,
-        //     width: containerRef.width,
-        //   })
-        //     .then((canvas): any => {
-        //       const image = canvas.toDataURL("image/png");
-        //       console.log(image, containerRef);
-        //       setImage(image);
-        //     })
-        //     .catch((err) => console.error(err));
-        // });
+        
       };
       var pf = performance.now();
       render();
@@ -110,7 +82,6 @@ function SaveModal({
       document.removeEventListener("click", handleClickOutside);
     };
   }, [handleClickOutside]);
-  console.log(measurement);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden flex justify-center items-center">

@@ -22,7 +22,7 @@ const Navbar = (props: Props) => {
     setActiveSize(9);
   }, []);
 
-  const handleDimension = (type: "cm" | "in") => {
+  const handleDimension = (type: "in") => {
     setMeasurement({
       activeDimension: type,
       customWidth:
@@ -36,9 +36,9 @@ const Navbar = (props: Props) => {
     });
   };
 
-  useEffect(() => {
-    handleDimension("cm");
-  }, [activeSize]);
+  // useEffect(() => {
+  //   handleDimension("cm");
+  // }, [activeSize]);
   return (
     <div className="pt-4 lg:pt-6 lg:pb-6 px-7 lg:px-20 flex items-center justify-between w-full bg-white">
       <Link href={"/"} className="flex md:hidden">

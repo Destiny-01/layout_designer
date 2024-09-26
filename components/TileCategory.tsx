@@ -10,6 +10,7 @@ import useTileStore, { useHistoryStore } from "@/store";
 import Image from "next/image";
 
 import { useEffect, useState } from "react";
+import icons from "./icons";
 
 type Props = {};
 
@@ -77,17 +78,15 @@ const TileCategory = (props: Props) => {
         break;
       }
     }
-    console.log(activeTilePath);
 
     setActiveTilePath(activeTilePath);
-
-    // while (finalArrangement.length < categories) {
-    //   const randomIndex = Math.floor(Math.random() * categories);
-    //   if (!finalArrangement.includes(randomIndex))
-    //     finalArrangement.push(randomIndex);
-    // }
     setAutoFillPattern(finalArrangement);
   };
+
+  const handleDrag = (e: React.DragEvent<HTMLImageElement>, draggedTilePath: string) => {
+    e.dataTransfer.setData('text/plain', draggedTilePath);
+  e.dataTransfer.effectAllowed = 'move';
+  } 
 
   return (
     <div className="space-y-3 py-3">
@@ -97,36 +96,13 @@ const TileCategory = (props: Props) => {
             <button
               className="flex items-center space-x-3 h-fit"
               onClick={() => {
-                console.log(item.tileName, activeTile, showSubCategory);
                 setShowSubCategory(item.tileName !== activeTile);
                 setActiveTile(
                   item.tileName === activeTile ? "" : item.tileName
                 );
               }}
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="mb-0.5 transition-all"
-                style={
-                  item.tileName === activeTile
-                    ? { rotate: "90deg" }
-                    : { rotate: "0deg" }
-                }
-              >
-                <path
-                  opacity="0.4"
-                  d="M7.7175 4.96997L4.77167 7.1808V10.4533C4.77167 11.0133 5.44833 11.2933 5.845 10.8966L8.86667 7.87497C9.35083 7.3908 9.35083 6.6033 8.86667 6.11914L7.7175 4.96997Z"
-                  fill="#292D32"
-                />
-                <path
-                  d="M4.77167 3.54662V7.18079L7.7175 4.96996L5.845 3.09746C5.44833 2.70662 4.77167 2.98662 4.77167 3.54662Z"
-                  fill="#292D32"
-                />
-              </svg>
+              <icons.SmallDownPointer tilt={item.tileName === activeTile} />
               <p
                 className={item.tileName === activeTile ? "text-[#C98319]" : ""}
               >
@@ -158,6 +134,8 @@ const TileCategory = (props: Props) => {
                               width={10}
                               height={10}
                               alt="Tile"
+                              draggable='true'
+                              onDrag={(e) => handleDrag(e, tileVariant.tilePath)}
                             />
                           </button>
                         )

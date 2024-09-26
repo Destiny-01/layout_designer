@@ -26,7 +26,6 @@ const TileEditComponent = ({
   const [showColorPanel, setShowColorPanel] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [updatedTilePath, setUpdatedTilePath] = useState<string | null>(null);
-  console.log(activeTile, editedTiles);
   const [rotationDegree, setRotationDegree] = useState<number>(
     activeTile?.rotationDegree || 0
   );
@@ -36,11 +35,7 @@ const TileEditComponent = ({
   const [tilePath, setTilePath] = useState<string>(
     initialTilePath ?? activeTile?.tilePath ?? activeTilePath
   );
-  console.log(
-    editedTiles.find((tile) => tile.tileIndex === tileIndex)?.tilePath,
-    activeTilePath,
-    activeTile?.tilePath
-  );
+  
   const [tileColor, setTileColor] = useState<string>("");
 
   const storeUserAction = (
@@ -68,7 +63,6 @@ const TileEditComponent = ({
         newDegree = rotationDegree > 0 ? 0 : 180;
         break;
     }
-    console.log(direction, newDegree, editedTiles);
     direction !== "reset" &&
       storeUserAction(direction, rotationDegree, newDegree);
 
@@ -78,7 +72,6 @@ const TileEditComponent = ({
 
     setRotationDegree(newDegree);
   };
-  console.log(rotationDegree, rotateStyle, boxSizeHeight, boxSizeWidth);
 
   const updateTileData = () => {
     const tileEditData = {
@@ -87,7 +80,6 @@ const TileEditComponent = ({
       rotateStyle,
       tilePath,
     };
-    console.log(tileEditData, "lll");
 
     const index = editedTiles.findIndex((tile) => tile.tileIndex === tileIndex);
 
@@ -103,7 +95,6 @@ const TileEditComponent = ({
     setShowColorPanel(!showColorPanel);
   };
 
-  console.log("actibe", activeTileName, activeTilePath, tilePath);
   const setEditedTilePath = (colorValue: string) => {
     setTileColor(colorValue);
     const specificTile = collectionTiles.find((item) => {
@@ -112,18 +103,12 @@ const TileEditComponent = ({
     let specificColorData = null;
 
     if (specificTile) {
-      console.log(
-        tilePath,
-        colorValue,
-        specificTile.subCategories[0].tileVariation[0].tilePath.split("-")[0]
-      );
       for (const subCategory of specificTile.subCategories) {
         const matchingTile = subCategory.tileVariation.find(
           (tile) =>
             tile.tileColor === colorValue &&
             tilePath.includes(tile.tilePath.split("-")[0])
         );
-        console.log({ matchingTile });
         if (matchingTile) {
           specificColorData = matchingTile;
           break;
@@ -131,7 +116,6 @@ const TileEditComponent = ({
       }
 
       if (specificColorData) {
-        console.log("reached", specificTile, activeTileName);
         storeUserAction("color", tilePath, specificColorData.tilePath);
         setTilePath(specificColorData.tilePath);
         setUpdatedTilePath(specificColorData.tilePath);
@@ -152,7 +136,6 @@ const TileEditComponent = ({
 
   useEffect(() => {
     if (updatedTilePath !== null && !isFirstLoad) {
-      console.log("loaded");
       updateTileData();
       setTilePath(updatedTilePath);
     }

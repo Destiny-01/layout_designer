@@ -1,7 +1,14 @@
 import useDeviceWidth from "@/hooks/useDeviceWidth"; // Path to your custom hook
 import useTileStore from "@/store";
 import Image from "next/image";
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import TileEditComponent from "./TileEditComponent";
 import { collectionTiles } from "@/data/tileCatgories";
 
@@ -18,52 +25,36 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   const tileColor = useTileStore((state) => state.tileColor);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   // const [boxSize, setBoxSize] = useState(deviceWidth >= 1024 ? 80 : 60); // Size of each box in pixels
-  const [numRows, setNumRows] = useState(3); // Initial number of rows, adjust as needed
-  const [numCols, setNumCols] = useState(3); // Initial number of columns, same as rows
+  const [numRows, setNumRows] = useState(measurement.rows); // Initial number of rows, adjust as needed
+  const [numCols, setNumCols] = useState(measurement.columns); // Initial number of columns, same as rows
   const [scale, setScale] = useState(1);
   const singleTile = useRef<any>(null);
   const zoom = useTileStore((state) => state.zoom);
-
-  console.log(zoom, scale);
-
-  useEffect(() => {
-    if (customWidth && activeDimension) {
-      if (activeDimension === "cm") {
-        // setBoxSize(customWidth * 5);
-      } else if (activeDimension === "in") {
-        // setBoxSize(customWidth * 7.5);
-      }
-    }
-  }, [customWidth, activeDimension]);
-
-  const boxSize = activeSize > 9 ? 64 * 1.5 : 64;
+  // const boxSize = activeSize > 9 ? 64 * 1.5 : 64;
+  const boxSize = activeSize * 10; // converted to (mm)
   useEffect(() => {
     const calculateGrid = () => {
       if (containerRef.current) {
         const availableWidth = containerRef.current.offsetWidth;
         const availableHeight = containerRef.current.offsetHeight;
         let containerWidth = customWidth > 20 ? customWidth : availableWidth;
-        // containerWidth =
-        //   activeDimension === "in" ? containerWidth * 0.393701 : containerWidth;
+
         let containerHeight =
           customHeight > 20 ? customHeight : availableHeight;
         containerHeight =
           activeTile === "Rio" && activeTilePath.includes("Rio")
             ? containerHeight - 40
             : containerHeight;
-        // containerHeight =
-        //   activeDimension === "in"
-        //     ? containerHeight * 0.393701
-        //     : containerHeight;
 
         const newNumCols = Math.floor(containerWidth / boxSize);
         const newNumRows = Math.floor(containerHeight / boxSize);
-        // const newNumCols = Math.floor(containerWidth / boxSize);
-        // const newNumRows =
-        //   deviceWidth >= 1024
-        //     ? Math.floor(containerWidth / 2 / boxSize)
-        //     : Math.floor(containerWidth / boxSize);
-        console.log(containerWidth, containerHeight, customWidth, boxSize);
+        // console.log(
+        //   containerWidth,
+        //   containerHeight,
+        //   customWidth,
+        //   boxSize,
+        //   newNumCols
+        // );
 
         // Set number of rows and columns
         setNumRows(newNumRows);
@@ -111,19 +102,17 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   );
 
   const editedTiles = useTileStore((state) => state.editedTiles);
-  const activeSubCategory = useTileStore((state) => state.activeSubCategory);
+  const setEditedTiles = useTileStore((state) => state.setEditedTiles);
   const autoFillPattern = useTileStore((state) => state.autoFillPattern);
-  console.log({ editedTiles });
 
   const [activeTileIndex, setActiveTileIndex] = useState<string | null>(null);
 
-  const getIndex = (tileIndex: string) => {
-    let position = editedTiles.findIndex(
-      (tile) => tile.tileIndex === tileIndex
-    );
-    return position;
-  };
-  console.log(boxSize, rows, numRows, numCols);
+  const getIndex = useMemo(
+    () => (tileIndex: string) => {
+      return editedTiles.findIndex((tile) => tile.tileIndex === tileIndex);
+    },
+    [editedTiles] // Dependency: Recompute only when `editedTiles` changes
+  );
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -147,7 +136,6 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     colIndex: number,
     initialRowIndex: number
   ) => {
-    console.log(fillTilePath);
     const rows = Math.floor(autoFillPattern.length / 2);
     if (
       activeCollection &&
@@ -163,17 +151,12 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
           )?.tilePath || singleCategory?.tileVariation[0].tilePath
         );
       }
-      // console.log(autoFillPattern, fillTilePath);
       const definiteIndex = (initialRowIndex - 1) % rows; //+ 1;
-      // if (colIndex % 2 === 0) {
       let rowIndex =
         initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
       let index = Math.abs(
         colIndex % 2 === 0
-          ? // ? (((rowIndex === 0 ? rowIndex : rowIndex + 2) - 1) %
-            //     autoFillPattern.length) +
-            //   1
-            rowIndex % 2 === 0
+          ? rowIndex % 2 === 0
             ? rowIndex + 1 > rows
               ? rowIndex - rows
               : rowIndex
@@ -183,26 +166,12 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
           : rowIndex + 2
       );
       const singleCategory = activeCollection.subCategories[index];
-      !singleCategory && console.log(singleCategory, rowIndex, rows, index);
-      // console.log(
-      //   singleCategory,
-      //   fillTilePath,
-      //   tileColor,
-      //   singleCategory?.tileVariation.find(
-      //     (tile) => tile.tileColor === tileColor
-      //   )?.tilePath
-      // );
+
       return (
-        //   editedTiles.find(
-        //   (tile) => tile.tileIndex === `${colIndex}-${rowIndex}`
-        // )?.tilePath ??
         singleCategory?.tileVariation.find(
           (tile) => tile.tileColor === tileColor
         )?.tilePath || singleCategory?.tileVariation[0].tilePath
       );
-      // } else {
-      //   return
-      // }
     } else {
       return fillTilePath;
     }
@@ -228,6 +197,31 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     }
   }, [activeTileIndex]);
 
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>, index: string) => {
+    e.preventDefault();
+    const editedIndex = getIndex(index);
+    const data = e.dataTransfer.getData("text/plain");
+
+    let newArr = [...editedTiles];
+    if (editedIndex !== -1) {
+      newArr[editedIndex].tilePath = data;
+    } else {
+      const editedSpec = {
+        tileIndex: index,
+        rotationDegree: 0,
+        rotateStyle: undefined,
+        tilePath: data,
+      };
+      newArr.push(editedSpec);
+    }
+    setEditedTiles(newArr);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
   return (
     <>
       <div
@@ -236,8 +230,6 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
         style={{
           transform: `scale(${scale * zoom})`,
           transformOrigin: "top left",
-          // width: `${numCols * boxSize}px`,
-          // height: `${numRows * boxSize}px`,
         }}
       >
         {rows.length > 3 && !activeTilePath && (
@@ -245,120 +237,95 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
             <p className="text-[#616161] text-lg">Please choose a model</p>
           </div>
         )}
-        {rows.map((rowIndex) => (
-          <div key={rowIndex} className="flex">
-            {cols.map((colIndex) => {
-              const activeTile =
-                editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
-              activeTile &&
-                console.log({
-                  activeTile,
-                  colIndex,
-                  rowIndex,
-                  editedTiles,
-                  tile: singleTile.current?.offsetWidth,
-                  boxSize,
-                });
-              // console.log(
-              //   getIndex(`${colIndex}-${rowIndex}`),
-              //   activeTile,
-              //   activeTilePath
-              // );
-              return (
-                // <div
-                // className={`${
-                //   ""
-                //   // activeSize === 13 ? "w-24 h-24" : "w-16 h-16"
-                // } bg-[#FAFAFA] border border-[#F1F1F1]`}
-                // style={{
-                //   width: `fit-content`,
-                //   height: `fit-content`,
-                // width: `${
-                //   singleTile.current?.offsetWidth > 20
-                //     ? singleTile.current?.offsetWidth
-                //     : boxSize * scale * zoom
-                // }px`,
-                // height: `${
-                //   singleTile.current?.offsetHeight > 20
-                //     ? singleTile.current?.offsetHeight
-                //     : boxSize * scale * zoom
-                // }px`,
-                // }}
-                // >
-                rows.length > 1 &&
-                activeTilePath !== "" && (
-                  <button
-                    key={colIndex}
-                    onClick={() => {
-                      setActiveTileIndex(`${colIndex}-${rowIndex}`);
-                    }}
-                    ref={singleTile}
-                    className="relative bg-[#FAFAFA] border border-[#F1F1F1]"
-                  >
-                    {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
-                      <Image
-                        // src={activeTilePath}
-                        src={renderAutoFill(activeTilePath, colIndex, rowIndex)}
-                        width={"0"}
-                        height={"0"}
-                        className="w-full h-full object-cover"
-                        alt="Tile"
-                        style={{
-                          rotate: `${activeRotationDegree}deg`,
-                        }}
-                      />
-                    ) : (
-                      <>
-                        {editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
-                          .tilePath && (
-                          <Image
-                            src={
-                              // renderAutoFill(
-                              editedTiles[getIndex(`${colIndex}-${rowIndex}`)]
-                                .tilePath ?? ""
-                              // colIndex,
-                              // rowIndex
-                              // )
-                            }
-                            width={"0"}
-                            height={"0"}
-                            className="w-full h-full object-cover"
-                            alt="Tile"
-                            style={
-                              activeTile.rotateStyle === "flipX"
-                                ? {
-                                    transform: `rotateY(${activeTile.rotationDegree}deg)`,
-                                  }
-                                : activeTile.rotateStyle === "flipY"
-                                ? {
-                                    transform: `rotateX(${activeTile.rotationDegree}deg)`,
-                                  }
-                                : {}
-                            }
-                          />
-                        )}
-                      </>
-                    )}
+        {rows.map((rowIndex) => {
+          return (
+            <div key={rowIndex} className="flex">
+              {cols.map((colIndex) => {
+                const activeTile =
+                  editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
 
-                    {activeTileIndex === `${colIndex}-${rowIndex}` && (
-                      <TileEditComponent
-                        tileIndex={activeTileIndex}
-                        tilePath={renderAutoFill(
-                          activeTilePath,
-                          colIndex,
-                          rowIndex
-                        )}
-                        boxSizeHeight={singleTile.current?.offsetHeight}
-                        boxSizeWidth={singleTile.current?.offsetWidth}
-                      />
-                    )}
-                  </button>
-                )
-                // </div>
-              );
-            })}
-          </div>
-        ))}
+                // console.log('activeTile', activeTile);
+
+                return (
+                  rows.length > 1 &&
+                  activeTilePath !== "" && (
+                    <button
+                      key={colIndex}
+                      onClick={() => {
+                        setActiveTileIndex(`${colIndex}-${rowIndex}`);
+                      }}
+                      ref={singleTile}
+                      className="relative bg-[#FAFAFA] border border-[#F1F1F1]"
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, `${colIndex}-${rowIndex}`)}
+                    >
+                      {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
+                        <Image
+                          src={renderAutoFill(
+                            activeTilePath,
+                            colIndex,
+                            rowIndex
+                          )}
+                          width={"0"}
+                          height={"0"}
+                          className="w-full h-full object-cover"
+                          alt="Tile"
+                          style={{
+                            rotate: `${activeRotationDegree}deg`,
+                          }}
+                        />
+                      ) : (
+                        <>
+                          {activeTile.tilePath && (
+                            <Image
+                              src={
+                                // renderAutoFill(
+                                activeTile.tilePath ?? ""
+                                // colIndex,
+                                // rowIndex
+                                // )
+                              }
+                              width={"0"}
+                              height={"0"}
+                              className="w-full h-full object-cover"
+                              alt="Tile"
+                              style={
+                                activeTile.rotateStyle === "flipX"
+                                  ? {
+                                      transform: `rotateY(${activeTile.rotationDegree}deg)`,
+                                    }
+                                  : activeTile.rotateStyle === "flipY"
+                                  ? {
+                                      transform: `rotateX(${activeTile.rotationDegree}deg)`,
+                                    }
+                                  : {}
+                              }
+                            />
+                          )}
+                        </>
+                      )}
+
+                      {activeTileIndex === `${colIndex}-${rowIndex}` && (
+                        <TileEditComponent
+                          tileIndex={activeTileIndex}
+                          tilePath={renderAutoFill(
+                            activeTilePath,
+                            colIndex,
+                            rowIndex
+                          )}
+                          boxSizeHeight={singleTile.current?.offsetHeight}
+                          boxSizeWidth={singleTile.current?.offsetWidth}
+                        />
+                      )}
+                    </button>
+                    // <div></div>
+                  )
+                  // </div>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
     </>
   );
