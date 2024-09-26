@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Logo from "@/public/assets/logo.png";
-import LogoFull from "@/public/assets/logoFull.png";
+import LogoFull from "@/public/assets/logoFull.svg";
 import Link from "next/link";
 import useTileStore from "@/store";
 import { useEffect } from "react";
@@ -45,7 +45,7 @@ const Navbar = (props: Props) => {
         <Image src={Logo} priority alt="Logo" />
       </Link>
 
-      <Link href={"/"} className="md:flex hidden">
+      <Link href={"/"} className="md:flex hidden ">
         <Image src={LogoFull} priority alt="Logo" />
       </Link>
 
