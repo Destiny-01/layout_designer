@@ -11,9 +11,9 @@ export interface EditedTile {
 export interface Dimension {
   customWidth: number;
   customHeight: number;
-  rows?: number;
-  columns?: number;
-  activeDimension: "cm" | "in";
+  rows: number;
+  columns: number;
+  activeDimension: "in";
 }
 
 export interface TileState {
@@ -77,20 +77,22 @@ const useTileStore = create(
       setAutoFillPattern: (autoFillPattern: number[]) =>
         set({ autoFillPattern }),
       setTileColor: (tileColor: string) => set({ tileColor }),
-      activeTilePath: "",
+      activeTilePath: "", //
       setActiveTilePath: (activeTilePath: string) => set({ activeTilePath }),
-      activeSubCategory: 0,
+      activeSubCategory: 0, //
       setActiveSubCategory: (activeSubCategory: number) =>
         set({ activeSubCategory }),
       editedTiles: [],
       setEditedTiles: (editedTiles: EditedTile[]) => set({ editedTiles }),
-      activeRotationDegree: 0,
+      activeRotationDegree: 0, //
       setActiveRotationDegree: (activeRotationDegree: number) =>
         set({ activeRotationDegree }),
       measurement: {
-        activeDimension: "cm",
+        activeDimension: "in",
         customHeight: 0,
         customWidth: 0,
+        rows: 3,
+        columns: 3,
       },
       setMeasurement: (measurement: Dimension) => set({ measurement }),
       activeSize: 9,
@@ -104,5 +106,4 @@ const useTileStore = create(
     }
   )
 );
-
 export default useTileStore;
