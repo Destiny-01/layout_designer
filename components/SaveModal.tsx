@@ -1,10 +1,7 @@
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import Grid from "./Grid";
 import useTileStore from "@/store";
 import { collectionTiles } from "@/data/tileCatgories";
-import html2canvas from "html2canvas";
 import { toPng } from "html-to-image";
 
 function SaveModal({

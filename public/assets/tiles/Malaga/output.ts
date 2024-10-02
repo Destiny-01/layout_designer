@@ -11,7 +11,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Cobalt",
-          tilePath: "/assets/tiles/Malaga/MAL01-Indigo.svg",
+          tilePath: "/assets/tiles/Malaga/MAL01-Cobalt.svg",
         },
         {
           tileColor: "Highland",
@@ -19,7 +19,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Indigo",
-          tilePath: "/assets/tiles/Malaga/MAL01-Indigo_1.svg",
+          tilePath: "/assets/tiles/Malaga/MAL01-Cobalt.svg",
         },
         {
           tileColor: "NestEgg",
@@ -27,7 +27,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Papaya",
-          tilePath: "/assets/tiles/Malaga/MAL01-Papaya.svg",
+          tilePath: "/assets/tiles/Malaga/MAL01-Papayavg",
         },
         {
           tileColor: "Sunshine",
@@ -64,7 +64,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Cobalt",
-          tilePath: "/assets/tiles/Malaga/MAL02-Indigo.svg",
+          tilePath: "/assets/tiles/Malaga/MAL02-Cobalt.svg",
         },
         {
           tileColor: "HighlandGreen",
@@ -72,7 +72,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Indigo",
-          tilePath: "/assets/tiles/Malaga/MAL02-Indigo_1.svg",
+          tilePath: "/assets/tiles/Malaga/MAL02-Indigo.svg",
         },
         {
           tileColor: "NestEgg",
@@ -117,7 +117,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Cobalt",
-          tilePath: "/assets/tiles/Malaga/MAL03-Indigo.svg",
+          tilePath: "/assets/tiles/Malaga/MAL03-Cobalt.svg",
         },
         {
           tileColor: "HighlandGreen",
@@ -125,7 +125,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Indigo",
-          tilePath: "/assets/tiles/Malaga/MAL03-Indigo_1.svg",
+          tilePath: "/assets/tiles/Malaga/MAL03-Indigo.svg",
         },
         {
           tileColor: "NestEgg",
@@ -170,7 +170,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Cobalt",
-          tilePath: "/assets/tiles/Malaga/MAL04-Indigo.svg",
+          tilePath: "/assets/tiles/Malaga/MAL04-Cobalt.svg",
         },
         {
           tileColor: "HighlandGreen",
@@ -178,7 +178,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Indigo",
-          tilePath: "/assets/tiles/Malaga/MAL04-Indigo_1.svg",
+          tilePath: "/assets/tiles/Malaga/MAL04-Indigo.svg",
         },
         {
           tileColor: "NestEgg",

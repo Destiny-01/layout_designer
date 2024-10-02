@@ -1,10 +1,13 @@
 "use client";
 import Grid from "@/components/Grid";
 import icons from "@/components/icons";
-import SaveModal from "@/components/SaveModal";
 import TileCategory from "@/components/TileCategory";
-import { collectionTiles, colorVariation } from "@/data/tileCatgories";
-import useTileStore, { HistoryEntry, useHistoryStore } from "@/store";
+import { collectionTiles } from "@/data/tileCatgories";
+import useTileStore, {
+  EditedTile,
+  HistoryEntry,
+  useHistoryStore,
+} from "@/store";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -54,21 +57,38 @@ const page = (props: Props) => {
   const updateRotationDegrees = (newRotationDegree: number) => {
     const updatedTiles = editedTiles.map((tile) => ({
       ...tile,
-      rotationDegree: 0,
+      rotationDegree: newRotationDegree,
       rotateStyle: undefined,
     }));
     setEditedTiles(updatedTiles);
   };
 
   const randomizeTileChoice = () => {
-    const numTiles = collectionTiles.length;
-    const randomIndex = Math.floor(Math.random() * numTiles);
-    const randomTileData = collectionTiles[randomIndex];
-    setTileName(randomTileData.tileName);
-    setActiveTilePath(
-      randomTileData.subCategories[0].tileVariation[0].tilePath
+    const tile = collectionTiles.find(
+      (element) => element.tileName === tileName
     );
-    setEditedTiles([]);
+    const numSubCategories = tile?.subCategories.length;
+    let editedTiles: EditedTile[] = [];
+
+    for (let i = 0; i < measurement.rows; i++) {
+      for (let j = 0; j < measurement.columns; j++) {
+        if (numSubCategories) {
+          const randomMass = Math.random();
+          const tileVariation =
+            tile.subCategories[Math.floor(randomMass * numSubCategories)]
+              .tileVariation;
+          const editedSpec: EditedTile = {
+            tileIndex: `${j}-${i}`,
+            rotationDegree: [0, 90, 180, 270][Math.floor(randomMass * 4)],
+            rotateStyle: undefined,
+            tilePath:
+              tileVariation.find((item)=> item.tileColor === storedTileColor)?.tilePath,
+          };
+          editedTiles.push(editedSpec);
+        }
+      }
+    }
+    setEditedTiles(editedTiles);
   };
 
   const deleteTileChoice = () => {
@@ -158,22 +178,6 @@ const page = (props: Props) => {
     setTileName(tileName);
     setActiveTilePath(tilePath);
     setEditedTiles([]);
-  };
-
-  const calcSquareMeters = () => {
-    // if (containerRef.current) {
-    //   const availableWidth = containerRef.current.offsetWidth;
-    //   const availableHeight = containerRef.current.offsetHeight;
-    //   let containerWidth = customWidth > 20 ? customWidth : availableWidth;
-
-    //   let containerHeight =
-    //     customHeight > 20 ? customHeight : availableHeight;
-    //   containerHeight =
-    //     activeTile === "Rio" && activeTilePath.includes("Rio")
-    //       ? containerHeight - 40
-    //       : containerHeight;
-    //   return `${widthCount} by ${heightCount}`;
-    console.log(measurement.columns);
   };
 
   useEffect(() => {
@@ -520,14 +524,13 @@ const page = (props: Props) => {
               <p className="text-sm font-medium">Rotate All</p>
             </button>
 
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center"
-            >
-              <div>
-                <icons.Save />
-              </div>
-              <p>Save</p>
+            <button className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
+              <Link href="/preview" className="flex">
+                <div>
+                  <icons.Save />
+                </div>
+                <p>Save</p>
+              </Link>
             </button>
 
             <Link href="https://212dimensions.com/my-cart">
@@ -553,13 +556,6 @@ const page = (props: Props) => {
             </div>
           </div>
 
-          {isModalOpen && (
-            <SaveModal
-              containerRef={containerRef}
-              onClose={() => setIsModalOpen(false)}
-            />
-          )}
-
           <div className="md:hidden flex items-center justify-between py-5">
             <div className="w-10" />
             <Link href="https://212dimensions.com/my-cart">
@@ -571,12 +567,13 @@ const page = (props: Props) => {
                 <p className="text-sm font-medium">Add to Cart</p>
               </button>
             </Link>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden"
-            >
-              <icons.Save />
-            </button>
+            <Link href="/preview">
+              <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden">
+                <div>
+                  <icons.Save />
+                </div>
+              </button>
+            </Link>
           </div>
 
           <div className={`flex items-center justify-between`}>
