@@ -1,8 +1,7 @@
 import useDeviceWidth from "@/hooks/useDeviceWidth"; // Path to your custom hook
 import useTileStore from "@/store";
 import Image from "next/image";
-import {
-  forwardRef,
+import React, {
   useCallback,
   useEffect,
   useMemo,
@@ -11,6 +10,7 @@ import {
 } from "react";
 import TileEditComponent from "./TileEditComponent";
 import { collectionTiles } from "@/data/tileCatgories";
+
 
 const Grid = ({ isMainGrid = true, containerRef }: any) => {
   // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
@@ -30,7 +30,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   const [scale, setScale] = useState(1);
   const singleTile = useRef<any>(null);
   const zoom = useTileStore((state) => state.zoom);
-  // const boxSize = activeSize > 9 ? 64 * 1.5 : 64;
+  const [pathCache, setPathCathe] = useState<{ [key: string]: string }>({});
   const boxSize = activeSize * 10; // converted to (mm)
   useEffect(() => {
     const calculateGrid = () => {
@@ -48,14 +48,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
 
         const newNumCols = Math.floor(containerWidth / boxSize);
         const newNumRows = Math.floor(containerHeight / boxSize);
-        // console.log(
-        //   containerWidth,
-        //   containerHeight,
-        //   customWidth,
-        //   boxSize,
-        //   newNumCols
-        // );
-
+        
         // Set number of rows and columns
         setNumRows(newNumRows);
         setActiveDimension({
@@ -131,52 +124,63 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   const activeCollection = collectionTiles.find(
     (tile) => tile.tileName === activeTile
   );
-  const renderAutoFill = (
-    fillTilePath: string,
-    colIndex: number,
-    initialRowIndex: number
-  ) => {
-    const rows = Math.floor(autoFillPattern.length / 2);
-    if (
-      activeCollection &&
-      activeCollection.subCategories.length > 1 &&
-      autoFillPattern.length > 0
-    ) {
-      if (autoFillPattern.length < 3) {
-        const singleCategory =
-          activeCollection.subCategories[initialRowIndex % 2];
+
+  useEffect(() => {
+    const renderAutoFill = (
+      fillTilePath: string,
+      colIndex: number,
+      initialRowIndex: number
+    ) => {
+      const rows = Math.floor(autoFillPattern.length / 2);
+      if (
+        activeCollection &&
+        activeCollection.subCategories.length > 1 &&
+        autoFillPattern.length > 0
+      ) {
+        if (autoFillPattern.length < 3) {
+          const singleCategory =
+            activeCollection.subCategories[initialRowIndex % 2];
+          return (
+            singleCategory?.tileVariation.find(
+              (tile) => tile.tileColor === tileColor
+            )?.tilePath || singleCategory?.tileVariation[0].tilePath
+          );
+        }
+        const definiteIndex = (initialRowIndex - 1) % rows; //+ 1;
+        let rowIndex =
+          initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
+        let index = Math.abs(
+          colIndex % 2 === 0
+            ? rowIndex % 2 === 0
+              ? rowIndex + 1 > rows
+                ? rowIndex - rows
+                : rowIndex
+              : (rowIndex === 0 ? rowIndex : rowIndex - 2) - 1
+            : rowIndex % 2 === 0
+            ? rowIndex + 1 - rows
+            : rowIndex + 2
+        );
+        const singleCategory = activeCollection.subCategories[index];
+
         return (
           singleCategory?.tileVariation.find(
             (tile) => tile.tileColor === tileColor
           )?.tilePath || singleCategory?.tileVariation[0].tilePath
         );
+      } else {
+        return fillTilePath;
       }
-      const definiteIndex = (initialRowIndex - 1) % rows; //+ 1;
-      let rowIndex =
-        initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
-      let index = Math.abs(
-        colIndex % 2 === 0
-          ? rowIndex % 2 === 0
-            ? rowIndex + 1 > rows
-              ? rowIndex - rows
-              : rowIndex
-            : (rowIndex === 0 ? rowIndex : rowIndex - 2) - 1
-          : rowIndex % 2 === 0
-          ? rowIndex + 1 - rows
-          : rowIndex + 2
-      );
-      const singleCategory = activeCollection.subCategories[index];
+    };
 
-      return (
-        singleCategory?.tileVariation.find(
-          (tile) => tile.tileColor === tileColor
-        )?.tilePath || singleCategory?.tileVariation[0].tilePath
-      );
-    } else {
-      return fillTilePath;
+    let pathCache: { [key: string]: string } = {};
+    for (let i = 0; i < cols.length; i++) {
+      for (let j = 0; j < rows.length; j++) {
+        pathCache[`${i}-${j}`] = renderAutoFill(activeTilePath, i, j);
+      }
     }
-  };
-
+    setPathCathe(pathCache);
+  }, [rows.length, cols.length, activeTilePath, autoFillPattern, tileColor]);
+  
   const handleSpacing = useCallback(() => {
     const activeTileIndexes = activeTileIndex?.split("-");
     let margin = "";
@@ -218,116 +222,103 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    e.dataTransfer.effectAllowed = 'move'
-  }
+    e.preventDefault();
+    e.dataTransfer.effectAllowed = "move";
+  };
 
   return (
-    <>
-      <div
-        className={`${handleSpacing()} grid-container w-full origin-top-left rounded-lg relative h-full`}
-        ref={containerRef}
-        style={{
-          transform: `scale(${scale * zoom})`,
-          transformOrigin: "top left",
-        }}
-      >
-        {rows.length > 3 && !activeTilePath && (
-          <div className="w-full h-full absolute flex items-center justify-center">
-            <p className="text-[#616161] text-lg">Please choose a model</p>
+    <div
+      className={`${handleSpacing()} grid-container w-full origin-top-left rounded-lg relative h-full`}
+      ref={containerRef}
+      style={{
+        transform: `scale(${scale * zoom})`,
+        transformOrigin: "top left",
+      }}
+    >
+      {rows.length > 3 && !activeTilePath && (
+        <div className="w-full h-full absolute flex items-center justify-center">
+          <p className="text-[#616161] text-lg">Please choose a model</p>
+        </div>
+      )}
+      {rows.map((rowIndex) => {
+        return (
+          <div key={rowIndex} className="flex">
+            {cols.map((colIndex) => {
+              const editedTile =
+                editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
+
+
+              return (
+                rows.length > 1 &&
+                activeTilePath !== "" && (
+                  <button
+                    key={colIndex}
+                    onClick={() => {
+                      setActiveTileIndex(`${colIndex}-${rowIndex}`);
+                    }}
+                    ref={singleTile}
+                    className="relative bg-[#FAFAFA] border border-[#F1F1F1]"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, `${colIndex}-${rowIndex}`)}
+                  >
+                    {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
+                      <Image
+                        src={
+                          pathCache[`${colIndex}-${rowIndex}`] || activeTilePath
+                        }
+                        width={"0"}
+                        height={"0"}
+                        className="w-full h-full object-cover"
+                        alt="Tile"
+                        style={{
+                          rotate: `${activeRotationDegree}deg`,
+                        }}
+                      />
+                    ) : (
+                      <>
+                        {editedTile.tilePath && (
+                          <Image
+                            src={editedTile.tilePath ?? ""}
+                            width={"0"}
+                            height={"0"}
+                            className="w-full h-full object-cover"
+                            alt="Tile"
+                            style={
+                              editedTile.rotateStyle === "flipX"
+                                ? {
+                                    transform: `rotateY(${editedTile.rotationDegree}deg)`,
+                                  }
+                                : editedTile.rotateStyle === "flipY"
+                                ? {
+                                    transform: `rotateX(${editedTile.rotationDegree}deg)`,
+                                  }
+                                : {
+                                    rotate: `${editedTile.rotationDegree}deg`,
+                                  }
+                            }
+                          />
+                        )}
+                      </>
+                    )}
+
+                    {activeTileIndex === `${colIndex}-${rowIndex}` && (
+                      <TileEditComponent
+                        tileIndex={activeTileIndex}
+                        tilePath={
+                          pathCache[`${colIndex}-${rowIndex}` || activeTilePath]
+                        }
+                        zoom={zoom}
+                      />
+                    )}
+                  </button>
+                )
+                // </div>
+              );
+            })}
           </div>
-        )}
-        {rows.map((rowIndex) => {
-          return (
-            <div key={rowIndex} className="flex">
-              {cols.map((colIndex) => {
-                const activeTile =
-                  editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
-
-                // console.log('activeTile', activeTile);
-
-                return (
-                  rows.length > 1 &&
-                  activeTilePath !== "" && (
-                    <button
-                      key={colIndex}
-                      onClick={() => {
-                        setActiveTileIndex(`${colIndex}-${rowIndex}`);
-                      }}
-                      ref={singleTile}
-                      className="relative bg-[#FAFAFA] border border-[#F1F1F1]"
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, `${colIndex}-${rowIndex}`)}
-                    >
-                      {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
-                        <Image
-                          src={renderAutoFill(
-                            activeTilePath,
-                            colIndex,
-                            rowIndex
-                          )}
-                          width={"0"}
-                          height={"0"}
-                          className="w-full h-full object-cover"
-                          alt="Tile"
-                          style={{
-                            rotate: `${activeRotationDegree}deg`,
-                          }}
-                        />
-                      ) : (
-                        <>
-                          {activeTile.tilePath && (
-                            <Image
-                              src={
-                                // renderAutoFill(
-                                activeTile.tilePath ?? ""
-                                // colIndex,
-                                // rowIndex
-                                // )
-                              }
-                              width={"0"}
-                              height={"0"}
-                              className="w-full h-full object-cover"
-                              alt="Tile"
-                              style={
-                                activeTile.rotateStyle === "flipX"
-                                  ? {
-                                      transform: `rotateY(${activeTile.rotationDegree}deg)`,
-                                    }
-                                  : activeTile.rotateStyle === "flipY"
-                                  ? {
-                                      transform: `rotateX(${activeTile.rotationDegree}deg)`,
-                                    }
-                                  : {}
-                              }
-                            />
-                          )}
-                        </>
-                      )}
-
-                      {activeTileIndex === `${colIndex}-${rowIndex}` && (
-                        <TileEditComponent
-                          tileIndex={activeTileIndex}
-                          tilePath={renderAutoFill(
-                            activeTilePath,
-                            colIndex,
-                            rowIndex
-                          )}
-                          boxSizeHeight={singleTile.current?.offsetHeight}
-                          boxSizeWidth={singleTile.current?.offsetWidth}
-                        />
-                      )}
-                    </button>
-                    // <div></div>
-                  )
-                  // </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-    </>
+        );
+      })}
+    </div>
   );
 };
 
