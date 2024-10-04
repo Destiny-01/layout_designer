@@ -81,8 +81,9 @@ const page = (props: Props) => {
             tileIndex: `${j}-${i}`,
             rotationDegree: [0, 90, 180, 270][Math.floor(randomMass * 4)],
             rotateStyle: undefined,
-            tilePath:
-              tileVariation.find((item)=> item.tileColor === storedTileColor)?.tilePath,
+            tilePath: tileVariation.find(
+              (item) => item.tileColor === storedTileColor
+            )?.tilePath,
           };
           editedTiles.push(editedSpec);
         }
@@ -266,7 +267,7 @@ const page = (props: Props) => {
                     activeSize < 13.5 ? "text-white" : "text-black"
                   }`}
                 >
-                  9x9 {"in"}
+                  9x9 {"cm"}
                 </p>
               </div>
             </button>
@@ -285,7 +286,7 @@ const page = (props: Props) => {
                     activeSize >= 13.5 ? "text-white" : "text-black"
                   }`}
                 >
-                  13.5x13.5 {"in"}
+                  13.5x13.5 {"cm"}
                 </p>
               </div>
             </button>
@@ -413,7 +414,7 @@ const page = (props: Props) => {
                         activeSize < 13.5 ? "text-white" : "text-black"
                       }`}
                     >
-                      9x9 {"in"}
+                      9x9 {"cm"}
                     </p>
                   </div>
                 </button>
@@ -431,7 +432,7 @@ const page = (props: Props) => {
                         activeSize >= 13.5 ? "text-white" : "text-black"
                       }`}
                     >
-                      13.5x13.5 {"in"}
+                      13.5x13.5 {"cm"}
                     </p>
                   </div>
                 </button>

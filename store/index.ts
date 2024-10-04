@@ -13,7 +13,7 @@ export interface Dimension {
   customHeight: number;
   rows: number;
   columns: number;
-  activeDimension: "in";
+  activeDimension: "cm";
 }
 
 export interface TileState {
@@ -88,7 +88,7 @@ const useTileStore = create(
       setActiveRotationDegree: (activeRotationDegree: number) =>
         set({ activeRotationDegree }),
       measurement: {
-        activeDimension: "in",
+        activeDimension: "cm",
         customHeight: 0,
         customWidth: 0,
         rows: 3,

@@ -22,20 +22,6 @@ const Navbar = (props: Props) => {
     setActiveSize(9);
   }, []);
 
-  const handleDimension = (type: "in") => {
-    setMeasurement({
-      activeDimension: type,
-      customWidth:
-        measurement.customWidth > activeSize
-          ? measurement.customWidth
-          : activeSize,
-      customHeight:
-        measurement.customHeight > activeSize
-          ? measurement.customHeight
-          : activeSize,
-    });
-  };
-
   // useEffect(() => {
   //   handleDimension("cm");
   // }, [activeSize]);
