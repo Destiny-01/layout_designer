@@ -83,10 +83,18 @@ const TileCategory = (props: Props) => {
     setAutoFillPattern(finalArrangement);
   };
 
-  const handleDrag = (e: React.DragEvent<HTMLImageElement>, draggedTilePath: string) => {
-    e.dataTransfer.setData('text/plain', draggedTilePath);
-  e.dataTransfer.effectAllowed = 'move';
-  } 
+  const handleDrag = (
+    e: React.DragEvent<HTMLDivElement>,
+    draggedTilePath: string
+  ) => {
+    e.preventDefault();
+    console.log(activeTile);
+    e.dataTransfer.setData(
+      "text/plain",
+      `${draggedTilePath}*+=${activeTile}`
+    );
+    e.dataTransfer.effectAllowed = "move";
+  };
 
   return (
     <div className="space-y-3 py-3">
@@ -128,15 +136,21 @@ const TileCategory = (props: Props) => {
                               setAutoFillPattern([]);
                             }}
                           >
-                            <Image
-                              src={tileVariant.tilePath}
-                              className="w-12 h-12"
-                              width={10}
-                              height={10}
-                              alt="Tile"
-                              draggable='true'
-                              onDrag={(e) => handleDrag(e, tileVariant.tilePath)}
-                            />
+                            <div
+                              className="z-50 "
+                              draggable="true"
+                              onDrag={(e) =>
+                                handleDrag(e, tileVariant.tilePath)
+                              }
+                            >
+                              <Image
+                                src={tileVariant.tilePath}
+                                className="w-12 h-12"
+                                width={10}
+                                height={10}
+                                alt="Tile"
+                              />
+                            </div>
                           </button>
                         )
                       );

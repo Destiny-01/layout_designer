@@ -6,6 +6,7 @@ import { collectionTiles } from "@/data/tileCatgories";
 import useTileStore, {
   EditedTile,
   HistoryEntry,
+  irregularTile,
   useHistoryStore,
 } from "@/store";
 import Image from "next/image";
@@ -46,7 +47,8 @@ const page = (props: Props) => {
   const currentIndex = useHistoryStore((state) => state.currentIndex);
 
   const rotateDiv = () => {
-    let newDegree = rotationDegree + 90;
+    const rotationAngle = irregularTile.includes(activeTile)? 180: 90
+    let newDegree = rotationDegree +  rotationAngle;
     if (newDegree >= 360) {
       newDegree = 0;
     }
@@ -69,7 +71,9 @@ const page = (props: Props) => {
     );
     const numSubCategories = tile?.subCategories.length;
     let editedTiles: EditedTile[] = [];
-
+    const rotateVia = irregularTile.includes(activeTile)
+      ? [0, 180]
+      : [0, 90, 180, 270];
     for (let i = 0; i < measurement.rows; i++) {
       for (let j = 0; j < measurement.columns; j++) {
         if (numSubCategories) {
@@ -79,7 +83,7 @@ const page = (props: Props) => {
               .tileVariation;
           const editedSpec: EditedTile = {
             tileIndex: `${j}-${i}`,
-            rotationDegree: [0, 90, 180, 270][Math.floor(randomMass * 4)],
+            rotationDegree: rotateVia[Math.floor(randomMass * 4)],
             rotateStyle: undefined,
             tilePath: tileVariation.find(
               (item) => item.tileColor === storedTileColor
@@ -211,6 +215,10 @@ const page = (props: Props) => {
       customHeight: customHeight > activeSize ? customHeight : activeSize,
     });
   }, [activeSize]);
+
+  useEffect(() => {
+    setActiveRotationDegree(0)
+  }, [tileName])
 
   return (
     <div className="w-full lg:px-20 p-7 flex items-start flex-col lg:flex-row">

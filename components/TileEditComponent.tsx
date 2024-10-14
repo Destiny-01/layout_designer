@@ -1,5 +1,5 @@
 import { collectionTiles, colorVariation } from "@/data/tileCatgories";
-import useTileStore, { EditedTile, useHistoryStore } from "@/store";
+import useTileStore, { EditedTile, useHistoryStore, irregularTile } from "@/store";
 import React, { useEffect, useState } from "react";
 import icons from "./icons";
 
@@ -44,7 +44,8 @@ const TileEditComponent = ({
     setCurrentIndex(currentIndex + 1);
   };
 
-  const rotateDiv = (direction: "reset" | "flipX" | "flipY") => {
+  const rotateDiv = (direction: "reset" | "flipX" | "flipY" | "rotate") => {
+    if (irregularTile.includes(activeTileName)) return
     let newDegree = 0;
     switch (direction) {
       case "reset":
@@ -59,6 +60,23 @@ const TileEditComponent = ({
       case "flipY":
         newDegree = rotationDegree > 0 ? 0 : 180;
         break;
+      default:
+        const editedTileIndex = editedTiles.findIndex(
+          (tile) => tile.tileIndex === tileIndex
+        );
+        if (editedTileIndex === -1) {
+          const editedTile = {
+            tileIndex: tileIndex,
+            rotationDegree: 90,
+            rotateStyle: undefined,
+            tilePath: tilePath,
+          };
+          setEditedTiles([...editedTiles, editedTile]);
+        } else {
+          const newArr = [...editedTiles];
+          newArr[editedTileIndex].rotationDegree += 90;
+          setEditedTiles(newArr);
+        }
     }
     direction !== "reset" &&
       storeUserAction(direction, rotationDegree, newDegree);
@@ -123,11 +141,12 @@ const TileEditComponent = ({
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
 
   const handleTileEdit = (
-    editType: "reset" | "flipX" | "flipY" | "colorEdit"
+    editType: "reset" | "flipX" | "flipY" | "colorEdit" | "rotate"
   ) => {
     editType === "reset" && rotateDiv("reset");
     editType === "flipX" && rotateDiv("flipX");
     editType === "flipY" && rotateDiv("flipY");
+    editType === "rotate" && rotateDiv("rotate");
     editType === "colorEdit" && handleColorPick();
   };
 
@@ -154,7 +173,7 @@ const TileEditComponent = ({
       >
         <div
           onClick={() => {
-            handleTileEdit("reset");
+            handleTileEdit("rotate");
           }}
         >
           <icons.Rotate2 />

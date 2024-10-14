@@ -86,7 +86,6 @@ function Preiew() {
     [editedTiles] // Dependency: Recompute only when `editedTiles` changes
   );
 
-  console.log(collectionTiles, editedTiles, tileColor);
 
   const parseUrl = (url: string): string => {
     const parts = url.split("/");
