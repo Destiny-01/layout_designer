@@ -1,5 +1,5 @@
 import useDeviceWidth from "@/hooks/useDeviceWidth"; // Path to your custom hook
-import useTileStore from "@/store";
+import useTileStore, { irregularTile } from "@/store";
 import Image from "next/image";
 import React, {
   useCallback,
@@ -10,7 +10,6 @@ import React, {
 } from "react";
 import TileEditComponent from "./TileEditComponent";
 import { collectionTiles } from "@/data/tileCatgories";
-
 
 const Grid = ({ isMainGrid = true, containerRef }: any) => {
   // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
@@ -48,7 +47,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
 
         const newNumCols = Math.floor(containerWidth / boxSize);
         const newNumRows = Math.floor(containerHeight / boxSize);
-        
+
         // Set number of rows and columns
         setNumRows(newNumRows);
         setActiveDimension({
@@ -180,7 +179,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     }
     setPathCathe(pathCache);
   }, [rows.length, cols.length, activeTilePath, autoFillPattern, tileColor]);
-  
+
   const handleSpacing = useCallback(() => {
     const activeTileIndexes = activeTileIndex?.split("-");
     let margin = "";
@@ -205,20 +204,30 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     e.preventDefault();
     const editedIndex = getIndex(index);
     const data = e.dataTransfer.getData("text/plain");
+    const [_tilePath, tileName] = data.split("*=+");
 
-    let newArr = [...editedTiles];
-    if (editedIndex !== -1) {
-      newArr[editedIndex].tilePath = data;
-    } else {
-      const editedSpec = {
-        tileIndex: index,
-        rotationDegree: 0,
-        rotateStyle: undefined,
-        tilePath: data,
-      };
-      newArr.push(editedSpec);
+    console.log(
+      data,
+      irregularTile.includes(tileName),
+      irregularTile.includes(activeTile)
+    );
+    if (
+      irregularTile.includes(tileName) === irregularTile.includes(activeTile)
+    ) {
+      let newArr = [...editedTiles];
+      if (editedIndex !== -1) {
+        newArr[editedIndex].tilePath = _tilePath;
+      } else {
+        const editedSpec = {
+          tileIndex: index,
+          rotationDegree: 0,
+          rotateStyle: undefined,
+          tilePath: _tilePath,
+        };
+        newArr.push(editedSpec);
+      }
+      setEditedTiles(newArr);
     }
-    setEditedTiles(newArr);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
@@ -246,7 +255,6 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
             {cols.map((colIndex) => {
               const editedTile =
                 editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
-
 
               return (
                 rows.length > 1 &&
@@ -281,7 +289,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                             src={editedTile.tilePath ?? ""}
                             width={"0"}
                             height={"0"}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover inline-block"
                             alt="Tile"
                             style={
                               editedTile.rotateStyle === "flipX"
