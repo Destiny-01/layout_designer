@@ -204,13 +204,8 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     e.preventDefault();
     const editedIndex = getIndex(index);
     const data = e.dataTransfer.getData("text/plain");
-    const [_tilePath, tileName] = data.split("*=+");
+    const [_tilePath, tileName] = data.split("*+=");
 
-    console.log(
-      data,
-      irregularTile.includes(tileName),
-      irregularTile.includes(activeTile)
-    );
     if (
       irregularTile.includes(tileName) === irregularTile.includes(activeTile)
     ) {

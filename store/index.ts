@@ -106,6 +106,13 @@ const useTileStore = create(
     }
   )
 );
-export const irregularTile = ["Kant", "Madera", "Malaga", "Plain", "Rio"];
+export const irregularTile = [
+  "Kant",
+  "Madera",
+  "Malaga",
+  "Plain",
+  "Rio",
+  "Ruta",
+];
 
 export default useTileStore;

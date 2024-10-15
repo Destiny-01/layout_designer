@@ -27,7 +27,7 @@ export const tileCategory: TileVariation = {
         },
         {
           tileColor: "Papaya",
-          tilePath: "/assets/tiles/Malaga/MAL01-Papayavg",
+          tilePath: "/assets/tiles/Malaga/MAL01-Papaya.svg",
         },
         {
           tileColor: "Sunshine",

@@ -12,10 +12,7 @@ const getAbsolutePaths = async (subDir: string): Promise<string[]> => {
 
   // return absolutePaths;
 
-  console.log(reqSvgs);
-
   return [];
 };
 
 export default getAbsolutePaths;
-

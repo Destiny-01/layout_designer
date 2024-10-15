@@ -47,8 +47,8 @@ const page = (props: Props) => {
   const currentIndex = useHistoryStore((state) => state.currentIndex);
 
   const rotateDiv = () => {
-    const rotationAngle = irregularTile.includes(activeTile)? 180: 90
-    let newDegree = rotationDegree +  rotationAngle;
+    const rotationAngle = irregularTile.includes(activeTile) ? 180 : 90;
+    let newDegree = rotationDegree + rotationAngle;
     if (newDegree >= 360) {
       newDegree = 0;
     }
@@ -217,8 +217,8 @@ const page = (props: Props) => {
   }, [activeSize]);
 
   useEffect(() => {
-    setActiveRotationDegree(0)
-  }, [tileName])
+    setActiveRotationDegree(0);
+  }, [tileName]);
 
   return (
     <div className="w-full lg:px-20 p-7 flex items-start flex-col lg:flex-row">
@@ -385,7 +385,7 @@ const page = (props: Props) => {
               {/* Zoom In Button */}
               <button
                 onClick={() => {
-                  setZoom(Math.min(zoom + 0.1, 3)); // max zoom in 300%
+                  setZoom(Math.min(zoom + 0.2, 10)); // max zoom in 1000%
                 }}
               >
                 <icons.ZoomIn zoom={zoom} />
@@ -394,7 +394,7 @@ const page = (props: Props) => {
               {/* Zoom out button */}
               <button
                 onClick={() => {
-                  setZoom(Math.max(zoom - 0.1, 0.1)); // min zoom out 10%
+                  setZoom(Math.max(zoom - 0.2, 0.1)); // min zoom out 10%
                 }}
               >
                 <icons.ZoomOut zoom={zoom} />
@@ -495,7 +495,7 @@ const page = (props: Props) => {
               {/* Zoom In Button */}
               <button
                 onClick={() => {
-                  setZoom(Math.min(zoom + 0.1, 3)); // max zoom in 300%
+                  setZoom(Math.min(zoom + 0.2, 10)); // max zoom in 1000%
                 }}
               >
                 <icons.ZoomIn zoom={zoom} />
@@ -504,7 +504,7 @@ const page = (props: Props) => {
               {/* Zoom out button */}
               <button
                 onClick={() => {
-                  setZoom(Math.max(zoom - 0.1, 0.1)); // min zoom out 10%
+                  setZoom(Math.max(zoom - 0.2, 0.1)); // min zoom out 10%
                 }}
               >
                 <icons.ZoomOut zoom={zoom} />
@@ -614,7 +614,7 @@ const page = (props: Props) => {
           {/* Zoom in button */}
           <button
             onClick={() => {
-              setZoom(Math.min(zoom + 0.1, 3)); // max zoom in 300%
+              setZoom(Math.min(zoom + 0.2, 10)); // max zoom in 1000%
             }}
           >
             <icons.ZoomIn zoom={zoom} />
@@ -623,7 +623,7 @@ const page = (props: Props) => {
           {/* Zoom out button */}
           <button
             onClick={() => {
-              setZoom(Math.max(zoom - 0.1, 0.1)); // min zoom out 10%
+              setZoom(Math.max(zoom - 0.2, 0.1)); // min zoom out 10%
             }}
           >
             <icons.ZoomOut zoom={zoom} />

@@ -87,12 +87,7 @@ const TileCategory = (props: Props) => {
     e: React.DragEvent<HTMLDivElement>,
     draggedTilePath: string
   ) => {
-    e.preventDefault();
-    console.log(activeTile);
-    e.dataTransfer.setData(
-      "text/plain",
-      `${draggedTilePath}*+=${activeTile}`
-    );
+    e.dataTransfer.setData("text/plain", `${draggedTilePath}*+=${activeTile}`);
     e.dataTransfer.effectAllowed = "move";
   };
 
@@ -139,7 +134,7 @@ const TileCategory = (props: Props) => {
                             <div
                               className="z-50 "
                               draggable="true"
-                              onDrag={(e) =>
+                              onDragStart={(e) =>
                                 handleDrag(e, tileVariant.tilePath)
                               }
                             >
@@ -148,6 +143,7 @@ const TileCategory = (props: Props) => {
                                 className="w-12 h-12"
                                 width={10}
                                 height={10}
+                                draggable="false"
                                 alt="Tile"
                               />
                             </div>
