@@ -311,6 +311,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                           pathCache[`${colIndex}-${rowIndex}` || activeTilePath]
                         }
                         zoom={zoom}
+                        scale={scale}
                       />
                     )}
                   </button>
