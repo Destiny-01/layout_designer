@@ -385,7 +385,7 @@ const page = (props: Props) => {
               {/* Zoom In Button */}
               <button
                 onClick={() => {
-                  setZoom(Math.min(zoom + 0.2, 10)); // max zoom in 1000%
+                  setZoom(Math.min(zoom + 0.2, 20)); // max zoom in 1000%
                 }}
               >
                 <icons.ZoomIn zoom={zoom} />

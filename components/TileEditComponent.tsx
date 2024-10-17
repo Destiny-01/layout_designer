@@ -1,17 +1,24 @@
 import { collectionTiles, colorVariation } from "@/data/tileCatgories";
-import useTileStore, { EditedTile, useHistoryStore, irregularTile } from "@/store";
+import useTileStore, {
+  EditedTile,
+  useHistoryStore,
+  irregularTile,
+} from "@/store";
 import React, { useEffect, useState } from "react";
 import icons from "./icons";
+import { ToastContainer, toast } from "react-toastify";
 
 type Props = {
   tileIndex: string;
   zoom: number;
+  scale: number;
   tilePath: string | undefined;
 };
 
 const TileEditComponent = ({
   tileIndex,
   zoom,
+  scale,
   tilePath: initialTilePath,
 }: Props) => {
   const activeTileName = useTileStore((state) => state.tileName);
@@ -45,7 +52,7 @@ const TileEditComponent = ({
   };
 
   const rotateDiv = (direction: "reset" | "flipX" | "flipY" | "rotate") => {
-    if (irregularTile.includes(activeTileName)) return
+    if (irregularTile.includes(activeTileName)) return;
     let newDegree = 0;
     switch (direction) {
       case "reset":
@@ -162,116 +169,104 @@ const TileEditComponent = ({
     !isFirstLoad && updateTileData();
   }, [showColorPanel, rotationDegree, tilePath]);
 
-  return (
-    <>
-      {/* Reset Button */}
-      <div
-        className="absolute left-1/4 -top-full z-40"
-        style={{
-          transform: `scale(${zoom < 1 ? 1 / zoom : 1})`,
-        }}
-      >
-        <div
-          onClick={() => {
-            handleTileEdit("rotate");
-          }}
-        >
-          <icons.Rotate2 />
-        </div>
-        {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
-      </div>
-
-      {/* Color Button */}
-      <div
-        className="absolute -right-full top-1/4 z-40"
-        style={{
-          transform: `scale(${zoom < 1 ? 1 / zoom : 1}) rotate(90deg)`,
-        }}
-      >
-        {showColorPanel && (
-          <div className="flex bottom-24 -left-10 rotate-[270deg] w-32 overflow-x-scroll gap-3 py-3 absolute">
-            {colorVariation.map((color) => {
-              return (
-                <button
-                  key={color.colorName}
-                  onClick={() => {
-                    setEditedTilePath(color.colorName);
-                  }}
-                >
-                  <div
-                    className={`w-7 h-7 rounded-full border ${
-                      tileColor === color.colorName
-                        ? "border-2 border-yellow-950"
-                        : "border border-black"
-                    } `}
-                    style={{
-                      backgroundColor: color.colorHEX,
-                    }}
-                  />
-                </button>
-              );
-            })}
+  if (scale * zoom < 0.3) {
+    toast.info("Zoom in to edit", {
+      toastId: "zoomIn",
+    });
+    return null
+  } 
+    return (
+      <>
+        <div className="w-36 h-36 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
+          {/* Reset Button */}
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+            <div
+              onClick={() => {
+                handleTileEdit("rotate");
+              }}
+            >
+              <icons.Rotate2 />
+            </div>
+            {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
           </div>
-        )}
 
-        {showColorPanel ? (
-          // Cancel button
-          <div
-            onClick={() => {
-              handleTileEdit("colorEdit");
-            }}
-          >
-            <icons.CancelButton />
+          {/* Color Button */}
+          <div className="absolute top-1/2 right-0  translate-x-1/2 -translate-y-1/2">
+            {showColorPanel && (
+              <div className="flex bottom-24 -left-10 rotate-[270deg] w-32 overflow-x-scroll gap-3 py-3 absolute">
+                {colorVariation.map((color) => {
+                  return (
+                    <button
+                      key={color.colorName}
+                      onClick={() => {
+                        setEditedTilePath(color.colorName);
+                      }}
+                    >
+                      <div
+                        className={`w-7 h-7 rounded-full border ${
+                          tileColor === color.colorName
+                            ? "border-2 border-yellow-950"
+                            : "border border-black"
+                        } `}
+                        style={{
+                          backgroundColor: color.colorHEX,
+                        }}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {showColorPanel ? (
+              // Cancel button
+              <div
+                onClick={() => {
+                  handleTileEdit("colorEdit");
+                }}
+              >
+                <icons.CancelButton />
+              </div>
+            ) : (
+              <div
+                onClick={() => {
+                  handleTileEdit("colorEdit");
+                }}
+              >
+                <icons.ColorPallet />
+              </div>
+            )}
+            {/* <div className="w-1 h-10 -ml-1 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
           </div>
-        ) : (
-          <div
-            onClick={() => {
-              handleTileEdit("colorEdit");
-            }}
-          >
-            <icons.ColorPallet />
+
+          {/* Rotate Right Button */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
+            <div
+              onClick={() => {
+                handleTileEdit("flipX");
+              }}
+            >
+              <icons.Flip />
+            </div>
+
+            {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
           </div>
-        )}
-        {/* <div className="w-1 h-10 -ml-1 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
-      </div>
 
-      {/* Rotate Right Button */}
-      <div
-        className="absolute -bottom-full left-1/4 z-40"
-        style={{
-          transform: `scale(${zoom < 1 ? 1 / zoom : 1}) rotate(180deg)`,
-        }}
-      >
-        <div
-          onClick={() => {
-            handleTileEdit("flipX");
-          }}
-        >
-          <icons.Flip />
+          {/* Rotate Left Button */}
+          <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2">
+            <div
+              onClick={() => {
+                handleTileEdit("flipY");
+              }}
+            >
+              <icons.Flip />
+            </div>
+
+            {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
+          </div>
         </div>
-
-        {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
-      </div>
-
-      {/* Rotate Left Button */}
-      <div
-        className="absolute top-1/4 -left-full  z-40"
-        style={{
-          transform: `scale(${zoom < 1 ? 1 / zoom : 1}) rotate(270deg)`,
-        }}
-      >
-        <div
-          onClick={() => {
-            handleTileEdit("flipY");
-          }}
-        >
-          <icons.Flip />
-        </div>
-
-        {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
-      </div>
-    </>
-  );
+      </>
+    );
 };
 
 export default TileEditComponent;
