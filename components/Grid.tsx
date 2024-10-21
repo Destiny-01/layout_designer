@@ -85,6 +85,8 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     activeDimension,
   ]);
 
+  // console.log(numCols, numRows)
+
   // Create arrays of row and column indices
   const rows = Array.from({ length: numRows }, (_, index) => index);
   const cols = Array.from({ length: numCols }, (_, index) => index);
@@ -252,7 +254,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                 editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
 
               return (
-                rows.length > 1 &&
+                rows.length > 0 &&
                 activeTilePath !== "" && (
                   <button
                     key={colIndex}
