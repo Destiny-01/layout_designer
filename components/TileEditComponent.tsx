@@ -191,33 +191,7 @@ const TileEditComponent = ({
           </div>
 
           {/* Color Button */}
-          <div className="absolute top-1/2 right-0  translate-x-1/2 -translate-y-1/2">
-            {showColorPanel && (
-              <div className="flex bottom-24 -left-10 rotate-[270deg] w-32 overflow-x-scroll gap-3 py-3 absolute">
-                {colorVariation.map((color) => {
-                  return (
-                    <button
-                      key={color.colorName}
-                      onClick={() => {
-                        setEditedTilePath(color.colorName);
-                      }}
-                    >
-                      <div
-                        className={`w-7 h-7 rounded-full border ${
-                          tileColor === color.colorName
-                            ? "border-2 border-yellow-950"
-                            : "border border-black"
-                        } `}
-                        style={{
-                          backgroundColor: color.colorHEX,
-                        }}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
+          <div className="absolute top-1/2 right-0 w-12 h-12 translate-x-1/2 -translate-y-1/2 bg-red flex">
             {showColorPanel ? (
               // Cancel button
               <div
@@ -234,6 +208,32 @@ const TileEditComponent = ({
                 }}
               >
                 <icons.ColorPallet />
+              </div>
+            )}
+
+            {showColorPanel && (
+              <div className="flex  w-32 overflow-x-scroll gap-3 py-3 absolute left-full top-0">
+                {colorVariation.map((color) => {
+                  return (
+                    <button
+                      key={color.colorName}
+                      onClick={() => {
+                        setEditedTilePath(color.colorName);
+                      }}
+                    >
+                      <div
+                        className={` w-5 h-5 md:w-7 md:h-7 rounded-full border ${
+                          tileColor === color.colorName
+                            ? "border-2 border-yellow-950"
+                            : "border border-black"
+                        } `}
+                        style={{
+                          backgroundColor: color.colorHEX,
+                        }}
+                      />
+                    </button>
+                  );
+                })}
               </div>
             )}
             {/* <div className="w-1 h-10 -ml-1 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
