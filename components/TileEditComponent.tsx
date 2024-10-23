@@ -6,7 +6,7 @@ import useTileStore, {
 } from "@/store";
 import React, { useEffect, useState } from "react";
 import icons from "./icons";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 
 type Props = {
   tileIndex: string;
@@ -39,7 +39,6 @@ const TileEditComponent = ({
   const [tilePath, setTilePath] = useState<string>(
     initialTilePath ?? activeTile?.tilePath ?? activeTilePath
   );
-
   const [tileColor, setTileColor] = useState<string>("");
 
   const storeUserAction = (
@@ -177,9 +176,9 @@ const TileEditComponent = ({
   } 
     return (
       <>
-        <div className="w-36 h-36 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
+        <div className="w-36 h-36 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2  bg-blue-600 hidden sm:block">
           {/* Reset Button */}
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 z-20">
             <div
               onClick={() => {
                 handleTileEdit("rotate");
@@ -191,7 +190,7 @@ const TileEditComponent = ({
           </div>
 
           {/* Color Button */}
-          <div className="absolute top-1/2 right-0 w-12 h-12 translate-x-1/2 -translate-y-1/2 bg-red flex">
+          <div className="absolute top-1/2 right-0 w-12 h-12 translate-x-1/2 -translate-y-1/2 bg-red flex z-20">
             {showColorPanel ? (
               // Cancel button
               <div
@@ -240,7 +239,7 @@ const TileEditComponent = ({
           </div>
 
           {/* Rotate Right Button */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20">
             <div
               onClick={() => {
                 handleTileEdit("flipX");
@@ -253,7 +252,7 @@ const TileEditComponent = ({
           </div>
 
           {/* Rotate Left Button */}
-          <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 z-20">
             <div
               onClick={() => {
                 handleTileEdit("flipY");

@@ -11,7 +11,12 @@ import React, {
 import TileEditComponent from "./TileEditComponent";
 import { collectionTiles } from "@/data/tileCatgories";
 
-const Grid = ({ isMainGrid = true, containerRef }: any) => {
+const Grid = ({
+  isMainGrid = true,
+  focusedTileIndex,
+  setFocusedTileIndex,
+  setFocusedTilePath,
+}: any) => {
   // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
   const deviceWidth = useDeviceWidth();
   const measurement = useTileStore((state) => state.measurement);
@@ -29,8 +34,10 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   const [scale, setScale] = useState(1);
   const singleTile = useRef<any>(null);
   const zoom = useTileStore((state) => state.zoom);
-  const [pathCache, setPathCathe] = useState<{ [key: string]: string }>({});
   const boxSize = activeSize * 10; // converted to (mm)
+  const containerRef = useRef<any>(null);
+  const [pathCache, setPathCathe] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     const calculateGrid = () => {
       if (containerRef.current) {
@@ -99,28 +106,12 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
   const autoFillPattern = useTileStore((state) => state.autoFillPattern);
 
-  const [activeTileIndex, setActiveTileIndex] = useState<string | null>(null);
-
   const getIndex = useMemo(
     () => (tileIndex: string) => {
       return editedTiles.findIndex((tile) => tile.tileIndex === tileIndex);
     },
     [editedTiles] // Dependency: Recompute only when `editedTiles` changes
   );
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setActiveTileIndex("");
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   const activeCollection = collectionTiles.find(
     (tile) => tile.tileName === activeTile
@@ -183,24 +174,24 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   }, [rows.length, cols.length, activeTilePath, autoFillPattern, tileColor]);
 
   const handleSpacing = useCallback(() => {
-    const activeTileIndexes = activeTileIndex?.split("-");
+    const focusedTileIndexes = focusedTileIndex?.split("-");
     let margin = "";
-    if (activeTileIndexes) {
-      margin = activeTileIndexes[0] === "0" ? margin + " ml-20" : "ml-0";
+    if (focusedTileIndexes) {
+      margin = focusedTileIndexes[0] === "0" ? margin + " ml-20" : "ml-0";
       margin =
-        activeTileIndexes[1] === "0" ? margin + " mt-20" : margin + " mt-0";
+        focusedTileIndexes[1] === "0" ? margin + " mt-20" : margin + " mt-0";
       margin =
-        activeTileIndexes[0] === String(cols.length - 1)
+        focusedTileIndexes[0] === String(cols.length - 1)
           ? margin + " mr-20"
           : margin + " mr-0";
       margin =
-        activeTileIndexes[1] === String(rows.length - 1)
+        focusedTileIndexes[1] === String(rows.length - 1)
           ? margin + " mb-20"
           : margin + " mb-0";
 
       return margin;
     }
-  }, [activeTileIndex]);
+  }, [focusedTileIndex]);
 
   const handleDrop = (e: React.DragEvent<HTMLButtonElement>, index: string) => {
     e.preventDefault();
@@ -232,6 +223,12 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     e.dataTransfer.effectAllowed = "move";
   };
 
+  const handleClick = (index: string) => {
+    setFocusedTileIndex(index);
+    setFocusedTilePath(pathCache[index] || activeTilePath);
+    
+  };
+
   return (
     <div
       className={`${handleSpacing()} grid-container w-full origin-top-left rounded-lg relative h-full`}
@@ -259,7 +256,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                   <button
                     key={colIndex}
                     onClick={() => {
-                      setActiveTileIndex(`${colIndex}-${rowIndex}`);
+                      handleClick(`${colIndex}-${rowIndex}`);
                     }}
                     ref={singleTile}
                     className="relative bg-[#FAFAFA] border border-[#F1F1F1]"
@@ -306,12 +303,10 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                       </>
                     )}
 
-                    {activeTileIndex === `${colIndex}-${rowIndex}` && (
+                    {focusedTileIndex === `${colIndex}-${rowIndex}` && (
                       <TileEditComponent
-                        tileIndex={activeTileIndex}
-                        tilePath={
-                          pathCache[`${colIndex}-${rowIndex}` || activeTilePath]
-                        }
+                        tileIndex={focusedTileIndex}
+                        tilePath={pathCache[focusedTileIndex] || activeTilePath}
                         zoom={zoom}
                         scale={scale}
                       />

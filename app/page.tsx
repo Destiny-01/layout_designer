@@ -1,5 +1,4 @@
 "use client";
-import Grid from "@/components/Grid";
 import icons from "@/components/icons";
 import TileCategory from "@/components/TileCategory";
 import { collectionTiles } from "@/data/tileCatgories";
@@ -12,6 +11,7 @@ import useTileStore, {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import GridAndEdit from "@/components/GridAndEdit";
 
 type Props = {};
 
@@ -21,7 +21,6 @@ const page = (props: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [price, setPrice] = useState<number | null>(null);
 
-  const containerRef = useRef<any>(null);
   const rotationDegree = useTileStore((state) => state.activeRotationDegree);
   const setActiveRotationDegree = useTileStore(
     (state) => state.setActiveRotationDegree
@@ -400,6 +399,7 @@ const page = (props: Props) => {
                 <icons.ZoomOut zoom={zoom} />
               </button>
             </div>
+
             <div className="flex w-full md:w-fit items-center justify-between">
               <div className="border border-primary rounded-full w-52 h-10 flex md:hidden bg-[#FBFBFB]">
                 <button
@@ -462,10 +462,7 @@ const page = (props: Props) => {
               </div>
             </div>
           </div>
-
-          <div className="overflow-auto my-6 lg:h-[500px] md:h-[300px] h-[200px]">
-            <Grid containerRef={containerRef} />
-          </div>
+          <GridAndEdit />
           <div className="text-center mb-4">
             {(
               (((measurement.columns * activeSize * 10) / 1000) *
@@ -474,7 +471,6 @@ const page = (props: Props) => {
             ).toFixed(2)}{" "}
             SQUARE METER
           </div>
-
           <div
             className={`flex items-center justify-between  ${
               activeTilePath.includes("Rio") || tileName === "Rio"
@@ -564,7 +560,6 @@ const page = (props: Props) => {
               )}
             </div>
           </div>
-
           <div className="md:hidden flex items-center justify-between py-5">
             <div className="w-10" />
             <Link href="https://212dimensions.com/my-cart">
@@ -584,7 +579,6 @@ const page = (props: Props) => {
               </button>
             </Link>
           </div>
-
           <div className={`flex items-center justify-between`}>
             <button
               onClick={randomizeTileChoice}

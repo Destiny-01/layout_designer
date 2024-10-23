@@ -436,7 +436,7 @@ const icons = {
     );
   },
 
-  Flip() {
+  Flip({ deg = 0 }: any) {
     return (
       <svg
         width="52"
@@ -444,37 +444,37 @@ const icons = {
         viewBox="0 0 52 52"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="rotate-[180deg]"
+        className={`rotate-[${deg}deg] `}
       >
         <g filter="url(#filter0_d_11_9247)">
-          <circle cx="26" cy="22" r="15" fill="white" />
+          <circle cx="26" cy="26" r="15" fill="white"></circle>
           <circle
             cx="26"
-            cy="22"
+            cy="26"
             r="14.75"
             stroke="#898989"
             strokeWidth="0.5"
-          />
+          ></circle>
         </g>
         <path
-          d="M17 28.8075C17 29.2314 17.4944 29.463 17.8201 29.1916L23.2844 24.638C23.5258 24.4368 23.524 24.0654 23.2806 23.8666L17.8163 19.4041C17.4897 19.1374 17 19.3698 17 19.7914V28.8075Z"
+          d="M17 29.8075C17 30.2314 17.4944 30.463 17.8201 30.1916L23.2844 25.638C23.5258 25.4368 23.524 25.0654 23.2806 24.8666L17.8163 20.4041C17.4897 20.1374 17 20.3698 17 20.7914V29.8075Z"
           fill="#191919"
-        />
+        ></path>
         <path
-          d="M27.5822 23.9738C27.3443 24.1761 27.3479 24.5446 27.5898 24.7421L33.0587 29.2084C33.3853 29.4751 33.875 29.2427 33.875 28.8211V19.7062C33.875 19.28 33.3759 19.0492 33.0512 19.3253L27.5822 23.9738ZM32.75 26.453C32.75 26.8756 32.2583 27.1076 31.9321 26.839L29.3777 24.7353C29.1402 24.5397 29.1341 24.178 29.3648 23.9745L31.9192 21.7206C32.242 21.4357 32.75 21.6649 32.75 22.0955V26.453Z"
+          d="M27.5822 24.9738C27.3443 25.1761 27.3479 25.5446 27.5898 25.7421L33.0587 30.2084C33.3853 30.4751 33.875 30.2427 33.875 29.8211V20.7062C33.875 20.28 33.3759 20.0492 33.0512 20.3253L27.5822 24.9738ZM32.75 27.453C32.75 27.8756 32.2583 28.1076 31.9321 27.839L29.3777 25.7353C29.1402 25.5397 29.1341 25.178 29.3648 24.9745L31.9192 22.7206C32.242 22.4357 32.75 22.6649 32.75 23.0955V27.453Z"
           fill="#191919"
-        />
-        <path d="M24.875 18.625H26V19.75H24.875V18.625Z" fill="#191919" />
-        <path d="M24.875 16.375H26V17.5H24.875V16.375Z" fill="#191919" />
-        <path d="M24.875 20.875H26V22H24.875V20.875Z" fill="#191919" />
-        <path d="M24.875 23.125H26V24.25H24.875V23.125Z" fill="#191919" />
-        <path d="M24.875 25.375H26V26.5H24.875V25.375Z" fill="#191919" />
-        <path d="M24.875 27.625H26V28.75H24.875V27.625Z" fill="#191919" />
-        <path d="M24.875 29.875H26V31H24.875V29.875Z" fill="#191919" />
+        ></path>
+        <path d="M24.875 19.625H26V20.75H24.875V19.625Z" fill="#191919"></path>
+        <path d="M24.875 17.375H26V18.5H24.875V17.375Z" fill="#191919"></path>
+        <path d="M24.875 21.875H26V23H24.875V21.875Z" fill="#191919"></path>
+        <path d="M24.875 24.125H26V25.25H24.875V24.125Z" fill="#191919"></path>
+        <path d="M24.875 26.375H26V27.5H24.875V26.375Z" fill="#191919"></path>
+        <path d="M24.875 28.625H26V29.75H24.875V28.625Z" fill="#191919"></path>
+        <path d="M24.875 30.875H26V32H24.875V30.875Z" fill="#191919"></path>
         <path
-          d="M25.4375 14.125C26.9 14.125 28.3625 14.9125 29.4875 16.2625L28.25 17.5H31.625V14.125L30.2751 15.475C28.9251 13.9 27.2375 13 25.4375 13C23.3 13 21.3875 14.125 19.925 16.2625L20.825 16.9375C22.0625 15.1375 23.6375 14.125 25.4375 14.125Z"
+          d="M25.4375 15.125C26.9 15.125 28.3625 15.9125 29.4875 17.2625L28.25 18.5H31.625V15.125L30.2751 16.475C28.9251 14.9 27.2375 14 25.4375 14C23.3 14 21.3875 15.125 19.925 17.2625L20.825 17.9375C22.0625 16.1375 23.6375 15.125 25.4375 15.125Z"
           fill="#191919"
-        />
+        ></path>
         <defs>
           <filter
             id="filter0_d_11_9247"
@@ -485,37 +485,37 @@ const icons = {
             filterUnits="userSpaceOnUse"
             colorInterpolationFilters="sRGB"
           >
-            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+            <feFlood floodOpacity="0" result="BackgroundImageFix"></feFlood>
             <feColorMatrix
               in="SourceAlpha"
               type="matrix"
               values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
               result="hardAlpha"
-            />
-            <feOffset dy="4" />
-            <feGaussianBlur stdDeviation="5.2" />
-            <feComposite in2="hardAlpha" operator="out" />
+            ></feColorMatrix>
+            <feOffset dy="1"></feOffset> {/* Reduced shadow offset */}
+            <feGaussianBlur stdDeviation="3.8"></feGaussianBlur>{" "}
+            {/* Reduced blur */}
+            <feComposite in2="hardAlpha" operator="out"></feComposite>
             <feColorMatrix
               type="matrix"
-              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
-            />
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0" // Reduced opacity
+            ></feColorMatrix>
             <feBlend
               mode="normal"
               in2="BackgroundImageFix"
               result="effect1_dropShadow_11_9247"
-            />
+            ></feBlend>
             <feBlend
               mode="normal"
               in="SourceGraphic"
               in2="effect1_dropShadow_11_9247"
               result="shape"
-            />
+            ></feBlend>
           </filter>
         </defs>
       </svg>
     );
   },
-
   ColorPallet() {
     return (
       <svg
@@ -567,8 +567,8 @@ const icons = {
               values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
               result="hardAlpha"
             />
-            <feOffset dy="4" />
-            <feGaussianBlur stdDeviation="5.2" />
+            <feOffset dy="1" />
+            <feGaussianBlur stdDeviation="3.8" />
             <feComposite in2="hardAlpha" operator="out" />
             <feColorMatrix
               type="matrix"
@@ -649,8 +649,8 @@ const icons = {
               values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
               result="hardAlpha"
             />
-            <feOffset dy="4" />
-            <feGaussianBlur stdDeviation="5.2" />
+            <feOffset dy="1" />
+            <feGaussianBlur stdDeviation="3.8" />
             <feComposite in2="hardAlpha" operator="out" />
             <feColorMatrix
               type="matrix"
@@ -672,6 +672,7 @@ const icons = {
       </svg>
     );
   },
+
   Rotate2() {
     return (
       <svg
@@ -680,17 +681,16 @@ const icons = {
         viewBox="0 0 52 52"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        
       >
         <g filter="url(#filter0_d_11_9249)">
-          <circle cx="26" cy="22" r="15" fill="white" />
+          <circle cx="26" cy="26" r="15" fill="white"></circle>
           <circle
             cx="26"
-            cy="22"
+            cy="26"
             r="14.75"
             stroke="#898989"
-            strokeWidth="0.5"
-          />
+            stroke-width="0.5"
+          ></circle>
         </g>
         <path
           d="M18.775 23.1083C18.775 27.1 22.0084 30.3333 26 30.3333C29.9917 30.3333 33.225 27.1 33.225 23.1083C33.225 21.625 32.775 20.2417 32.0084 19.0917M28.4084 16.2333C27.6834 16.0167 26.8834 15.875 26 15.875C23.325 15.875 20.9834 17.3333 19.7417 19.4917"
@@ -730,8 +730,8 @@ const icons = {
               values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
               result="hardAlpha"
             />
-            <feOffset dy="4" />
-            <feGaussianBlur stdDeviation="5.2" />
+            <feOffset dy="1" />
+            <feGaussianBlur stdDeviation="4.8" />
             <feComposite in2="hardAlpha" operator="out" />
             <feColorMatrix
               type="matrix"
@@ -752,7 +752,7 @@ const icons = {
         </defs>
       </svg>
     );
-  }
+  },
 };
 
 export default icons;
