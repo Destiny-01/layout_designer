@@ -196,6 +196,12 @@ function GridAndEdit() {
             focusedTileIndex,
             setFocusedTileIndex,
             setFocusedTilePath,
+            editComponent: {
+              handleTileEdit,
+              showColorPanel,
+              tileColor,
+              setEditedTilePath,
+            },
           }}
         />
       </div>
@@ -205,7 +211,7 @@ function GridAndEdit() {
           handleTileEdit,
           showColorPanel,
           tileColor,
-          setEditedTilePath
+          setEditedTilePath,
         }}
       />
     </div>

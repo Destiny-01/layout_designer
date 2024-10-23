@@ -16,6 +16,7 @@ const Grid = ({
   focusedTileIndex,
   setFocusedTileIndex,
   setFocusedTilePath,
+  editComponent
 }: any) => {
   // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
   const deviceWidth = useDeviceWidth();
@@ -259,7 +260,7 @@ const Grid = ({
                       handleClick(`${colIndex}-${rowIndex}`);
                     }}
                     ref={singleTile}
-                    className="relative bg-[#FAFAFA] border border-[#F1F1F1]"
+                    className={` relative bg-[#FAFAFA] border border-[#F1F1F1]`}
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, `${colIndex}-${rowIndex}`)}
                   >
@@ -305,10 +306,11 @@ const Grid = ({
 
                     {focusedTileIndex === `${colIndex}-${rowIndex}` && (
                       <TileEditComponent
-                        tileIndex={focusedTileIndex}
-                        tilePath={pathCache[focusedTileIndex] || activeTilePath}
-                        zoom={zoom}
-                        scale={scale}
+                        {...{
+                          zoom,
+                          scale,
+                          ...editComponent,
+                        }}
                       />
                     )}
                   </button>
