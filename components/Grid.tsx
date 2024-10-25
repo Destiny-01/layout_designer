@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { collectionTiles } from "@/data/tileCatgories";
 
-const Grid = ({ isMainGrid = true, focusedTileIndex, setFocusedTileIndex, setFocusedTilePath, gridRef: containerRef }: any) => {
+const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex }, setFocusedTileSpec, gridRef: containerRef }: any) => {
   // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
   const deviceWidth = useDeviceWidth();
   const measurement = useTileStore((state) => state.measurement);
@@ -65,7 +65,6 @@ const Grid = ({ isMainGrid = true, focusedTileIndex, setFocusedTileIndex, setFoc
     };
   }, [deviceWidth, activeSize, activeTile, customWidth, customHeight, activeTilePath, isMainGrid, activeDimension]);
 
-
   // Create arrays of row and column indices
   const rows = Array.from({ length: numRows }, (_, index) => index);
   const cols = Array.from({ length: numCols }, (_, index) => index);
@@ -123,19 +122,6 @@ const Grid = ({ isMainGrid = true, focusedTileIndex, setFocusedTileIndex, setFoc
     setPathCathe(pathCache);
   }, [rows.length, cols.length, activeTilePath, autoFillPattern, tileColor]);
 
-  const handleSpacing = useCallback(() => {
-    const focusedTileIndexes = focusedTileIndex?.split("-");
-    let margin = "";
-    if (focusedTileIndexes) {
-      margin = focusedTileIndexes[0] === "0" ? margin + " ml-20" : "ml-0";
-      margin = focusedTileIndexes[1] === "0" ? margin + " mt-20" : margin + " mt-0";
-      margin = focusedTileIndexes[0] === String(cols.length - 1) ? margin + " mr-20" : margin + " mr-0";
-      margin = focusedTileIndexes[1] === String(rows.length - 1) ? margin + " mb-20" : margin + " mb-0";
-
-      return margin;
-    }
-  }, [focusedTileIndex]);
-
   const handleDrop = (e: React.DragEvent<HTMLButtonElement>, index: string) => {
     e.preventDefault();
     const editedIndex = getIndex(index);
@@ -164,14 +150,14 @@ const Grid = ({ isMainGrid = true, focusedTileIndex, setFocusedTileIndex, setFoc
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleClick = (index: string) => {
-    setFocusedTileIndex(index);
-    setFocusedTilePath(pathCache[index] || activeTilePath);
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, index: string) => {
+    const rect = (e.target as HTMLButtonElement).getBoundingClientRect();
+    setFocusedTileSpec({ index: index, path: pathCache[index] || activeTilePath, editorTabCoor: [(rect.left + rect.right) / 2, rect.bottom + 20] });
   };
 
   return (
     <div
-      className={`${handleSpacing()} grid-container w-full origin-top-left rounded-lg relative h-full`}
+      className={` grid-container w-full origin-top-left rounded-lg relative h-full`}
       ref={containerRef}
       style={{
         transform: `scale(${scale * zoom})`,
@@ -194,8 +180,8 @@ const Grid = ({ isMainGrid = true, focusedTileIndex, setFocusedTileIndex, setFoc
                 activeTilePath !== "" && (
                   <button
                     key={colIndex}
-                    onClick={() => {
-                      handleClick(`${colIndex}-${rowIndex}`);
+                    onClick={(e) => {
+                      handleClick(e, `${colIndex}-${rowIndex}`);
                     }}
                     ref={singleTile}
                     className={` relative bg-[#FAFAFA] border border-[#F1F1F1]`}
@@ -204,10 +190,11 @@ const Grid = ({ isMainGrid = true, focusedTileIndex, setFocusedTileIndex, setFoc
                     style={
                       focusedTileIndex === `${colIndex}-${rowIndex}`
                         ? {
-                            transform: `scale(1.06)`,
                             zIndex: 10,
-                            borderWidth: 0,
+                            borderStyle: "none",
+                            borderWidth: "0px",
                             boxShadow: "0 -3px 16px rgba(0, 0, 0, 0.3)",
+                            transform: "scale(1.09)",
                           }
                         : {}
                     }

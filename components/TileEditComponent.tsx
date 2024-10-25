@@ -4,10 +4,10 @@
 import React, { useEffect, useState } from "react";
 import icons from "./icons";
 import { collectionTiles, colorVariation } from "@/data/tileCatgories";
-import useTileStore, { EditedTile, useHistoryStore } from "@/store";
+import useTileStore, { EditedTile, irregularTile, useHistoryStore } from "@/store";
 import { useTransition, animated, config } from "@react-spring/web";
 
-function TileEditComponent({ focusedTileIndex, focusedTilePath, containerRef}: any) {
+function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: focusedTilePath }, editorTabRef }: any) {
   const editedTiles = useTileStore((state) => state.editedTiles);
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
   const { setState, state, currentIndex, setCurrentIndex } = useHistoryStore();
@@ -95,17 +95,24 @@ function TileEditComponent({ focusedTileIndex, focusedTilePath, containerRef}: a
   }, [focusedTileIndex, editedTiles]);
 
   // #2 Side Effect
-  
+
   const transitions = useTransition(showColorPanel ? [] : [0], {
     from: { opacity: 0, width: "0%" },
     enter: { opacity: 1, width: "100%" },
-    config: config.stiff 
+    config: config.stiff,
   });
+
+  // if (scale * zoom < 0.3) {
+  //   toast.info("Zoom in to edit", {
+  //     toastId: "zoomIn",
+  //   });
+  //   return null;
+  // }
 
   return (
     <div className="w-full flex justify-center">
       <div
-        ref={containerRef}
+        ref={editorTabRef}
         className=" drop-shadow-lg py-3 h-14 flex space-x-5
        shadow-[0px_10px_15px_rgba(0,0,0,0.1),inset_0px_-5px_10px_rgba(0,0,0,0.05)]
         rounded-2xl px-5 mb-7  justify-between items-center border border-gray-200 bg-[#fcf8f0] max-w-[300px]"
@@ -122,7 +129,6 @@ function TileEditComponent({ focusedTileIndex, focusedTilePath, containerRef}: a
                 <icons.Rotate2 />
               </div>
             </div>
-
             {/* Rotate Right Button */}
             <div className="">
               <div
@@ -135,19 +141,20 @@ function TileEditComponent({ focusedTileIndex, focusedTilePath, containerRef}: a
 
               {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
             </div>
+            {/* Rotate Left Button --- */}
+            {!irregularTile.includes(activeTileName) && (
+              <div>
+                <div
+                  onClick={() => {
+                    rotateEdit("flipY");
+                  }}
+                >
+                  <icons.Flip deg={90} />
+                </div>
 
-            {/* Rotate Left Button */}
-            <div>
-              <div
-                onClick={() => {
-                  rotateEdit("flipY");
-                }}
-              >
-                <icons.Flip deg={90} />
+                {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
               </div>
-
-              {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
-            </div>
+            )}
           </animated.div>
         ))}
 
@@ -181,7 +188,6 @@ function TileEditComponent({ focusedTileIndex, focusedTilePath, containerRef}: a
                     onClick={() => {
                       colorEdit(color.colorName);
                     }}
-                    className=""
                   >
                     <div
                       className={` w-8 h-8 rounded-full border ${
