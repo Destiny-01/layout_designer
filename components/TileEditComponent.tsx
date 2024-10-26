@@ -6,6 +6,7 @@ import icons from "./icons";
 import { collectionTiles, colorVariation } from "@/data/tileCatgories";
 import useTileStore, { EditedTile, irregularTile, useHistoryStore } from "@/store";
 import { useTransition, animated, config } from "@react-spring/web";
+import { toast } from "react-toastify";
 
 function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: focusedTilePath }, editorTabRef }: any) {
   const editedTiles = useTileStore((state) => state.editedTiles);
@@ -13,6 +14,7 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
   const { setState, state, currentIndex, setCurrentIndex } = useHistoryStore();
   const activeTileName = useTileStore((state) => state.tileName);
   const [tileColor, setTileColor] = useState<string>("");
+  const zoom = useTileStore((state) => state.zoom);
 
   const [showColorPanel, setShowColorPanel] = useState(false);
   const [tileEditState, setTileEditState] = useState<
@@ -102,12 +104,12 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
     config: config.stiff,
   });
 
-  // if (scale * zoom < 0.3) {
-  //   toast.info("Zoom in to edit", {
-  //     toastId: "zoomIn",
-  //   });
-  //   return null;
-  // }
+  if (zoom < 0.7) {
+    toast.info("Zoom in to edit", {
+      toastId: "zoomIn",
+    });
+    return null;
+  }
 
   return (
     <div className="w-full flex justify-center">

@@ -3,6 +3,7 @@ import useTileStore, { irregularTile } from "@/store";
 import Image from "next/image";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { collectionTiles } from "@/data/tileCatgories";
+import { toast } from "react-toastify";
 
 const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex }, setFocusedTile, gridRef: containerRef }: any) => {
   const deviceWidth = useDeviceWidth();
@@ -15,12 +16,12 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
   const activeTile = useTileStore((state) => state.tileName);
   const tileColor = useTileStore((state) => state.tileColor);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
-  const [numRows, setNumRows] = useState(measurement.rows); // Initial number of rows, adjust as needed
-  const [numCols, setNumCols] = useState(measurement.columns); // Initial number of columns, same as rows
+  const [numRows, setNumRows] = useState(measurement.rows);
+  const [numCols, setNumCols] = useState(measurement.columns);
   // const [scale, setScale] = useState(1);
   const singleTile = useRef<any>(null);
   const zoom = useTileStore((state) => state.zoom);
-  const boxSize = activeSize * 10
+  const boxSize = activeSize * 10;
   const [pathCache, setPathCathe] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -56,7 +57,6 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
 
     // Call calculateGrid initially and on window resize
     isMainGrid && calculateGrid();
-    // calculateGrid();
     window.addEventListener("resize", calculateGrid);
 
     return () => {
@@ -123,11 +123,16 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
 
   const handleDrop = (e: React.DragEvent<HTMLButtonElement>, index: string) => {
     e.preventDefault();
+    if (irregularTile.includes(activeTile)) {
+      toast.info("Can't drop here", {
+        toastId: ';)'
+      })
+    };
     const editedIndex = getIndex(index);
     const data = e.dataTransfer.getData("text/plain");
     const [_tilePath, tileName] = data.split("*+=");
 
-    if (irregularTile.includes(tileName) === irregularTile.includes(activeTile)) {
+    if (tileName && irregularTile.includes(tileName) === irregularTile.includes(activeTile)) {
       let newArr = [...editedTiles];
       if (editedIndex !== -1) {
         newArr[editedIndex].tilePath = _tilePath;
@@ -149,17 +154,30 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, index: string) => {
-    const rect = (e.target as HTMLButtonElement).getBoundingClientRect();
-    setFocusedTile( index,  pathCache[index] || activeTilePath, [(rect.left + rect.right) / 2, rect.bottom + 20]);
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>, draggedTilePath: string) => {
+    e.dataTransfer.setData("text/plain", `${draggedTilePath}*+=${activeTile}`);
+    e.dataTransfer.effectAllowed = "move";
   };
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, index: string) => {
+    const rect = (e.target as HTMLButtonElement).getBoundingClientRect();
+    setFocusedTile(index, pathCache[index] || activeTilePath, [(rect.left + rect.right) / 2, rect.bottom + 20]);
+  };
+
+  useEffect(() => {
+    if (window.outerWidth < 450 && numCols > 16) {
+      console.log("here");
+      toast.info("Rotate your device for a better experience", {
+        toastId: ":)",
+      });
+    }
+  }, [numCols]);
   return (
     <div
       className={` grid-container w-full origin-top-left rounded-lg relative h-full`}
       ref={containerRef}
       style={{
-        // transform: `scale(${scale * zoom})`,
+        transform: `scale(${zoom})`,
         transformOrigin: "top left",
       }}
     >
@@ -170,7 +188,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
       )}
       {rows.map((rowIndex) => {
         return (
-          <div key={rowIndex} className="flex">
+          <div key={rowIndex} className="flex h-fit">
             {cols.map((colIndex) => {
               const editedTile = editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
 
@@ -183,8 +201,9 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
                       handleClick(e, `${colIndex}-${rowIndex}`);
                     }}
                     ref={singleTile}
-                    className={` relative bg-[#FAFAFA] border border-[#F1F1F1]`}
+                    className={`  bg-[#FAFAFA] border border-[#F1F1F1] h-fit flex`}
                     onDragOver={handleDragOver}
+                    onDragStart={(e) => handleDrag(e, editedTile.tilePath || pathCache[`${colIndex}-${rowIndex}`] || activeTilePath)}
                     onDrop={(e) => handleDrop(e, `${colIndex}-${rowIndex}`)}
                     style={
                       focusedTileIndex === `${colIndex}-${rowIndex}`
@@ -203,7 +222,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
                         src={pathCache[`${colIndex}-${rowIndex}`] || activeTilePath}
                         width={"0"}
                         height={"0"}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto object-cover "
                         alt="Tile"
                         style={{
                           rotate: `${activeRotationDegree}deg`,
@@ -216,7 +235,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
                             src={editedTile.tilePath ?? ""}
                             width={"0"}
                             height={"0"}
-                            className="w-full h-full object-cover inline-block"
+                            className="w-full h-auto object-cover inline-block"
                             alt="Tile"
                             style={
                               editedTile.rotateStyle === "flipX"
