@@ -24,7 +24,7 @@ function GridAndEdit() {
 
     const handleResize = () => (window.outerWidth < 500 ? setFloatEditor(false) : setFloatEditor(true));
 
-    handleResize()
+    handleResize();
 
     window.addEventListener("mousedown", handleClickOutSide);
     window.addEventListener("resize", handleResize);
@@ -34,25 +34,25 @@ function GridAndEdit() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
-  useEffect(() => {
+  const setFocusedTile = (index: string, path: string, initailCoor: [number, number]) => {
     if (gridAndEditRef.current) {
       const rect = gridAndEditRef.current.getBoundingClientRect();
-      const newArr = focusedTileSpec.editorTabCoor;
-      const coor = [newArr[0] - rect.left, newArr[1] - rect.top] as [number, number];
-      floatEditor && setFocusedTileSpec((obj) => ({ ...obj, editorTabCoor: coor }));
+      const coor = [initailCoor[0] - rect.left, initailCoor[1] - rect.top] as [number, number];
+      setFocusedTileSpec({ index: index, path:path, editorTabCoor: coor });
     }
-  }, [floatEditor, focusedTileSpec.index]);
+  };
 
   const [transitions, api] = useTransition(focusedTileSpec.index.length ? [0] : [], () => ({
-    from: { transform: "translateX(-40%)", opacity: 0 },
-    enter: { transform: "translateX(-50%)", opacity: 1 },
+    from: { transform: "translate(-50%, -10%)", opacity: 0 },
+    enter: { transform: "translate(-50%, 30%)", opacity: 1 },
     config: config.stiff,
-    reset: true
+    reset: true,
+    exitBeforeEnter: true,
+    // immediate: true
   }));
 
   useEffect(() => {
-    setTimeout(() => api.start(), 0)
+    setTimeout(() => api.start(), 0);
   }, [focusedTileSpec.index, api]);
 
   return (
@@ -61,7 +61,7 @@ function GridAndEdit() {
         <Grid
           {...{
             focusedTileSpec,
-            setFocusedTileSpec,
+            setFocusedTile,
             gridRef,
           }}
         />
@@ -70,6 +70,7 @@ function GridAndEdit() {
       {transitions((style, i) => (
         <animated.div
           key={i}
+          className={''}
           style={
             floatEditor
               ? {

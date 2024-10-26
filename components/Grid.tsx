@@ -4,8 +4,7 @@ import Image from "next/image";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { collectionTiles } from "@/data/tileCatgories";
 
-const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex }, setFocusedTileSpec, gridRef: containerRef }: any) => {
-  // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
+const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex }, setFocusedTile, gridRef: containerRef }: any) => {
   const deviceWidth = useDeviceWidth();
   const measurement = useTileStore((state) => state.measurement);
   const customWidth = measurement.customWidth;
@@ -18,10 +17,10 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const [numRows, setNumRows] = useState(measurement.rows); // Initial number of rows, adjust as needed
   const [numCols, setNumCols] = useState(measurement.columns); // Initial number of columns, same as rows
-  const [scale, setScale] = useState(1);
+  // const [scale, setScale] = useState(1);
   const singleTile = useRef<any>(null);
   const zoom = useTileStore((state) => state.zoom);
-  const boxSize = activeSize * 10; // converted to (mm)
+  const boxSize = activeSize * 10
   const [pathCache, setPathCathe] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -51,7 +50,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
         const heightScale = availableHeight / containerHeight;
         const newScale = Math.min(widthScale, heightScale);
 
-        setScale(newScale);
+        // setScale(newScale);
       }
     };
 
@@ -152,7 +151,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, index: string) => {
     const rect = (e.target as HTMLButtonElement).getBoundingClientRect();
-    setFocusedTileSpec({ index: index, path: pathCache[index] || activeTilePath, editorTabCoor: [(rect.left + rect.right) / 2, rect.bottom + 20] });
+    setFocusedTile( index,  pathCache[index] || activeTilePath, [(rect.left + rect.right) / 2, rect.bottom + 20]);
   };
 
   return (
@@ -160,7 +159,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
       className={` grid-container w-full origin-top-left rounded-lg relative h-full`}
       ref={containerRef}
       style={{
-        transform: `scale(${scale * zoom})`,
+        // transform: `scale(${scale * zoom})`,
         transformOrigin: "top left",
       }}
     >
