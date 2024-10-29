@@ -154,7 +154,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDrag = (e: React.DragEvent<HTMLDivElement>, draggedTilePath: string) => {
+  const handleDrag = (e: React.DragEvent<HTMLButtonElement>, draggedTilePath: string) => {
     e.dataTransfer.setData("text/plain", `${draggedTilePath}*+=${activeTile}`);
     e.dataTransfer.effectAllowed = "move";
   };
