@@ -47,12 +47,14 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
     // tileEditState would be edited by the #1 side effect and is triggered by setEditedTiles call in this block
   };
 
-  const rotateEdit = (direction: "flipX" | "flipY") => {
+  const rotateEdit = (direction: "flipX" | "flipY" | "rotate") => {
     let angle = tileEditState?.editedTileSpec?.rotationDegree || 0;
     if (direction === "flipX") {
       angle = angle % 180 === 0 ? 180 - angle : angle - 90;
     } else if (direction === "flipY") {
       angle = !(270 % angle) ? 270 - angle + 90 : angle - 90;
+    } else if (direction === "rotate") {
+      angle += 90;
     }
     //  console.log(angle, direction);
     setEdit(direction, { rotationDegree: angle });
@@ -125,7 +127,7 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
             <div className="">
               <div
                 onClick={() => {
-                  resetEdit();
+                  rotateEdit('rotate');
                 }}
               >
                 <icons.Rotate2 />
