@@ -75,6 +75,10 @@ export const tileCategory: TileVariation = {
           tilePath: "/assets/tiles/Lisboa/LIS02-HighlandGreen.svg",
         },
         {
+          tileColor: "Indigo",
+          tilePath: "/assets/tiles/Lisboa/LIS01-Indigo.svg",
+        },
+        {
           tileColor: "NestEgg",
           tilePath: "/assets/tiles/Lisboa/LIS02-NestEgg.svg",
         },
