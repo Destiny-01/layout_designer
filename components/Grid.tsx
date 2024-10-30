@@ -1,18 +1,11 @@
 import useDeviceWidth from "@/hooks/useDeviceWidth"; // Path to your custom hook
 import useTileStore, { irregularTile } from "@/store";
 import Image from "next/image";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import TileEditComponent from "./TileEditComponent";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { collectionTiles } from "@/data/tileCatgories";
+import { toast } from "react-toastify";
 
-const Grid = ({ isMainGrid = true, containerRef }: any) => {
-  // const Grid = forwardRef(({ isMainGrid = true }: any, containerRef: any) => {
+const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex }, setFocusedTile, gridRef: containerRef }: any) => {
   const deviceWidth = useDeviceWidth();
   const measurement = useTileStore((state) => state.measurement);
   const customWidth = measurement.customWidth;
@@ -23,14 +16,14 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
   const activeTile = useTileStore((state) => state.tileName);
   const tileColor = useTileStore((state) => state.tileColor);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
-  // const [boxSize, setBoxSize] = useState(deviceWidth >= 1024 ? 80 : 60); // Size of each box in pixels
-  const [numRows, setNumRows] = useState(measurement.rows); // Initial number of rows, adjust as needed
-  const [numCols, setNumCols] = useState(measurement.columns); // Initial number of columns, same as rows
-  const [scale, setScale] = useState(1);
+  const [numRows, setNumRows] = useState(measurement.rows);
+  const [numCols, setNumCols] = useState(measurement.columns);
+  // const [scale, setScale] = useState(1);
   const singleTile = useRef<any>(null);
   const zoom = useTileStore((state) => state.zoom);
+  const boxSize = activeSize * 10;
   const [pathCache, setPathCathe] = useState<{ [key: string]: string }>({});
-  const boxSize = activeSize * 10; // converted to (mm)
+
   useEffect(() => {
     const calculateGrid = () => {
       if (containerRef.current) {
@@ -38,12 +31,8 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
         const availableHeight = containerRef.current.offsetHeight;
         let containerWidth = customWidth > 20 ? customWidth : availableWidth;
 
-        let containerHeight =
-          customHeight > 20 ? customHeight : availableHeight;
-        containerHeight =
-          activeTile === "Rio" && activeTilePath.includes("Rio")
-            ? containerHeight - 40
-            : containerHeight;
+        let containerHeight = customHeight > 20 ? customHeight : availableHeight;
+        containerHeight = activeTile === "Rio" && activeTilePath.includes("Rio") ? containerHeight - 40 : containerHeight;
 
         const newNumCols = Math.floor(containerWidth / boxSize);
         const newNumRows = Math.floor(containerHeight / boxSize);
@@ -62,42 +51,28 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
         const heightScale = availableHeight / containerHeight;
         const newScale = Math.min(widthScale, heightScale);
 
-        setScale(newScale);
+        // setScale(newScale);
       }
     };
 
     // Call calculateGrid initially and on window resize
     isMainGrid && calculateGrid();
-    // calculateGrid();
     window.addEventListener("resize", calculateGrid);
 
     return () => {
       window.removeEventListener("resize", calculateGrid);
     };
-  }, [
-    deviceWidth,
-    activeSize,
-    activeTile,
-    customWidth,
-    customHeight,
-    activeTilePath,
-    isMainGrid,
-    activeDimension,
-  ]);
+  }, [deviceWidth, activeSize, activeTile, customWidth, customHeight, activeTilePath, isMainGrid, activeDimension]);
 
   // Create arrays of row and column indices
   const rows = Array.from({ length: numRows }, (_, index) => index);
   const cols = Array.from({ length: numCols }, (_, index) => index);
 
-  const activeRotationDegree = useTileStore(
-    (state) => state.activeRotationDegree
-  );
+  const activeRotationDegree = useTileStore((state) => state.activeRotationDegree);
 
   const editedTiles = useTileStore((state) => state.editedTiles);
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
   const autoFillPattern = useTileStore((state) => state.autoFillPattern);
-
-  const [activeTileIndex, setActiveTileIndex] = useState<string | null>(null);
 
   const getIndex = useMemo(
     () => (tileIndex: string) => {
@@ -105,49 +80,19 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     },
     [editedTiles] // Dependency: Recompute only when `editedTiles` changes
   );
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setActiveTileIndex("");
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
-  const activeCollection = collectionTiles.find(
-    (tile) => tile.tileName === activeTile
-  );
+  const activeCollection = collectionTiles.find((tile) => tile.tileName === activeTile);
 
   useEffect(() => {
-    const renderAutoFill = (
-      fillTilePath: string,
-      colIndex: number,
-      initialRowIndex: number
-    ) => {
+    const renderAutoFill = (fillTilePath: string, colIndex: number, initialRowIndex: number) => {
       const rows = Math.floor(autoFillPattern.length / 2);
-      if (
-        activeCollection &&
-        activeCollection.subCategories.length > 1 &&
-        autoFillPattern.length > 0
-      ) {
+      if (activeCollection && activeCollection.subCategories.length > 1 && autoFillPattern.length > 0) {
         if (autoFillPattern.length < 3) {
-          const singleCategory =
-            activeCollection.subCategories[initialRowIndex % 2];
-          return (
-            singleCategory?.tileVariation.find(
-              (tile) => tile.tileColor === tileColor
-            )?.tilePath || singleCategory?.tileVariation[0].tilePath
-          );
+          const singleCategory = activeCollection.subCategories[initialRowIndex % 2];
+          return singleCategory?.tileVariation.find((tile) => tile.tileColor === tileColor)?.tilePath || singleCategory?.tileVariation[0].tilePath;
         }
         const definiteIndex = (initialRowIndex - 1) % rows; //+ 1;
-        let rowIndex =
-          initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
+        let rowIndex = initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
         let index = Math.abs(
           colIndex % 2 === 0
             ? rowIndex % 2 === 0
@@ -161,11 +106,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
         );
         const singleCategory = activeCollection.subCategories[index];
 
-        return (
-          singleCategory?.tileVariation.find(
-            (tile) => tile.tileColor === tileColor
-          )?.tilePath || singleCategory?.tileVariation[0].tilePath
-        );
+        return singleCategory?.tileVariation.find((tile) => tile.tileColor === tileColor)?.tilePath || singleCategory?.tileVariation[0].tilePath;
       } else {
         return fillTilePath;
       }
@@ -180,35 +121,18 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     setPathCathe(pathCache);
   }, [rows.length, cols.length, activeTilePath, autoFillPattern, tileColor]);
 
-  const handleSpacing = useCallback(() => {
-    const activeTileIndexes = activeTileIndex?.split("-");
-    let margin = "";
-    if (activeTileIndexes) {
-      margin = activeTileIndexes[0] === "0" ? margin + " ml-20" : "ml-0";
-      margin =
-        activeTileIndexes[1] === "0" ? margin + " mt-20" : margin + " mt-0";
-      margin =
-        activeTileIndexes[0] === String(cols.length - 1)
-          ? margin + " mr-20"
-          : margin + " mr-0";
-      margin =
-        activeTileIndexes[1] === String(rows.length - 1)
-          ? margin + " mb-20"
-          : margin + " mb-0";
-
-      return margin;
-    }
-  }, [activeTileIndex]);
-
   const handleDrop = (e: React.DragEvent<HTMLButtonElement>, index: string) => {
     e.preventDefault();
+    if (irregularTile.includes(activeTile)) {
+      toast.info("Can't drop here", {
+        toastId: ';)'
+      })
+    };
     const editedIndex = getIndex(index);
     const data = e.dataTransfer.getData("text/plain");
     const [_tilePath, tileName] = data.split("*+=");
 
-    if (
-      irregularTile.includes(tileName) === irregularTile.includes(activeTile)
-    ) {
+    if (tileName && irregularTile.includes(tileName) === irregularTile.includes(activeTile)) {
       let newArr = [...editedTiles];
       if (editedIndex !== -1) {
         newArr[editedIndex].tilePath = _tilePath;
@@ -230,12 +154,30 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
     e.dataTransfer.effectAllowed = "move";
   };
 
+  const handleDrag = (e: React.DragEvent<HTMLButtonElement>, draggedTilePath: string) => {
+    e.dataTransfer.setData("text/plain", `${draggedTilePath}*+=${activeTile}`);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, index: string) => {
+    const rect = (e.target as HTMLButtonElement).getBoundingClientRect();
+    setFocusedTile(index, pathCache[index] || activeTilePath, [(rect.left + rect.right) / 2, rect.bottom + 20]);
+  };
+
+  useEffect(() => {
+    if (window.outerWidth < 450 && numCols > 16) {
+      console.log("here");
+      toast.info("Rotate your device for a better experience", {
+        toastId: ":)",
+      });
+    }
+  }, [numCols]);
   return (
     <div
-      className={`${handleSpacing()} grid-container w-full origin-top-left rounded-lg relative h-full`}
+      className={` grid-container w-full origin-top-left rounded-lg relative h-full`}
       ref={containerRef}
       style={{
-        transform: `scale(${scale * zoom})`,
+        transform: `scale(${zoom})`,
         transformOrigin: "top left",
       }}
     >
@@ -246,32 +188,41 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
       )}
       {rows.map((rowIndex) => {
         return (
-          <div key={rowIndex} className="flex">
+          <div key={rowIndex} className="flex h-fit">
             {cols.map((colIndex) => {
-              const editedTile =
-                editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
+              const editedTile = editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
 
               return (
-                rows.length > 1 &&
+                rows.length > 0 &&
                 activeTilePath !== "" && (
                   <button
                     key={colIndex}
-                    onClick={() => {
-                      setActiveTileIndex(`${colIndex}-${rowIndex}`);
+                    onClick={(e) => {
+                      handleClick(e, `${colIndex}-${rowIndex}`);
                     }}
                     ref={singleTile}
-                    className="relative bg-[#FAFAFA] border border-[#F1F1F1]"
+                    className={`  bg-[#FAFAFA] border border-[#F1F1F1] h-fit flex`}
                     onDragOver={handleDragOver}
+                    onDragStart={(e) => handleDrag(e, editedTile.tilePath || pathCache[`${colIndex}-${rowIndex}`] || activeTilePath)}
                     onDrop={(e) => handleDrop(e, `${colIndex}-${rowIndex}`)}
+                    style={
+                      focusedTileIndex === `${colIndex}-${rowIndex}`
+                        ? {
+                            zIndex: 10,
+                            borderStyle: "none",
+                            borderWidth: "0px",
+                            boxShadow: "0 -3px 16px rgba(0, 0, 0, 0.3)",
+                            transform: "scale(1.09)",
+                          }
+                        : {}
+                    }
                   >
                     {getIndex(`${colIndex}-${rowIndex}`) === -1 ? (
                       <Image
-                        src={
-                          pathCache[`${colIndex}-${rowIndex}`] || activeTilePath
-                        }
+                        src={pathCache[`${colIndex}-${rowIndex}`] || activeTilePath}
                         width={"0"}
                         height={"0"}
-                        className="w-full h-full object-cover"
+                        className="w-full h-auto object-cover "
                         alt="Tile"
                         style={{
                           rotate: `${activeRotationDegree}deg`,
@@ -284,7 +235,7 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                             src={editedTile.tilePath ?? ""}
                             width={"0"}
                             height={"0"}
-                            className="w-full h-full object-cover inline-block"
+                            className="w-full h-auto object-cover inline-block"
                             alt="Tile"
                             style={
                               editedTile.rotateStyle === "flipX"
@@ -303,19 +254,8 @@ const Grid = ({ isMainGrid = true, containerRef }: any) => {
                         )}
                       </>
                     )}
-
-                    {activeTileIndex === `${colIndex}-${rowIndex}` && (
-                      <TileEditComponent
-                        tileIndex={activeTileIndex}
-                        tilePath={
-                          pathCache[`${colIndex}-${rowIndex}` || activeTilePath]
-                        }
-                        zoom={zoom}
-                      />
-                    )}
                   </button>
                 )
-                // </div>
               );
             })}
           </div>

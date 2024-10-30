@@ -1,116 +1,71 @@
-import { collectionTiles, colorVariation } from "@/data/tileCatgories";
-import useTileStore, { EditedTile, useHistoryStore, irregularTile } from "@/store";
+"use client";
+// Tile edit component for small screen
+
 import React, { useEffect, useState } from "react";
 import icons from "./icons";
+import { collectionTiles, colorVariation } from "@/data/tileCatgories";
+import useTileStore, { EditedTile, irregularTile, useHistoryStore } from "@/store";
+import { useTransition, animated, config } from "@react-spring/web";
+import { toast } from "react-toastify";
 
-type Props = {
-  tileIndex: string;
-  zoom: number;
-  tilePath: string | undefined;
-};
-
-const TileEditComponent = ({
-  tileIndex,
-  zoom,
-  tilePath: initialTilePath,
-}: Props) => {
-  const activeTileName = useTileStore((state) => state.tileName);
-  const activeTilePath = useTileStore((state) => state.activeTilePath);
+function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: focusedTilePath }, editorTabRef }: any) {
   const editedTiles = useTileStore((state) => state.editedTiles);
+  const setEditedTiles = useTileStore((state) => state.setEditedTiles);
   const { setState, state, currentIndex, setCurrentIndex } = useHistoryStore();
-
-  const activeTile = editedTiles.find((tile) => tile.tileIndex === tileIndex);
-  const [showColorPanel, setShowColorPanel] = useState(false);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
-  const [updatedTilePath, setUpdatedTilePath] = useState<string | null>(null);
-  const [rotationDegree, setRotationDegree] = useState<number>(
-    activeTile?.rotationDegree || 0
-  );
-  const [rotateStyle, setRotateStyle] = useState<
-    EditedTile["rotateStyle"] | undefined
-  >(activeTile?.rotateStyle);
-  const [tilePath, setTilePath] = useState<string>(
-    initialTilePath ?? activeTile?.tilePath ?? activeTilePath
-  );
-
+  const activeTileName = useTileStore((state) => state.tileName);
   const [tileColor, setTileColor] = useState<string>("");
+  const zoom = useTileStore((state) => state.zoom);
 
-  const storeUserAction = (
-    action: "rotate" | "flipX" | "flipY" | "color",
-    from: any,
-    to: any
+  const [showColorPanel, setShowColorPanel] = useState(false);
+  const [tileEditState, setTileEditState] = useState<
+    { editedTileSpec: EditedTile; editedSpecIndex: number } | { editedTileSpec: null; editedSpecIndex: number }
+  >();
+
+  const setEdit = (
+    action: "flipX" | "flipY" | "color",
+    kwargs: { rotationDegree: number } | { rotateStyle: "flipX" | "flipY" | undefined } | { tilePath: string | undefined }
   ) => {
-    setState([...state, { tileIndex, from, to, action }]);
-    setCurrentIndex(currentIndex + 1);
-  };
+    let to;
+    let from;
 
-  const rotateDiv = (direction: "reset" | "flipX" | "flipY" | "rotate") => {
-    if (irregularTile.includes(activeTileName)) return
-    let newDegree = 0;
-    switch (direction) {
-      case "reset":
-        newDegree = 0;
-        setEditedTiles(
-          editedTiles.filter((tile) => tile.tileIndex !== tileIndex)
-        );
-        setTilePath(activeTilePath);
-      case "flipX":
-        newDegree = rotationDegree > 0 ? 0 : 180;
-        break;
-      case "flipY":
-        newDegree = rotationDegree > 0 ? 0 : 180;
-        break;
-      default:
-        const editedTileIndex = editedTiles.findIndex(
-          (tile) => tile.tileIndex === tileIndex
-        );
-        if (editedTileIndex === -1) {
-          const editedTile = {
-            tileIndex: tileIndex,
-            rotationDegree: 90,
-            rotateStyle: undefined,
-            tilePath: tilePath,
-          };
-          setEditedTiles([...editedTiles, editedTile]);
-        } else {
-          const newArr = [...editedTiles];
-          newArr[editedTileIndex].rotationDegree += 90;
-          setEditedTiles(newArr);
-        }
-    }
-    direction !== "reset" &&
-      storeUserAction(direction, rotationDegree, newDegree);
-
-    direction === "flipX" || direction === "flipY"
-      ? setRotateStyle(direction)
-      : setRotateStyle(undefined);
-
-    setRotationDegree(newDegree);
-  };
-
-  const updateTileData = () => {
-    const tileEditData = {
-      tileIndex,
-      rotationDegree,
-      rotateStyle,
-      tilePath,
-    };
-
-    const index = editedTiles.findIndex((tile) => tile.tileIndex === tileIndex);
-
-    if (index !== -1) {
-      editedTiles[index] = tileEditData;
-      setEditedTiles([...editedTiles]);
+    if (tileEditState?.editedTileSpec) {
+      from = tileEditState.editedTileSpec[Object.keys(kwargs)[0] as keyof EditedTile];
+      to = Object.values(kwargs)[0];
+      const newArr = [...editedTiles];
+      newArr[tileEditState.editedSpecIndex] = { ...tileEditState.editedTileSpec, ...kwargs };
+      setEditedTiles(newArr);
     } else {
-      setEditedTiles([...editedTiles, tileEditData]);
+      from = to = Object.values(kwargs)[0];
+      setEditedTiles([
+        ...editedTiles,
+        { tileIndex: focusedTileIndex, rotationDegree: 0, rotateStyle: undefined, tilePath: focusedTilePath, ...kwargs },
+      ]);
     }
+
+    setState([...state, { tileIndex: focusedTileIndex, from, to, action }]);
+    setCurrentIndex(currentIndex + 1);
+    // tileEditState would be edited by the #1 side effect and is triggered by setEditedTiles call in this block
   };
 
-  const handleColorPick = () => {
-    setShowColorPanel(!showColorPanel);
+  const rotateEdit = (direction: "flipX" | "flipY" | "rotate") => {
+    let angle = tileEditState?.editedTileSpec?.rotationDegree || 0;
+    if (direction === "flipX") {
+      angle = angle % 180 === 0 ? 180 - angle : angle - 90;
+    } else if (direction === "flipY") {
+      angle = !(270 % angle) ? 270 - angle + 90 : angle - 90;
+    } else if (direction === "rotate") {
+      angle += 90;
+    }
+    //  console.log(angle, direction);
+    setEdit(direction, { rotationDegree: angle });
   };
 
-  const setEditedTilePath = (colorValue: string) => {
+  const resetEdit = () => {
+    setEditedTiles(editedTiles.filter((item) => item.tileIndex !== focusedTileIndex));
+    setTileEditState({ editedSpecIndex: -1, editedTileSpec: null });
+  };
+
+  const colorEdit = (colorValue: string) => {
     setTileColor(colorValue);
     const specificTile = collectionTiles.find((item) => {
       return item.tileName === activeTileName;
@@ -120,9 +75,7 @@ const TileEditComponent = ({
     if (specificTile) {
       for (const subCategory of specificTile.subCategories) {
         const matchingTile = subCategory.tileVariation.find(
-          (tile) =>
-            tile.tileColor === colorValue &&
-            tilePath.includes(tile.tilePath.split("-")[0])
+          (tile) => tile.tileColor === colorValue && focusedTilePath.includes(tile.tilePath.split("-")[0])
         );
         if (matchingTile) {
           specificColorData = matchingTile;
@@ -131,147 +84,132 @@ const TileEditComponent = ({
       }
 
       if (specificColorData) {
-        storeUserAction("color", tilePath, specificColorData.tilePath);
-        setTilePath(specificColorData.tilePath);
-        setUpdatedTilePath(specificColorData.tilePath);
+        setEdit("color", { tilePath: specificColorData.tilePath });
       }
     }
   };
 
-  const setEditedTiles = useTileStore((state) => state.setEditedTiles);
-
-  const handleTileEdit = (
-    editType: "reset" | "flipX" | "flipY" | "colorEdit" | "rotate"
-  ) => {
-    editType === "reset" && rotateDiv("reset");
-    editType === "flipX" && rotateDiv("flipX");
-    editType === "flipY" && rotateDiv("flipY");
-    editType === "rotate" && rotateDiv("rotate");
-    editType === "colorEdit" && handleColorPick();
-  };
-
+  // #1 Side Effect
   useEffect(() => {
-    if (updatedTilePath !== null && !isFirstLoad) {
-      updateTileData();
-      setTilePath(updatedTilePath);
-    }
-    isFirstLoad && setIsFirstLoad(false);
-  }, [updatedTilePath]);
+    const editIndex = editedTiles.findIndex((tile) => tile.tileIndex === focusedTileIndex);
+    setTileEditState({
+      editedTileSpec: editedTiles[editIndex],
+      editedSpecIndex: editIndex,
+    });
+  }, [focusedTileIndex, editedTiles]);
 
-  useEffect(() => {
-    !isFirstLoad && updateTileData();
-  }, [showColorPanel, rotationDegree, tilePath]);
+  // #2 Side Effect
+
+  const transitions = useTransition(showColorPanel ? [] : [0], {
+    from: { opacity: 0, width: "0%" },
+    enter: { opacity: 1, width: "100%" },
+    config: config.stiff,
+  });
+
+  if (zoom < 0.7) {
+    toast.info("Zoom in to edit", {
+      toastId: "zoomIn",
+    });
+    return null;
+  }
 
   return (
-    <>
-      {/* Reset Button */}
+    <div className="w-full flex justify-center">
       <div
-        className="absolute left-1/4 -top-full z-40"
-        style={{
-          transform: `scale(${zoom < 1 ? 1 / zoom : 1})`,
-        }}
+        ref={editorTabRef}
+        className=" drop-shadow-lg py-3 h-14 flex space-x-5
+       shadow-[0px_10px_15px_rgba(0,0,0,0.1),inset_0px_-5px_10px_rgba(0,0,0,0.05)]
+        rounded-2xl px-5 mb-7  justify-between items-center border border-gray-200 bg-[#fcf8f0] max-w-[300px]"
       >
-        <div
-          onClick={() => {
-            handleTileEdit("rotate");
-          }}
-        >
-          <icons.Rotate2 />
-        </div>
-        {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
-      </div>
+        {transitions((style, i) => (
+          <animated.div style={style} key={i} className={"flex space-x-5"}>
+            {/* Reset Button */}
+            <div className="">
+              <div
+                onClick={() => {
+                  rotateEdit('rotate');
+                }}
+              >
+                <icons.Rotate2 />
+              </div>
+            </div>
+            {/* Rotate Right Button */}
+            <div className="">
+              <div
+                onClick={() => {
+                  rotateEdit("flipX");
+                }}
+              >
+                <icons.Flip deg={0} />
+              </div>
 
-      {/* Color Button */}
-      <div
-        className="absolute -right-full top-1/4 z-40"
-        style={{
-          transform: `scale(${zoom < 1 ? 1 / zoom : 1}) rotate(90deg)`,
-        }}
-      >
-        {showColorPanel && (
-          <div className="flex bottom-24 -left-10 rotate-[270deg] w-32 overflow-x-scroll gap-3 py-3 absolute">
-            {colorVariation.map((color) => {
-              return (
-                <button
-                  key={color.colorName}
+              {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
+            </div>
+            {/* Rotate Left Button --- */}
+            {!irregularTile.includes(activeTileName) && (
+              <div>
+                <div
                   onClick={() => {
-                    setEditedTilePath(color.colorName);
+                    rotateEdit("flipY");
                   }}
                 >
+                  <icons.Flip deg={90} />
+                </div>
+
+                {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
+              </div>
+            )}
+          </animated.div>
+        ))}
+
+        {/* Color Button */}
+        <div className="flex items-center space-x-4">
+          {showColorPanel ? (
+            // Cancel button
+            <div
+              onClick={() => {
+                setShowColorPanel(false);
+              }}
+            >
+              <icons.CancelButton />
+            </div>
+          ) : (
+            <div
+              onClick={() => {
+                setShowColorPanel(true);
+              }}
+            >
+              <icons.ColorPallet />
+            </div>
+          )}
+
+          {showColorPanel && (
+            <div className="flex w-36 h-10 overflow-x-scroll gap-3 scroll-m-2">
+              {colorVariation.map((color) => {
+                return (
                   <div
-                    className={`w-7 h-7 rounded-full border ${
-                      tileColor === color.colorName
-                        ? "border-2 border-yellow-950"
-                        : "border border-black"
-                    } `}
-                    style={{
-                      backgroundColor: color.colorHEX,
+                    key={color.colorName}
+                    onClick={() => {
+                      colorEdit(color.colorName);
                     }}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {showColorPanel ? (
-          // Cancel button
-          <div
-            onClick={() => {
-              handleTileEdit("colorEdit");
-            }}
-          >
-            <icons.CancelButton />
-          </div>
-        ) : (
-          <div
-            onClick={() => {
-              handleTileEdit("colorEdit");
-            }}
-          >
-            <icons.ColorPallet />
-          </div>
-        )}
-        {/* <div className="w-1 h-10 -ml-1 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
-      </div>
-
-      {/* Rotate Right Button */}
-      <div
-        className="absolute -bottom-full left-1/4 z-40"
-        style={{
-          transform: `scale(${zoom < 1 ? 1 / zoom : 1}) rotate(180deg)`,
-        }}
-      >
-        <div
-          onClick={() => {
-            handleTileEdit("flipX");
-          }}
-        >
-          <icons.Flip />
+                  >
+                    <div
+                      className={` w-8 h-8 rounded-full border ${
+                        tileColor === color.colorName ? "border-2 border-yellow-950" : "border border-black"
+                      } `}
+                      style={{
+                        backgroundColor: color.colorHEX,
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-
-        {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
       </div>
-
-      {/* Rotate Left Button */}
-      <div
-        className="absolute top-1/4 -left-full  z-40"
-        style={{
-          transform: `scale(${zoom < 1 ? 1 / zoom : 1}) rotate(270deg)`,
-        }}
-      >
-        <div
-          onClick={() => {
-            handleTileEdit("flipY");
-          }}
-        >
-          <icons.Flip />
-        </div>
-
-        {/* <div className="w-1 h-10 top-10 border-l-2 border-[#7a7a7a] border-dashed absolute left-1/2" /> */}
-      </div>
-    </>
+    </div>
   );
-};
+}
 
 export default TileEditComponent;
