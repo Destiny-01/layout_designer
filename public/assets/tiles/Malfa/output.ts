@@ -321,5 +321,111 @@ export const tileCategory: TileVariation = {
         },
       ],
     },
+    {
+      colorVariation: [
+        {
+          tileColor: "Blush",
+          tilePath: "/assets/tiles/Malfa/MLF07-Blush.svg",
+        },
+        {
+          tileColor: "BottleGreen",
+          tilePath: "/assets/tiles/Malfa/MLF07-Bottle-Green.svg",
+        },
+        {
+          tileColor: "Cobalt",
+          tilePath: "/assets/tiles/Malfa/MLF07-Cobalt.svg",
+        },
+        {
+          tileColor: "HighlandGreen",
+          tilePath: "/assets/tiles/Malfa/MLF07-HighlandGreen.svg",
+        },
+        {
+          tileColor: "Indigo",
+          tilePath: "/assets/tiles/Malfa/MLF07-Indigo.svg",
+        },
+        {
+          tileColor: "NestEgg",
+          tilePath: "/assets/tiles/Malfa/MLF07-Nest-Egg.svg",
+        },
+        {
+          tileColor: "Papaya",
+          tilePath: "/assets/tiles/Malfa/MLF07-Papaya.svg",
+        },
+        {
+          tileColor: "Sunshine",
+          tilePath: "/assets/tiles/Malfa/MLF07-Sunshine.svg",
+        },
+        { tileColor: "Tan", tilePath: "/assets/tiles/Malfa/MLF07-Tan.svg" },
+        {
+          tileColor: "Terracotta",
+          tilePath: "/assets/tiles/Malfa/MLF07-Terracotta.svg",
+        },
+        {
+          tileColor: "Toffee",
+          tilePath: "/assets/tiles/Malfa/MLF07-Toffee.svg",
+        },
+        {
+          tileColor: "Verdigris",
+          tilePath: "/assets/tiles/Malfa/MLF07-Verdigris.svg",
+        },
+        {
+          tileColor: "White",
+          tilePath: "/assets/tiles/Malfa/MLF07-White.svg",
+        },
+      ],
+    },
+    {
+      colorVariation: [
+        {
+          tileColor: "Blush",
+          tilePath: "/assets/tiles/Malfa/MLF08-Blush.svg",
+        },
+        {
+          tileColor: "BottleGreen",
+          tilePath: "/assets/tiles/Malfa/MLF08-Bottle-Green.svg",
+        },
+        {
+          tileColor: "Cobalt",
+          tilePath: "/assets/tiles/Malfa/MLF08-Cobalt.svg",
+        },
+        {
+          tileColor: "HighlandGreen",
+          tilePath: "/assets/tiles/Malfa/MLF08-HighlandGreen.svg",
+        },
+        {
+          tileColor: "Indigo",
+          tilePath: "/assets/tiles/Malfa/MLF08-Indigo.svg",
+        },
+        {
+          tileColor: "NestEgg",
+          tilePath: "/assets/tiles/Malfa/MLF08-Nest-Egg.svg",
+        },
+        {
+          tileColor: "Papaya",
+          tilePath: "/assets/tiles/Malfa/MLF08-Papaya.svg",
+        },
+        {
+          tileColor: "Sunshine",
+          tilePath: "/assets/tiles/Malfa/MLF08-Sunshine.svg",
+        },
+        { tileColor: "Tan", tilePath: "/assets/tiles/Malfa/MLF08-Tan.svg" },
+        {
+          tileColor: "Terracotta",
+          tilePath: "/assets/tiles/Malfa/MLF08-Terracotta.svg",
+        },
+        {
+          tileColor: "Toffee",
+          tilePath: "/assets/tiles/Malfa/MLF08-Toffee.svg",
+        },
+        {
+          tileColor: "Verdigris",
+          tilePath: "/assets/tiles/Malfa/MLF08-Verdigris.svg",
+        },
+        {
+          tileColor: "White",
+          tilePath: "/assets/tiles/Malfa/MLF08-White.svg",
+        },
+      ],
+    },
   ],
 };
