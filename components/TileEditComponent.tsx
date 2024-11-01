@@ -4,11 +4,18 @@
 import React, { useEffect, useState } from "react";
 import icons from "./icons";
 import { collectionTiles, colorVariation } from "@/data/tileCatgories";
-import useTileStore, { EditedTile, irregularTile, useHistoryStore } from "@/store";
+import useTileStore, {
+  EditedTile,
+  irregularTile,
+  useHistoryStore,
+} from "@/store";
 import { useTransition, animated, config } from "@react-spring/web";
 import { toast } from "react-toastify";
 
-function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: focusedTilePath }, editorTabRef }: any) {
+function TileEditComponent({
+  focusedTileSpec: { index: focusedTileIndex, path: focusedTilePath },
+  editorTabRef,
+}: any) {
   const editedTiles = useTileStore((state) => state.editedTiles);
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
   const { setState, state, currentIndex, setCurrentIndex } = useHistoryStore();
@@ -18,27 +25,43 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
 
   const [showColorPanel, setShowColorPanel] = useState(false);
   const [tileEditState, setTileEditState] = useState<
-    { editedTileSpec: EditedTile; editedSpecIndex: number } | { editedTileSpec: null; editedSpecIndex: number }
+    | { editedTileSpec: EditedTile; editedSpecIndex: number }
+    | { editedTileSpec: null; editedSpecIndex: number }
   >();
 
   const setEdit = (
-    action: "flipX" | "flipY" | "color",
-    kwargs: { rotationDegree: number } | { rotateStyle: "flipX" | "flipY" | undefined } | { tilePath: string | undefined }
+    action: "flipX" | "flipY" | "color" | "rotate",
+    kwargs:
+      | { rotationDegree: number }
+      | { rotateStyle: "flipX" | "flipY" | undefined }
+      | { tilePath: string | undefined }
   ) => {
     let to;
     let from;
 
     if (tileEditState?.editedTileSpec) {
-      from = tileEditState.editedTileSpec[Object.keys(kwargs)[0] as keyof EditedTile];
+      from =
+        tileEditState.editedTileSpec[
+          Object.keys(kwargs)[0] as keyof EditedTile
+        ];
       to = Object.values(kwargs)[0];
       const newArr = [...editedTiles];
-      newArr[tileEditState.editedSpecIndex] = { ...tileEditState.editedTileSpec, ...kwargs };
+      newArr[tileEditState.editedSpecIndex] = {
+        ...tileEditState.editedTileSpec,
+        ...kwargs,
+      };
       setEditedTiles(newArr);
     } else {
       from = to = Object.values(kwargs)[0];
       setEditedTiles([
         ...editedTiles,
-        { tileIndex: focusedTileIndex, rotationDegree: 0, rotateStyle: undefined, tilePath: focusedTilePath, ...kwargs },
+        {
+          tileIndex: focusedTileIndex,
+          rotationDegree: 0,
+          rotateStyle: undefined,
+          tilePath: focusedTilePath,
+          ...kwargs,
+        },
       ]);
     }
 
@@ -61,7 +84,9 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
   };
 
   const resetEdit = () => {
-    setEditedTiles(editedTiles.filter((item) => item.tileIndex !== focusedTileIndex));
+    setEditedTiles(
+      editedTiles.filter((item) => item.tileIndex !== focusedTileIndex)
+    );
     setTileEditState({ editedSpecIndex: -1, editedTileSpec: null });
   };
 
@@ -75,7 +100,9 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
     if (specificTile) {
       for (const subCategory of specificTile.subCategories) {
         const matchingTile = subCategory.tileVariation.find(
-          (tile) => tile.tileColor === colorValue && focusedTilePath.includes(tile.tilePath.split("-")[0])
+          (tile) =>
+            tile.tileColor === colorValue &&
+            focusedTilePath.includes(tile.tilePath.split("-")[0])
         );
         if (matchingTile) {
           specificColorData = matchingTile;
@@ -91,7 +118,9 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
 
   // #1 Side Effect
   useEffect(() => {
-    const editIndex = editedTiles.findIndex((tile) => tile.tileIndex === focusedTileIndex);
+    const editIndex = editedTiles.findIndex(
+      (tile) => tile.tileIndex === focusedTileIndex
+    );
     setTileEditState({
       editedTileSpec: editedTiles[editIndex],
       editedSpecIndex: editIndex,
@@ -127,7 +156,7 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
             <div className="">
               <div
                 onClick={() => {
-                  rotateEdit('rotate');
+                  rotateEdit("rotate");
                 }}
               >
                 <icons.Rotate2 />
@@ -195,7 +224,9 @@ function TileEditComponent({ focusedTileSpec: { index: focusedTileIndex, path: f
                   >
                     <div
                       className={` w-8 h-8 rounded-full border ${
-                        tileColor === color.colorName ? "border-2 border-yellow-950" : "border border-black"
+                        tileColor === color.colorName
+                          ? "border-2 border-yellow-950"
+                          : "border border-black"
                       } `}
                       style={{
                         backgroundColor: color.colorHEX,
