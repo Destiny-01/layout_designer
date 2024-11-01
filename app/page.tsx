@@ -220,6 +220,12 @@ const page = (props: Props) => {
     setActiveRotationDegree(0);
   }, [tileName]);
 
+  const handleDrag = (e: React.DragEvent<HTMLButtonElement>, draggedTilePath: string) => {
+    e.dataTransfer.setData("text/plain", `${draggedTilePath}*+=${activeTile}`);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+
   return (
     <div className="w-full lg:px-20 p-7 flex items-start flex-col lg:flex-row">
       <div className="lg:max-w-[25%] lg:w-fit w-full lg:mr-10">
@@ -319,6 +325,8 @@ const page = (props: Props) => {
                               handleTileChoice(item.tileName, tileVariant.tilePath);
                               setActiveRotationDegree(0);
                             }}
+                            draggable="true"
+                            onDragStart={(e) => handleDrag(e, tileVariant.tilePath)}
                           >
                             <Image src={tileVariant.tilePath} className="w-12 h-12" width={10} height={10} alt="Tile" />
                           </button>

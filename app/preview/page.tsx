@@ -14,9 +14,7 @@ function Preiew() {
   const autoFillPattern = useTileStore((state) => state.autoFillPattern);
   const tileColor = useTileStore((state) => state.tileColor);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
-  const activeRotationDegree = useTileStore(
-    (state) => state.activeRotationDegree
-  );
+  const activeRotationDegree = useTileStore((state) => state.activeRotationDegree);
   const zoom = useTileStore((state) => state.zoom);
   const [image, setImage] = useState("");
   const activeTileName = useTileStore((state) => state.tileName);
@@ -28,34 +26,18 @@ function Preiew() {
       price: number;
     }[]
   >([]);
-  const activeCollection = collectionTiles.find(
-    (tile) => tile.tileName === activeTile
-  );
+  const activeCollection = collectionTiles.find((tile) => tile.tileName === activeTile);
   const divRef = useRef<HTMLDivElement | null>(null);
 
-  const renderAutoFill = (
-    fillTilePath: string,
-    colIndex: number,
-    initialRowIndex: number
-  ) => {
+  const renderAutoFill = (fillTilePath: string, colIndex: number, initialRowIndex: number) => {
     const rows = Math.floor(autoFillPattern.length / 2);
-    if (
-      activeCollection &&
-      activeCollection.subCategories.length > 1 &&
-      autoFillPattern.length > 0
-    ) {
+    if (activeCollection && activeCollection.subCategories.length > 1 && autoFillPattern.length > 0) {
       if (autoFillPattern.length < 3) {
-        const singleCategory =
-          activeCollection.subCategories[initialRowIndex % 2];
-        return (
-          singleCategory?.tileVariation.find(
-            (tile) => tile.tileColor === tileColor
-          )?.tilePath || singleCategory?.tileVariation[0].tilePath
-        );
+        const singleCategory = activeCollection.subCategories[initialRowIndex % 2];
+        return singleCategory?.tileVariation.find((tile) => tile.tileColor === tileColor)?.tilePath || singleCategory?.tileVariation[0].tilePath;
       }
       const definiteIndex = (initialRowIndex - 1) % rows; //+ 1;
-      let rowIndex =
-        initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
+      let rowIndex = initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
       let index = Math.abs(
         colIndex % 2 === 0
           ? rowIndex % 2 === 0
@@ -69,11 +51,7 @@ function Preiew() {
       );
       const singleCategory = activeCollection.subCategories[index];
 
-      return (
-        singleCategory?.tileVariation.find(
-          (tile) => tile.tileColor === tileColor
-        )?.tilePath || singleCategory?.tileVariation[0].tilePath
-      );
+      return singleCategory?.tileVariation.find((tile) => tile.tileColor === tileColor)?.tilePath || singleCategory?.tileVariation[0].tilePath;
     } else {
       return fillTilePath;
     }
@@ -86,18 +64,13 @@ function Preiew() {
     [editedTiles] // Dependency: Recompute only when `editedTiles` changes
   );
 
-
   const parseUrl = (url: string): string => {
     const parts = url.split("/");
     const collection = parts[parts.length - 2];
     const match = url.match(/\/([A-Za-z0-9]+)-([A-Za-z-]+)\.svg$/);
     if (match) {
       const colorPart = match[2].split("-");
-      const color = colorPart
-        .map((word, index) =>
-          index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
-        )
-        .join("");
+      const color = colorPart.map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1))).join("");
       return `${collection}-${color}`;
     }
     return "";
@@ -105,8 +78,7 @@ function Preiew() {
 
   useEffect(() => {
     const details: any = {
-      [`${activeTileName}-${tileColor}`]:
-        measurement.columns * measurement.rows - editedTiles.length,
+      [`${activeTileName}-${tileColor}`]: measurement.columns * measurement.rows - editedTiles.length,
     };
     for (let i = 0; i < editedTiles.length; i++) {
       const element = editedTiles[i];
@@ -121,12 +93,8 @@ function Preiew() {
         qty: details[key],
         price:
           activeSize === 9
-            ? (collectionTiles.find(
-                (item) => item.tileName === key.split("-")[0]
-              )?.price9by9 || 0) * details[key]
-            : (collectionTiles.find(
-                (item) => item.tileName === key.split("-")[0]
-              )?.price13by13 || 0) * details[key],
+            ? (collectionTiles.find((item) => item.tileName === key.split("-")[0])?.price9by9 || 0) * details[key]
+            : (collectionTiles.find((item) => item.tileName === key.split("-")[0])?.price13by13 || 0) * details[key],
       });
     }
 
@@ -192,14 +160,9 @@ function Preiew() {
 
       {/* Layout Visualiser Title */}
       <div className="w-full flex justify-between">
-        <h1 className="text-xl font-semibold md:text-3xl text-center align-middle mb-3">
-          Layout Visualiser
-        </h1>
+        <h1 className="text-xl font-semibold md:text-3xl text-center align-middle mb-3">Layout Visualiser</h1>
 
-        <button
-          onClick={() => handleDownloadImage()}
-          className="border border-[#F6E2C4] rounded-full px-5 py-2 flex mb-4 space-x-3 items-center"
-        >
+        <button onClick={() => handleDownloadImage()} className="border border-[#F6E2C4] rounded-full px-5 py-2 flex mb-4 space-x-3 items-center">
           <div>
             <icons.Save />
           </div>
@@ -214,7 +177,7 @@ function Preiew() {
 
         <div
           ref={divRef}
-          className="h-4/5 gap-px"
+          className="h-4/5 gap-[1px]"
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${measurement.columns}, minmax(0, 1fr))`,
@@ -226,16 +189,17 @@ function Preiew() {
               const editedTile = editedTiles[getIndex(`${i}-${j}`)];
               return (
                 activeTilePath !== "" && (
-                  <div key={`${i}-${j}`}>
+                  <div key={`${i}-${j}`} className="flex justify-center relative bg-transparent overflow-hidden">
                     {getIndex(`${i}-${j}`) === -1 ? (
                       <Image
                         src={renderAutoFill(activeTilePath, i, j)}
                         width={"0"}
                         height={"0"}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover relative -z"
                         alt="Tile"
                         style={{
                           rotate: `${activeRotationDegree}deg`,
+                          scale: 1.09,
                         }}
                       />
                     ) : (
@@ -245,21 +209,12 @@ function Preiew() {
                             src={editedTile.tilePath ?? ""}
                             width={"0"}
                             height={"0"}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover relative -"
                             alt="Tile"
-                            style={
-                              editedTile.rotateStyle === "flipX"
-                                ? {
-                                    transform: `rotateY(${editedTile.rotationDegree}deg)`,
-                                  }
-                                : editedTile.rotateStyle === "flipY"
-                                ? {
-                                    transform: `rotateX(${editedTile.rotationDegree}deg)`,
-                                  }
-                                : {
-                                    rotate: `${editedTile.rotationDegree}deg`,
-                                  }
-                            }
+                            style={{
+                              rotate: `${editedTile.rotationDegree}deg`,
+                              scale: 1.09,
+                            }}
                           />
                         )}
                       </>
@@ -284,10 +239,7 @@ function Preiew() {
 
       {/* Table Data - (You can add rows dynamically here) */}
       {infoTable.map((item, i) => (
-        <div
-          key={i}
-          className="grid grid-cols-4 md:grid-cols-5 text-center text-sm mb-4"
-        >
+        <div key={i} className="grid grid-cols-4 md:grid-cols-5 text-center text-sm mb-4">
           <span>{item.name} tile</span>
           <span>{item.color}</span>
           <span className="hidden md:block">{`${activeSize}x${activeSize}`}</span>
@@ -301,24 +253,16 @@ function Preiew() {
 
       {/* Total Section */}
       <div className="grid grid-cols-4 md:grid-cols-5 text-center mb-6">
-        <span className="text-lg font-semibold col-start-2 md:col-start-3">
-          Total
-        </span>
-        <span className="text-lg col-start-3 md:col-start-4">
-          {(measurement.columns || 1) * (measurement.rows || 1)} tiles
-        </span>
-        <span className="text-lg col-sta">
-          &#8364;{infoTable.reduce((total, item) => total + item.price, 0)}
-        </span>
+        <span className="text-lg font-semibold col-start-2 md:col-start-3">Total</span>
+        <span className="text-lg col-start-3 md:col-start-4">{(measurement.columns || 1) * (measurement.rows || 1)} tiles</span>
+        <span className="text-lg col-sta">&#8364;{infoTable.reduce((total, item) => total + item.price, 0)}</span>
       </div>
 
       {/* Disclaimer Section */}
       <p className="text-xs text-center text-gray-500">
-        Our visualiser is intended for demonstration purposes only. It
-        automatically rounds down to the nearest whole number, providing an
-        approximate representation. For accurate planning, please verify using
-        your own drawings and measurements. 10% contingency buffer not included
-        but recommended for breakages. Shipping not included.
+        Our visualiser is intended for demonstration purposes only. It automatically rounds down to the nearest whole number, providing an approximate
+        representation. For accurate planning, please verify using your own drawings and measurements. 10% contingency buffer not included but
+        recommended for breakages. Shipping not included.
       </p>
     </div>
   );

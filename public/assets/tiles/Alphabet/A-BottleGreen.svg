@@ -15,7 +15,7 @@
       .cls-2, .cls-3 {
         stroke: #1d1d1b;
         stroke-miterlimit: 10;
-        stroke-width: .25px;
+        stroke-width: .25;
       }
 
       .cls-3 {
