@@ -1,7 +1,7 @@
 import useDeviceWidth from "@/hooks/useDeviceWidth"; // Path to your custom hook
 import useTileStore, { irregularTile } from "@/store";
 import Image from "next/image";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {  useEffect, useMemo, useState } from "react";
 import { collectionTiles } from "@/data/tileCatgories";
 import { toast } from "react-toastify";
 
@@ -18,8 +18,6 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const [numRows, setNumRows] = useState(measurement.rows);
   const [numCols, setNumCols] = useState(measurement.columns);
-  // const [scale, setScale] = useState(1);
-  const singleTile = useRef<any>(null);
   const zoom = useTileStore((state) => state.zoom);
   const boxSize = activeSize * 10;
   const [pathCache, setPathCathe] = useState<{ [key: string]: string }>({});
@@ -173,6 +171,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
       });
     }
   }, [numCols]);
+
   return (
     <div
       className={` grid-container space-y-[1.5px] w-full origin-top-left rounded-lg relative h-full`}
@@ -182,7 +181,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
         transformOrigin: "top left",
       }}
     >
-      {rows.length > 3 && !activeTilePath && (
+      { !activeTilePath && (
         <div className="w-full h-full absolute flex items-center justify-center">
           <p className="text-[#616161] text-lg">Please choose a model</p>
         </div>
@@ -201,7 +200,6 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
                     onClick={(e) => {
                       handleClick(e, `${colIndex}-${rowIndex}`);
                     }}
-                    ref={singleTile}
                     className={`   border-0 border-[#F1F1F1] h-full w-full overflow-hidden relative  `}
                     onDragOver={handleDragOver}
                     onDragStart={(e) => handleDrag(e, editedTile?.tilePath || pathCache[`${colIndex}-${rowIndex}`] || activeTilePath)}

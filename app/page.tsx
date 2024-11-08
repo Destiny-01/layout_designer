@@ -2,29 +2,24 @@
 import icons from "@/components/icons";
 import TileCategory from "@/components/TileCategory";
 import { collectionTiles } from "@/data/tileCatgories";
-import useTileStore, {
-  EditedTile,
-  HistoryEntry,
-  irregularTile,
-  useHistoryStore,
-} from "@/store";
+import useTileStore, { EditedTile, HistoryEntry, irregularTile, useHistoryStore } from "@/store";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import GridAndEdit from "@/components/GridAndEdit";
+import { useRouter } from "next/navigation";
+import { useRootLayoutContext } from "@/contexts/RootLayoutContext";
+import { toPng } from "html-to-image";
 
 type Props = {};
 
 const page = (props: Props) => {
   const [showTile, setShowTile] = useState<boolean>(false);
   const [showSeeAllTile, setShowSeeAllTile] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [price, setPrice] = useState<number | null>(null);
 
   const rotationDegree = useTileStore((state) => state.activeRotationDegree);
-  const setActiveRotationDegree = useTileStore(
-    (state) => state.setActiveRotationDegree
-  );
+  const setActiveRotationDegree = useTileStore((state) => state.setActiveRotationDegree);
   const editedTiles = useTileStore((state) => state.editedTiles);
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const setEditedTiles = useTileStore((state) => state.setEditedTiles);
@@ -44,6 +39,8 @@ const page = (props: Props) => {
   const state = useHistoryStore((state) => state.state);
   const setCurrentIndex = useHistoryStore((state) => state.setCurrentIndex);
   const currentIndex = useHistoryStore((state) => state.currentIndex);
+  const router = useRouter();
+  const { gridRef, tilePreviewDataUrl } = useRootLayoutContext();
 
   const rotateDiv = () => {
     const rotationAngle = irregularTile.includes(activeTile) ? 180 : 90;
@@ -65,30 +62,22 @@ const page = (props: Props) => {
   };
 
   const randomizeTileChoice = () => {
-    const tile = collectionTiles.find(
-      (element) => element.tileName === tileName
-    );
+    const tile = collectionTiles.find((element) => element.tileName === tileName);
     const numSubCategories = tile?.subCategories.length;
     let editedTiles: EditedTile[] = [];
-    const rotateVia = irregularTile.includes(activeTile)
-      ? [0, 180]
-      : [0, 90, 180, 270];
+    const rotateVia = irregularTile.includes(activeTile) ? [0, 180] : [0, 90, 180, 270];
     for (let i = 0; i < measurement.rows; i++) {
       for (let j = 0; j < measurement.columns; j++) {
         if (numSubCategories) {
           const randomMass = Math.random();
-          const tileVariation =
-            tile.subCategories[Math.floor(randomMass * numSubCategories)]
-              .tileVariation;
-              const editedSpec: EditedTile = {
-                tileIndex: `${j}-${i}`,
-                rotationDegree: rotateVia[Math.floor(randomMass * 4)],
-                rotateStyle: undefined,
-                tilePath: tileVariation.find(
-                  (item) => item.tileColor === storedTileColor
-                )?.tilePath,
-              };
-              !editedSpec.tilePath && console.log(editedSpec, tileVariation, storedTileColor);
+          const tileVariation = tile.subCategories[Math.floor(randomMass * numSubCategories)].tileVariation;
+          const editedSpec: EditedTile = {
+            tileIndex: `${j}-${i}`,
+            rotationDegree: rotateVia[Math.floor(randomMass * 4)],
+            rotateStyle: undefined,
+            tilePath: tileVariation.find((item) => item.tileColor === storedTileColor)?.tilePath,
+          };
+          !editedSpec.tilePath && console.log(editedSpec, tileVariation, storedTileColor);
           editedTiles.push(editedSpec);
         }
       }
@@ -113,12 +102,8 @@ const page = (props: Props) => {
   };
 
   const executeAction = (newState: HistoryEntry, isUndo = true) => {
-    const currentTile = editedTiles.find(
-      (tile) => tile.tileIndex === newState.tileIndex
-    );
-    const index = editedTiles.findIndex(
-      (tile) => tile.tileIndex === newState.tileIndex
-    );
+    const currentTile = editedTiles.find((tile) => tile.tileIndex === newState.tileIndex);
+    const index = editedTiles.findIndex((tile) => tile.tileIndex === newState.tileIndex);
 
     if (currentTile) {
       switch (newState.action) {
@@ -198,14 +183,8 @@ const page = (props: Props) => {
   }, []);
 
   useEffect(() => {
-    const newPrice =
-      (activeSize > 9 ? specificTile?.price13by13 : specificTile?.price9by9) ||
-      0;
-    setPrice(
-      measurement.columns && measurement.rows
-        ? measurement.columns * measurement.rows * newPrice
-        : null
-    );
+    const newPrice = (activeSize > 9 ? specificTile?.price13by13 : specificTile?.price9by9) || 0;
+    setPrice(measurement.columns && measurement.rows ? measurement.columns * measurement.rows * newPrice : null);
   }, [tileName, measurement.rows, measurement.columns]);
 
   useEffect(() => {
@@ -225,6 +204,32 @@ const page = (props: Props) => {
     e.dataTransfer.effectAllowed = "move";
   };
 
+  const handleRoute = () => {
+    console.log("here");
+    if (gridRef.current) {
+      const style = {
+        transform: `scale(${zoom})`,
+        transformOrigin: "top left",
+        width: `${gridRef.current.offsetWidth}px`,
+        height: `${gridRef.current.offsetHeight}px`,
+      };
+
+      toPng(gridRef.current, {
+        width: gridRef.current.scrollWidth * zoom,
+        height: gridRef.current.scrollHeight * zoom,
+        style,
+      })
+        .then((dataUrl: string) => {
+          tilePreviewDataUrl.current = dataUrl;
+          localStorage.setItem("tilePreviewDataUrl", dataUrl);
+          router.push("preview");
+        })
+        .catch((error: Error) => {
+          console.error("Oops, something went wrong!", error);
+        })
+        .finally(() => console.log("done"));
+    }
+  };
 
   return (
     <div className="w-full lg:px-20 p-7 flex items-start flex-col lg:flex-row">
@@ -473,13 +478,11 @@ const page = (props: Props) => {
               <p className="text-sm font-medium">Rotate All</p>
             </button>
 
-            <button className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
-              <Link href="/preview" className="flex">
-                <div>
-                  <icons.Save />
-                </div>
-                <p>Save</p>
-              </Link>
+            <button className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center" onClick={handleRoute}>
+              <div>
+                <icons.Save />
+              </div>
+              <p>Save</p>
             </button>
 
             <Link href="https://212dimensions.com/my-cart">
@@ -515,13 +518,11 @@ const page = (props: Props) => {
                 <p className="text-sm font-medium">Add to Cart</p>
               </button>
             </Link>
-            <Link href="/preview">
-              <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden">
-                <div>
-                  <icons.Save />
-                </div>
-              </button>
-            </Link>
+            <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden" onClick={handleRoute}>
+              <div>
+                <icons.Save />
+              </div>
+            </button>
           </div>
           <div className={`flex items-center justify-between`}>
             <button

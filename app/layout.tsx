@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import RootLayoutProvider from "@/contexts/RootLayoutContext";
 
 export const metadata: Metadata = {
   title: "Two 1/2 Dimensions",
@@ -17,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={"font-nohemi text-black"}>
-        <Navbar />
-        <ToastContainer />
-        <div className="lg:mt-6">{children}</div>
+        <RootLayoutProvider>
+          <Navbar />
+          <ToastContainer />
+          <div className="lg:mt-6">{children}</div>
+        </RootLayoutProvider>
       </body>
     </html>
   );

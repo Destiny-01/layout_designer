@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Grid from "./Grid";
 import TileEditComponent from "./TileEditComponent";
 import { animated, config, useTransition } from "@react-spring/web";
+import { useRootLayoutContext } from "@/contexts/RootLayoutContext";
 
 function GridAndEdit() {
   const [focusedTileSpec, setFocusedTileSpec] = useState({
@@ -13,8 +14,9 @@ function GridAndEdit() {
   });
   const [floatEditor, setFloatEditor] = useState(false);
   const editorTabRef = useRef<HTMLDivElement | null>(null);
-  const gridRef = useRef<HTMLDivElement | null>(null);
   const gridAndEditRef = useRef<HTMLDivElement | null>(null);
+  const { gridRef } = useRootLayoutContext();
+
 
   useEffect(() => {
     const handleClickOutSide = (e: Event) =>

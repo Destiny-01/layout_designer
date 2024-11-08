@@ -1,22 +1,15 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useTileStore from "@/store";
 import { collectionTiles } from "@/data/tileCatgories";
-import Image from "next/image";
 import icons from "@/components/icons";
-import { toPng } from "html-to-image";
+import { useRootLayoutContext } from "@/contexts/RootLayoutContext";
 
 function Preiew() {
   const activeSize = useTileStore((state) => state.activeSize);
-  const activeTile = useTileStore((state) => state.tileName);
   const measurement = useTileStore((state) => state.measurement);
   const editedTiles = useTileStore((state) => state.editedTiles);
-  const autoFillPattern = useTileStore((state) => state.autoFillPattern);
   const tileColor = useTileStore((state) => state.tileColor);
-  const activeTilePath = useTileStore((state) => state.activeTilePath);
-  const activeRotationDegree = useTileStore((state) => state.activeRotationDegree);
-  const zoom = useTileStore((state) => state.zoom);
-  const [image, setImage] = useState("");
   const activeTileName = useTileStore((state) => state.tileName);
   const [infoTable, setInfoTable] = useState<
     {
@@ -26,43 +19,7 @@ function Preiew() {
       price: number;
     }[]
   >([]);
-  const activeCollection = collectionTiles.find((tile) => tile.tileName === activeTile);
-  const divRef = useRef<HTMLDivElement | null>(null);
-
-  const renderAutoFill = (fillTilePath: string, colIndex: number, initialRowIndex: number) => {
-    const rows = Math.floor(autoFillPattern.length / 2);
-    if (activeCollection && activeCollection.subCategories.length > 1 && autoFillPattern.length > 0) {
-      if (autoFillPattern.length < 3) {
-        const singleCategory = activeCollection.subCategories[initialRowIndex % 2];
-        return singleCategory?.tileVariation.find((tile) => tile.tileColor === tileColor)?.tilePath || singleCategory?.tileVariation[0].tilePath;
-      }
-      const definiteIndex = (initialRowIndex - 1) % rows; //+ 1;
-      let rowIndex = initialRowIndex + 1 > rows ? definiteIndex : initialRowIndex;
-      let index = Math.abs(
-        colIndex % 2 === 0
-          ? rowIndex % 2 === 0
-            ? rowIndex + 1 > rows
-              ? rowIndex - rows
-              : rowIndex
-            : (rowIndex === 0 ? rowIndex : rowIndex - 2) - 1
-          : rowIndex % 2 === 0
-          ? rowIndex + 1 - rows
-          : rowIndex + 2
-      );
-      const singleCategory = activeCollection.subCategories[index];
-
-      return singleCategory?.tileVariation.find((tile) => tile.tileColor === tileColor)?.tilePath || singleCategory?.tileVariation[0].tilePath;
-    } else {
-      return fillTilePath;
-    }
-  };
-
-  const getIndex = useMemo(
-    () => (tileIndex: string) => {
-      return editedTiles.findIndex((tile) => tile.tileIndex === tileIndex);
-    },
-    [editedTiles] // Dependency: Recompute only when `editedTiles` changes
-  );
+  const { tilePreviewDataUrl } = useRootLayoutContext();
 
   const parseUrl = (url: string): string => {
     const parts = url.split("/");
@@ -101,39 +58,9 @@ function Preiew() {
     setInfoTable(infoTable);
   }, []);
 
-  useEffect(() => {
-    const render = () => {
-      if (divRef.current) {
-        const style = {
-          transform: `scale(${zoom})`,
-          transformOrigin: "top left",
-          width: `${divRef.current.offsetWidth}px`,
-          height: `${divRef.current.offsetHeight}px`,
-        };
-
-        toPng(divRef.current, {
-          width: divRef.current.scrollWidth * zoom,
-          height: divRef.current.scrollHeight * zoom,
-          style,
-        })
-          .then((dataUrl: string) => {
-            const img = document.createElement("img") as HTMLImageElement;
-            img.src = dataUrl;
-            setImage(dataUrl);
-          })
-          .catch((error: Error) => {
-            console.error("Oops, something went wrong!", error);
-          })
-          .finally(() => console.log("done"));
-      }
-    };
-    var pf = performance.now();
-    render();
-  }, []);
-
   const handleDownloadImage = () => {
     const link = document.createElement("a");
-    link.href = image;
+    link.href = tilePreviewDataUrl.current;
     link.download = "component.png";
     link.click();
   };
@@ -175,57 +102,7 @@ function Preiew() {
       <div className="border-2 bg-gray-300 h-64 flex justify-center items-center mb-6">
         {/* <p className="text-gray-400">Image to be centred in here</p> */}
 
-        <div
-          ref={divRef}
-          className="h-4/5 gap-[1px]"
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${measurement.columns}, minmax(0, 1fr))`,
-            gridTemplateRows: `repeat(${measurement.rows}, minmax(0, 1fr))`,
-          }}
-        >
-          {Array.from({ length: measurement.rows }).map((_, j) =>
-            Array.from({ length: measurement.columns }).map((_, i) => {
-              const editedTile = editedTiles[getIndex(`${i}-${j}`)];
-              return (
-                activeTilePath !== "" && (
-                  <div key={`${i}-${j}`} className="flex justify-center relative bg-transparent overflow-hidden">
-                    {getIndex(`${i}-${j}`) === -1 ? (
-                      <Image
-                        src={renderAutoFill(activeTilePath, i, j)}
-                        width={"0"}
-                        height={"0"}
-                        className="w-full h-full object-cover relative -z"
-                        alt="Tile"
-                        style={{
-                          rotate: `${activeRotationDegree}deg`,
-                          scale: 1.09,
-                        }}
-                      />
-                    ) : (
-                      <>
-                        {editedTile.tilePath && (
-                          <Image
-                            src={editedTile.tilePath ?? ""}
-                            width={"0"}
-                            height={"0"}
-                            className="w-full h-full object-cover relative -"
-                            alt="Tile"
-                            style={{
-                              rotate: `${editedTile.rotationDegree}deg`,
-                              scale: 1.09,
-                            }}
-                          />
-                        )}
-                      </>
-                    )}
-                  </div>
-                )
-                // </div>
-              );
-            })
-          )}
-        </div>
+        <img className="h-4/5" src={tilePreviewDataUrl.current || localStorage.getItem("tilePreviewDataUrl")|| undefined} alt="No selection was made" />
       </div>
 
       {/* Table Header */}
