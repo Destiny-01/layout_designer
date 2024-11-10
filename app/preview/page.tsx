@@ -102,7 +102,7 @@ function Preiew() {
       <div className="border-2 bg-gray-300 h-64 flex justify-center items-center mb-6">
         {/* <p className="text-gray-400">Image to be centred in here</p> */}
 
-        <img className="h-4/5" src={tilePreviewDataUrl.current || localStorage.getItem("tilePreviewDataUrl")|| undefined} alt="No selection was made" />
+        <img className="h-4/5" src={tilePreviewDataUrl.current || undefined} alt="No selection was made" />
       </div>
 
       {/* Table Header */}
