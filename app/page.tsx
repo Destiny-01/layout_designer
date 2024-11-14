@@ -518,11 +518,11 @@ const page = (props: Props) => {
                 <p className="text-sm font-medium">Add to Cart</p>
               </button>
             </Link>
-            <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden" onClick={handleRoute}>
+            {/* <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex hidden md:block md:hidden" onClick={handleRoute}>
               <div>
                 <icons.Save />
               </div>
-            </button>
+            </button> */}
           </div>
           <div className={`flex items-center justify-between`}>
             <button
