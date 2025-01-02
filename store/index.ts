@@ -112,8 +112,7 @@ export const irregularTile = [
   "Malaga",
   "Plain",
   "Rio",
-  "Ruta",
-  "Penang",
+  "Ruta"
 ];
 
 export default useTileStore;

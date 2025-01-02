@@ -1,7 +1,7 @@
 import useDeviceWidth from "@/hooks/useDeviceWidth"; // Path to your custom hook
 import useTileStore, { irregularTile } from "@/store";
 import Image from "next/image";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {  useEffect, useMemo, useState } from "react";
 import { collectionTiles } from "@/data/tileCatgories";
 import { toast } from "react-toastify";
 
@@ -18,8 +18,6 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
   const activeTilePath = useTileStore((state) => state.activeTilePath);
   const [numRows, setNumRows] = useState(measurement.rows);
   const [numCols, setNumCols] = useState(measurement.columns);
-  // const [scale, setScale] = useState(1);
-  const singleTile = useRef<any>(null);
   const zoom = useTileStore((state) => state.zoom);
   const boxSize = activeSize * 10;
   const [pathCache, setPathCathe] = useState<{ [key: string]: string }>({});
@@ -125,9 +123,9 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
     e.preventDefault();
     if (irregularTile.includes(activeTile)) {
       toast.info("Can't drop here", {
-        toastId: ';)'
-      })
-    };
+        toastId: ";)",
+      });
+    }
     const editedIndex = getIndex(index);
     const data = e.dataTransfer.getData("text/plain");
     const [_tilePath, tileName] = data.split("*+=");
@@ -155,6 +153,7 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
   };
 
   const handleDrag = (e: React.DragEvent<HTMLButtonElement>, draggedTilePath: string) => {
+    console.log("here");
     e.dataTransfer.setData("text/plain", `${draggedTilePath}*+=${activeTile}`);
     e.dataTransfer.effectAllowed = "move";
   };
@@ -172,23 +171,24 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
       });
     }
   }, [numCols]);
+
   return (
     <div
-      className={` grid-container w-full origin-top-left rounded-lg relative h-full`}
+      className={` grid-container space-y-[1.5px] w-full origin-top-left rounded-lg relative h-full`}
       ref={containerRef}
       style={{
         transform: `scale(${zoom})`,
         transformOrigin: "top left",
       }}
     >
-      {rows.length > 3 && !activeTilePath && (
+      { !activeTilePath && (
         <div className="w-full h-full absolute flex items-center justify-center">
           <p className="text-[#616161] text-lg">Please choose a model</p>
         </div>
       )}
       {rows.map((rowIndex) => {
         return (
-          <div key={rowIndex} className="flex h-fit">
+          <div key={rowIndex} className="flex space-x-[1.5px]">
             {cols.map((colIndex) => {
               const editedTile = editedTiles[getIndex(`${colIndex}-${rowIndex}`)];
 
@@ -200,10 +200,9 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
                     onClick={(e) => {
                       handleClick(e, `${colIndex}-${rowIndex}`);
                     }}
-                    ref={singleTile}
-                    className={`  bg-[#FAFAFA] border border-[#F1F1F1] h-fit flex`}
+                    className={`   border-0 border-[#F1F1F1] h-full w-full overflow-hidden relative  `}
                     onDragOver={handleDragOver}
-                    onDragStart={(e) => handleDrag(e, editedTile.tilePath || pathCache[`${colIndex}-${rowIndex}`] || activeTilePath)}
+                    onDragStart={(e) => handleDrag(e, editedTile?.tilePath || pathCache[`${colIndex}-${rowIndex}`] || activeTilePath)}
                     onDrop={(e) => handleDrop(e, `${colIndex}-${rowIndex}`)}
                     style={
                       focusedTileIndex === `${colIndex}-${rowIndex}`
@@ -212,7 +211,8 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
                             borderStyle: "none",
                             borderWidth: "0px",
                             boxShadow: "0 -3px 16px rgba(0, 0, 0, 0.3)",
-                            transform: "scale(1.09)",
+                            scale: 1.09,
+                            transformOrigin: "49.8% 49.8%",
                           }
                         : {}
                     }
@@ -222,10 +222,12 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
                         src={pathCache[`${colIndex}-${rowIndex}`] || activeTilePath}
                         width={"0"}
                         height={"0"}
-                        className="w-full h-auto object-cover "
+                        className="w-full h-auto object-cover relative "
                         alt="Tile"
                         style={{
                           rotate: `${activeRotationDegree}deg`,
+                          transformOrigin: "49.8% 49.8%",
+                          scale: 1.04,
                         }}
                       />
                     ) : (
@@ -235,21 +237,13 @@ const Grid = ({ isMainGrid = true, focusedTileSpec: { index: focusedTileIndex },
                             src={editedTile.tilePath ?? ""}
                             width={"0"}
                             height={"0"}
-                            className="w-full h-auto object-cover inline-block"
+                            className="w-full h-auto object-cover relative"
                             alt="Tile"
-                            style={
-                              editedTile.rotateStyle === "flipX"
-                                ? {
-                                    transform: `rotateY(${editedTile.rotationDegree}deg)`,
-                                  }
-                                : editedTile.rotateStyle === "flipY"
-                                ? {
-                                    transform: `rotateX(${editedTile.rotationDegree}deg)`,
-                                  }
-                                : {
-                                    rotate: `${editedTile.rotationDegree}deg`,
-                                  }
-                            }
+                            style={{
+                              rotate: `${editedTile?.rotationDegree}deg`,
+                              transformOrigin: "49.8% 49.8%",
+                              scale: 1.04,
+                            }}
                           />
                         )}
                       </>

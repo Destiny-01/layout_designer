@@ -10,15 +10,17 @@ import useTileStore, {
 } from "@/store";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import GridAndEdit from "@/components/GridAndEdit";
+import { useRouter } from "next/navigation";
+import { useRootLayoutContext } from "@/contexts/RootLayoutContext";
+import { toPng } from "html-to-image";
 
 type Props = {};
 
 const page = (props: Props) => {
   const [showTile, setShowTile] = useState<boolean>(false);
   const [showSeeAllTile, setShowSeeAllTile] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [price, setPrice] = useState<number | null>(null);
 
   const rotationDegree = useTileStore((state) => state.activeRotationDegree);
@@ -44,6 +46,8 @@ const page = (props: Props) => {
   const state = useHistoryStore((state) => state.state);
   const setCurrentIndex = useHistoryStore((state) => state.setCurrentIndex);
   const currentIndex = useHistoryStore((state) => state.currentIndex);
+  const router = useRouter();
+  const { gridRef, tilePreviewDataUrl } = useRootLayoutContext();
 
   const rotateDiv = () => {
     const rotationAngle = irregularTile.includes(activeTile) ? 180 : 90;
@@ -221,6 +225,41 @@ const page = (props: Props) => {
     setActiveRotationDegree(0);
   }, [tileName]);
 
+  const handleDrag = (
+    e: React.DragEvent<HTMLButtonElement>,
+    draggedTilePath: string
+  ) => {
+    e.dataTransfer.setData("text/plain", `${draggedTilePath}*+=${activeTile}`);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleRoute = () => {
+    console.log("here");
+    if (gridRef.current) {
+      const style = {
+        transform: `scale(${zoom})`,
+        transformOrigin: "top left",
+        width: `${gridRef.current.offsetWidth}px`,
+        height: `${gridRef.current.offsetHeight}px`,
+      };
+
+      toPng(gridRef.current, {
+        width: gridRef.current.scrollWidth * zoom,
+        height: gridRef.current.scrollHeight * zoom,
+        style,
+      })
+        .then((dataUrl: string) => {
+          tilePreviewDataUrl.current = dataUrl;
+          localStorage.setItem("tilePreviewDataUrl", dataUrl);
+          router.push("preview");
+        })
+        .catch((error: Error) => {
+          console.error("Oops, something went wrong!", error);
+        })
+        .finally(() => console.log("done"));
+    }
+  };
+
   return (
     <div className="w-full lg:px-20 p-7 flex items-start flex-col lg:flex-row">
       <div className="lg:max-w-[25%] lg:w-fit w-full lg:mr-10">
@@ -350,6 +389,10 @@ const page = (props: Props) => {
                               );
                               setActiveRotationDegree(0);
                             }}
+                            draggable="true"
+                            onDragStart={(e) =>
+                              handleDrag(e, tileVariant.tilePath)
+                            }
                           >
                             <Image
                               src={tileVariant.tilePath}
@@ -532,13 +575,14 @@ const page = (props: Props) => {
               <p className="text-sm font-medium">Rotate All</p>
             </button>
 
-            <button className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
-              <Link href="/preview" className="flex">
-                <div>
-                  <icons.Save />
-                </div>
-                <p>Save</p>
-              </Link>
+            <button
+              className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center"
+              onClick={handleRoute}
+            >
+              <div>
+                <icons.Save />
+              </div>
+              <p>Save</p>
             </button>
 
             <div className="flex space-x-5">
@@ -552,16 +596,6 @@ const page = (props: Props) => {
                 <p>-- --</p>
               )}
             </div>
-          </div>
-          <div className="md:hidden flex items-center justify-between py-5">
-            <div className="w-10" />
-            <Link href="/preview">
-              <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden">
-                <div>
-                  <icons.Save />
-                </div>
-              </button>
-            </Link>
           </div>
           <div className={`flex items-center justify-between`}>
             <button
