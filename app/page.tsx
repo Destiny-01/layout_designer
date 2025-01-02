@@ -80,15 +80,16 @@ const page = (props: Props) => {
           const tileVariation =
             tile.subCategories[Math.floor(randomMass * numSubCategories)]
               .tileVariation;
-              const editedSpec: EditedTile = {
-                tileIndex: `${j}-${i}`,
-                rotationDegree: rotateVia[Math.floor(randomMass * 4)],
-                rotateStyle: undefined,
-                tilePath: tileVariation.find(
-                  (item) => item.tileColor === storedTileColor
-                )?.tilePath,
-              };
-              !editedSpec.tilePath && console.log(editedSpec, tileVariation, storedTileColor);
+          const editedSpec: EditedTile = {
+            tileIndex: `${j}-${i}`,
+            rotationDegree: rotateVia[Math.floor(randomMass * 4)],
+            rotateStyle: undefined,
+            tilePath: tileVariation.find(
+              (item) => item.tileColor === storedTileColor
+            )?.tilePath,
+          };
+          !editedSpec.tilePath &&
+            console.log(editedSpec, tileVariation, storedTileColor);
           editedTiles.push(editedSpec);
         }
       }
@@ -246,9 +247,11 @@ const page = (props: Props) => {
               </div>
             </div>
             <p className="pt-5 text-center lg:max-w-52 text-black opacity-40 text-[10px]">
-              This visualizer is intended for demonstration purposes only. It automatically rounds down to the nearest whole number, providing an
-              approximate representation. For accurate planning, please verify using your own drawings and measurements. 10% contigency buffer not
-              included but recommended for breakages
+              This visualizer is intended for demonstration purposes only. It
+              automatically rounds down to the nearest whole number, providing
+              an approximate representation. For accurate planning, please
+              verify using your own drawings and measurements. 10% contigency
+              buffer not included but recommended for breakages
             </p>
           </div>
 
@@ -263,8 +266,18 @@ const page = (props: Props) => {
                   : "w-2/5 h-full rounded-full p-1 bg-[#FBFBFB]"
               } `}
             >
-              <div className={`${activeSize < 13.5 ? "bg-[#CE9640]" : "bg-[#FBFBFB]"} w-full h-full rounded-full  flex items-center justify-center`}>
-                <p className={`text-xs font-semibold ${activeSize < 13.5 ? "text-white" : "text-black"}`}>9x9 {"cm"}</p>
+              <div
+                className={`${
+                  activeSize < 13.5 ? "bg-[#CE9640]" : "bg-[#FBFBFB]"
+                } w-full h-full rounded-full  flex items-center justify-center`}
+              >
+                <p
+                  className={`text-xs font-semibold ${
+                    activeSize < 13.5 ? "text-white" : "text-black"
+                  }`}
+                >
+                  9x9 {"cm"}
+                </p>
               </div>
             </button>
 
@@ -272,17 +285,29 @@ const page = (props: Props) => {
               onClick={() => {
                 setActiveSize(13.5);
               }}
-              className={`w-3/5 h-full rounded-full p-1 ${activeSize >= 13.5 ? "bg-[#CE9640]" : "bg-[#FBFBFB]"}`}
+              className={`w-3/5 h-full rounded-full p-1 ${
+                activeSize >= 13.5 ? "bg-[#CE9640]" : "bg-[#FBFBFB]"
+              }`}
             >
               <div className="w-full h-full rounded-full flex items-center justify-center">
-                <p className={`text-xs font-semibold ${activeSize >= 13.5 ? "text-white" : "text-black"}`}>13.5x13.5 {"cm"}</p>
+                <p
+                  className={`text-xs font-semibold ${
+                    activeSize >= 13.5 ? "text-white" : "text-black"
+                  }`}
+                >
+                  13.5x13.5 {"cm"}
+                </p>
               </div>
             </button>
           </div>
         </div>
 
         {showSaveBtn && (
-          <button type="button" className={`my-2 px-5 py-3 rounded-lg text-white bg-[#303825]`} onClick={saveDimension}>
+          <button
+            type="button"
+            className={`my-2 px-5 py-3 rounded-lg text-white bg-[#303825]`}
+            onClick={saveDimension}
+          >
             Save
           </button>
         )}
@@ -303,7 +328,10 @@ const page = (props: Props) => {
             </div>
 
             <div>
-              <button onClick={() => setShowSeeAllTile(!showSeeAllTile)} className="flex space-x-2 items-center">
+              <button
+                onClick={() => setShowSeeAllTile(!showSeeAllTile)}
+                className="flex space-x-2 items-center"
+              >
                 <p className="font-mermaid font-bold">See All</p>
                 <icons.DownPointer showSeeAllTile={showSeeAllTile} />
               </button>
@@ -316,11 +344,20 @@ const page = (props: Props) => {
                           <button
                             key={tileVariant.tileColor}
                             onClick={() => {
-                              handleTileChoice(item.tileName, tileVariant.tilePath);
+                              handleTileChoice(
+                                item.tileName,
+                                tileVariant.tilePath
+                              );
                               setActiveRotationDegree(0);
                             }}
                           >
-                            <Image src={tileVariant.tilePath} className="w-12 h-12" width={10} height={10} alt="Tile" />
+                            <Image
+                              src={tileVariant.tilePath}
+                              className="w-12 h-12"
+                              width={10}
+                              height={10}
+                              alt="Tile"
+                            />
                           </button>
                         )
                     );
@@ -378,19 +415,35 @@ const page = (props: Props) => {
                   } `}
                 >
                   <div
-                    className={`${activeSize < 13.5 ? "bg-[#CE9640]" : "bg-[#FBFBFB]"} w-full h-full rounded-full  flex items-center justify-center`}
+                    className={`${
+                      activeSize < 13.5 ? "bg-[#CE9640]" : "bg-[#FBFBFB]"
+                    } w-full h-full rounded-full  flex items-center justify-center`}
                   >
-                    <p className={`text-xs font-semibold ${activeSize < 13.5 ? "text-white" : "text-black"}`}>9x9 {"cm"}</p>
+                    <p
+                      className={`text-xs font-semibold ${
+                        activeSize < 13.5 ? "text-white" : "text-black"
+                      }`}
+                    >
+                      9x9 {"cm"}
+                    </p>
                   </div>
                 </button>
                 <button
                   onClick={() => {
                     setActiveSize(13.5);
                   }}
-                  className={`w-3/5 h-full rounded-full p-1 ${activeSize >= 13.5 ? "bg-[#CE9640]" : "bg-[#FBFBFB]"}`}
+                  className={`w-3/5 h-full rounded-full p-1 ${
+                    activeSize >= 13.5 ? "bg-[#CE9640]" : "bg-[#FBFBFB]"
+                  }`}
                 >
                   <div className="w-full h-full rounded-full flex items-center justify-center">
-                    <p className={`text-xs font-semibold ${activeSize >= 13.5 ? "text-white" : "text-black"}`}>13.5x13.5 {"cm"}</p>
+                    <p
+                      className={`text-xs font-semibold ${
+                        activeSize >= 13.5 ? "text-white" : "text-black"
+                      }`}
+                    >
+                      13.5x13.5 {"cm"}
+                    </p>
                   </div>
                 </button>
               </div>
@@ -413,9 +466,20 @@ const page = (props: Props) => {
           </div>
           <GridAndEdit />
           <div className="text-center mb-4">
-            {((((measurement.columns * activeSize * 10) / 1000) * (measurement.rows * activeSize * 10)) / 1000).toFixed(2)} SQUARE METER
+            {(
+              (((measurement.columns * activeSize * 10) / 1000) *
+                (measurement.rows * activeSize * 10)) /
+              1000
+            ).toFixed(2)}{" "}
+            SQUARE METER
           </div>
-          <div className={`flex items-center justify-between  ${activeTilePath.includes("Rio") || tileName === "Rio" ? "lg:mt-20 mt-24" : "fj"}`}>
+          <div
+            className={`flex items-center justify-between  ${
+              activeTilePath.includes("Rio") || tileName === "Rio"
+                ? "lg:mt-20 mt-24"
+                : "fj"
+            }`}
+          >
             <div className="flex space-x-7 md:hidden">
               <div>
                 <icons.Undo />
@@ -457,7 +521,10 @@ const page = (props: Props) => {
               <p className="text-sm font-medium">Randomise</p>
             </button>
 
-            <button onClick={rotateDiv} className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
+            <button
+              onClick={rotateDiv}
+              className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center"
+            >
               <div>
                 <icons.Rotate />
               </div>
@@ -474,16 +541,6 @@ const page = (props: Props) => {
               </Link>
             </button>
 
-            <Link href="https://212dimensions.com/my-cart">
-              <button className="border border-[#F6E2C4] rounded-full px-5 py-2 md:flex hidden space-x-3 items-center">
-                <div>
-                  <icons.Cart />
-                </div>
-
-                <p className="text-sm font-medium">Add to Cart</p>
-              </button>
-            </Link>
-
             <div className="flex space-x-5">
               <p className="font-bold">TOTAL:</p>
               {activeTilePath && price ? (
@@ -498,15 +555,6 @@ const page = (props: Props) => {
           </div>
           <div className="md:hidden flex items-center justify-between py-5">
             <div className="w-10" />
-            <Link href="https://212dimensions.com/my-cart">
-              <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center">
-                <div>
-                  <icons.Cart />
-                </div>
-
-                <p className="text-sm font-medium">Add to Cart</p>
-              </button>
-            </Link>
             <Link href="/preview">
               <button className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden">
                 <div>
@@ -528,7 +576,10 @@ const page = (props: Props) => {
               <p className="text-sm font-medium">Randomise</p>
             </button>
 
-            <button onClick={rotateDiv} className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center">
+            <button
+              onClick={rotateDiv}
+              className="border border-[#F6E2C4] rounded-full px-5 py-2 flex md:hidden space-x-3 items-center"
+            >
               <div>
                 <icons.Rotate />
               </div>
